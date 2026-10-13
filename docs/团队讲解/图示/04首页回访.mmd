@@ -1,0 +1,35 @@
+flowchart TB
+  A["进入首页或刷新回访"]
+  B["读取当前用户<br/>近期有效记忆"]
+  C["筛选具体问题<br/>且未确认已解决"]
+  D{"有候选？"}
+  N["暂无回访<br/>无需调用首页模型"]
+  M["模型选择候选记录 ID"]
+  V["后端核对 ID<br/>生成进展与咨询询问"]
+  U{"用户选择"}
+  P["已解决或还没解决<br/>关联原问题的新对话"]
+  Q["继续问相关指南<br/>预填并由用户提交"]
+  S["重新总结进展<br/>保存后刷新首页"]
+  F["进入问答流程<br/>检索后展示指南"]
+  A --> B
+  B --> C
+  C --> D
+  D --> |否|N
+  D --> |是|M
+  M --> V
+  V --> U
+  U --> |记录进展|P
+  U --> |继续咨询|Q
+  P --> S
+  Q --> F
+  classDef system fill:#edf5ef,stroke:#2b6349,color:#20362c,stroke-width:2px
+  class A,B,C,V,P,Q,F system
+  classDef model fill:#eaf1fa,stroke:#3a6692,color:#20362c,stroke-width:2px
+  class M model
+  classDef store fill:#fff5e2,stroke:#9a6b25,color:#20362c,stroke-width:2px
+  class S store
+  classDef decision fill:#f2eef9,stroke:#73578f,color:#20362c,stroke-width:2px
+  class D,U decision
+  classDef error fill:#fff0ee,stroke:#a35244,color:#20362c,stroke-width:2px
+  classDef neutral fill:#f3f5f6,stroke:#637279,color:#20362c,stroke-width:2px
+  class N neutral

@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements-lock.txt .
+RUN pip install --no-cache-dir -r requirements-lock.txt
+COPY backend ./backend
+COPY data ./data
+COPY prompts ./prompts
+RUN useradd --uid 10001 --create-home appuser && mkdir -p /app/runtime && chown appuser:appuser /app/runtime
+USER appuser
+ENV DATA_DIR=/app/runtime PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+EXPOSE 8781
+CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8781", "--workers", "1", "--no-access-log"]

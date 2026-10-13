@@ -1,0 +1,37 @@
+flowchart TB
+  A["本轮答复已校验<br/>且记忆开启"]
+  B["模型生成会话摘要<br/>和结构化字段"]
+  C["校验原文、真实指南<br/>关联记录及记忆版本"]
+  D{"通过？"}
+  X["不写入<br/>明确提示摘要失败"]
+  P{"延续旧问题？"}
+  S["旧摘要变为<br/>superseded"]
+  N["作为新问题<br/>或无问题摘要"]
+  W["事务写入新摘要 active<br/>同时更新记忆版本"]
+  H{"问题已解决？"}
+  R["保留咨询经历<br/>首页不再回访"]
+  F["尚未解决或未说明<br/>有具体主题才回访"]
+  A --> B
+  B --> C
+  C --> D
+  D --> |否|X
+  D --> |是|P
+  P --> |是|S
+  P --> |否|N
+  S --> W
+  N --> W
+  W --> H
+  H --> |是|R
+  H --> |否|F
+  classDef system fill:#edf5ef,stroke:#2b6349,color:#20362c,stroke-width:2px
+  class A,C,F system
+  classDef model fill:#eaf1fa,stroke:#3a6692,color:#20362c,stroke-width:2px
+  class B model
+  classDef store fill:#fff5e2,stroke:#9a6b25,color:#20362c,stroke-width:2px
+  class S,W,R store
+  classDef decision fill:#f2eef9,stroke:#73578f,color:#20362c,stroke-width:2px
+  class D,P,H decision
+  classDef error fill:#fff0ee,stroke:#a35244,color:#20362c,stroke-width:2px
+  class X error
+  classDef neutral fill:#f3f5f6,stroke:#637279,color:#20362c,stroke-width:2px
+  class N neutral

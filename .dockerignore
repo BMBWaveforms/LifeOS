@@ -1,0 +1,13 @@
+.venv
+.runtime
+__pycache__
+.pytest_cache
+.env
+api.json
+tests
+docs
+.git
+.github
+preview
+.preview-site
+*.log

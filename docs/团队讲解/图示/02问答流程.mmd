@@ -1,0 +1,42 @@
+flowchart TB
+  Q["用户提交问题"]
+  A["验证身份<br/>构建本轮上下文"]
+  L["加载提示词<br/>调用问答 Agent"]
+  T{"请求工具？"}
+  R["搜索候选标题<br/>或完整回读条目"]
+  V["校验来源、用户归属<br/>和记忆版本"]
+  E{"通过？"}
+  X["技术错误<br/>不展示未校验结果"]
+  C["形成已校验答复"]
+  B{"记忆开启？"}
+  S["调用摘要模型<br/>校验并尝试保存"]
+  N["关闭长期记忆<br/>本轮不保存摘要"]
+  O["返回答复<br/>及摘要保存状态"]
+  H["展示答复、读取记忆<br/>刷新首页回访"]
+  Q --> A
+  A --> L
+  L --> T
+  T --> |是|R
+  R --> L
+  T --> |否|V
+  L --> |调用失败|X
+  V --> E
+  E --> |否|X
+  E --> |是|C
+  C --> B
+  B --> |是|S
+  B --> |否|N
+  S --> O
+  N --> O
+  O --> H
+  classDef system fill:#edf5ef,stroke:#2b6349,color:#20362c,stroke-width:2px
+  class Q,A,R,V,C,O,H system
+  classDef model fill:#eaf1fa,stroke:#3a6692,color:#20362c,stroke-width:2px
+  class L,S model
+  classDef store fill:#fff5e2,stroke:#9a6b25,color:#20362c,stroke-width:2px
+  classDef decision fill:#f2eef9,stroke:#73578f,color:#20362c,stroke-width:2px
+  class T,E,B decision
+  classDef error fill:#fff0ee,stroke:#a35244,color:#20362c,stroke-width:2px
+  class X error
+  classDef neutral fill:#f3f5f6,stroke:#637279,color:#20362c,stroke-width:2px
+  class N neutral

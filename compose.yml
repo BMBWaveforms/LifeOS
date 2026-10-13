@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      API_CONFIG_FILE: /run/secrets/model_api
+      DATA_DIR: /app/runtime
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8780,http://127.0.0.1:8780}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    secrets:
+      - model_api
+    volumes:
+      - memory_data:/app/runtime
+      - ./prompts:/app/prompts:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8781/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8780}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+secrets:
+  model_api:
+    file: ${API_CONFIG_PATH:-../api.json}
+volumes:
+  memory_data:

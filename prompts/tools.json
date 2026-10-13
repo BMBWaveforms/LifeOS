@@ -1,0 +1,40 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "search_entries",
+      "description": "在固定指南快照中搜索候选标题；标题不是建议依据。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_entry",
+      "description": "完整回读指南原文、适用限制和来源；每张卡片引用前必须执行。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "guide_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guide_id"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+]

@@ -1,0 +1,20 @@
+.venv/
+.runtime/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+api.json
+*.sqlite*
+.DS_Store
+.env.*
+!.env.example
+login.json
+auth.json
+*.log
+.preview-site/
+docs/团队讲解/维护/预览/
+# These historical run records and checksums belong to the original delivery archive.
+docs/real-first-run.json
+docs/docker-run.json
+SHA256.json
