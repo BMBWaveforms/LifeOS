@@ -24,19 +24,20 @@
 git clone https://github.com/shuaishuaisylas/LifeOS.git
 cd LifeOS
 cp config/model-api.example.json api.json
+cp deploy/compose.env.example .env.compose
 ```
 
 编辑 `api.json`，填入自己的 API Key、接口地址和可用模型名。不要提交该文件。然后启动：
 
 ```sh
-API_CONFIG_PATH=./api.json docker compose up -d --build
-docker compose ps
+docker compose --env-file .env.compose up -d --build
+docker compose --env-file .env.compose ps
 ```
 
 访问 `http://localhost:8780`。首次启动会为 `alice` 和 `bob` 生成独立的随机密码，查看：
 
 ```sh
-docker compose exec backend python -c 'from pathlib import Path; print(Path("/app/runtime/login.json").read_text())'
+docker compose --env-file .env.compose exec backend python -c 'from pathlib import Path; print(Path("/app/runtime/login.json").read_text())'
 ```
 
 启用自动摘要后，尝试“工作时被手机通知打断，怎么改善？”，查看指南来源、长期摘要和首页回访；点击已解决后，该问题退出回访。两个账号数据隔离。
@@ -44,10 +45,12 @@ docker compose exec backend python -c 'from pathlib import Path; print(Path("/ap
 如果 8780 已被占用，可用下面的替代启动命令：
 
 ```sh
-API_CONFIG_PATH=./api.json WEB_PORT=8782 ALLOWED_ORIGINS=http://localhost:8782,http://127.0.0.1:8782 docker compose up -d --build
+WEB_PORT=8782 ALLOWED_ORIGINS=http://localhost:8782,http://127.0.0.1:8782 docker compose --env-file .env.compose up -d --build
 ```
 
-SQLite、账号哈希和首次凭据保存在 `memory_data` 数据卷中。`docker compose down` 保留它们；`docker compose down -v` 会删除卷。模型凭据通过只读 secret 挂载，不进入前端或镜像。详细配置和备份方法见 [部署说明](docs/部署.md)。
+SQLite、账号哈希和首次凭据保存在 `memory_data` 数据卷中。`docker compose --env-file .env.compose down` 保留它们；加 `-v` 会删除卷。模型凭据通过只读 secret 挂载，不进入前端或镜像。详细配置和备份方法见 [部署说明](docs/部署.md)。
+
+每次操作沿用同一 `.env.compose` 和项目名；替代端口日常使用时应写入该文件。更新已有部署先确认原项目名，避免创建另一套卷。Linux 上还需按 Agent 手册验证 UID 10001 能读取挂载的模型文件；后端 healthy 不代表密钥文件可读。
 
 ## 本地开发
 

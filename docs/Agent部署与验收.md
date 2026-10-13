@@ -22,6 +22,7 @@
 git --version
 docker version
 docker compose version
+docker compose ls --all
 docker ps --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'
 ```
 
@@ -90,6 +91,24 @@ docker compose --env-file .env.compose ps
 ```
 
 预期两个服务：`backend` 状态为 running / healthy，`frontend` 为 running。前端默认发布 `127.0.0.1:8780 → 80`；后端仅在 Compose 内部监听 8781。保持后端一实例、一 worker。
+
+随后验证当前后端用户能读取 secret，命令不输出文件内容：
+
+```sh
+docker compose --env-file .env.compose exec -T backend python -c 'import os; assert os.access("/run/secrets/model_api", os.R_OK), "Model secret is not readable by the backend user"; print("Model secret is readable")'
+```
+
+后端 UID 为 10001。Linux 文件所有权与宿主机用户不同，`chmod 600 api.json` 后可能导致容器无法读取。文件来源的 secret 是 bind mount，Compose 的 secret `uid/gid/mode` 配置不会自动修复这一问题。[Docker secret 权限说明](https://docs.docker.com/reference/compose-file/services/#secrets)
+
+仅当上述检查失败，并确认使用普通 rootful Docker、没有 user namespace remap 时，可在已授权的目标 Linux 主机创建后端可读的私有副本：
+
+```sh
+docker info --format '{{json .SecurityOptions}}'
+sudo install -d -m 700 -o 10001 -g 10001 /var/lib/lifeos-private
+sudo install -m 600 -o 10001 -g 10001 api.json /var/lib/lifeos-private/model-api.json
+```
+
+再将 `.env.compose` 的 `API_CONFIG_PATH` 改为 `/var/lib/lifeos-private/model-api.json`，重新创建后端并重复读取检查。rootless / userns 环境应按实际宿主机 UID 映射或既有 secret 制度配置权限，不照搬 UID，也不改成全局可写或把后端改为 root。之后更新 Key 要同步到这个实际挂载副本。
 
 若宿主机 8780 已占用，将 `.env.compose` 改为：
 
@@ -253,7 +272,7 @@ docker compose --env-file .env.compose logs --tail 100 backend frontend
 | 构建失败 | Dockerfile、依赖下载和目标机器网络；按实际错误处理，不先改业务代码 |
 | secret 文件不存在 | `API_CONFIG_PATH` 指向宿主机现存文件；保留已有配置，不拿占位 Key 冒充完成 |
 | 页面可打开但 `/health` 为 502 | 后端是否 healthy、前端转发是否指向 `backend:8781` |
-| `model.configured=false` | JSON 格式、Key 字段和 HTTPS base_url；检查时不打印 Key |
+| `model.configured=false` | 先检查后端用户能否读取 secret，再检查 JSON 格式、Key 字段和 HTTPS base_url；不打印 Key |
 | 模型 HTTP 401/403 | Key 或提供者鉴权；健康接口 configured 并不能排除此故障 |
 | 模型 HTTP 400 | 实际可用模型名及兼容参数；改配置前核对提供者的当前接口 |
 | POST 请求 403 | 浏览器实际 origin 与 `ALLOWED_ORIGINS` 是否匹配，含隧道端口 |
