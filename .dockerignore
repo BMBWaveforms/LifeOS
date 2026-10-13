@@ -3,7 +3,12 @@
 __pycache__
 .pytest_cache
 .env
+.env.*
 api.json
+.private-backups
+*.sqlite*
+login.json
+auth.json
 tests
 docs
 .git

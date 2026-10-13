@@ -13,6 +13,7 @@ login.json
 auth.json
 *.log
 .preview-site/
+.private-backups/
 docs/团队讲解/维护/预览/
 # These historical run records and checksums belong to the original delivery archive.
 docs/real-first-run.json
