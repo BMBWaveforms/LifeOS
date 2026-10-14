@@ -7,7 +7,7 @@
 1. `README.md`：产品、体验方式和开发入口。
 2. `docs/Agent部署与验收.md`：按步骤部署、验证、更新及排障。
 3. `compose.yml`、`deploy/compose.env.example`：实际服务和部署参数。
-4. 涉及业务改动时，再读 `docs/架构与接口.md`、相关 `prompts/` 和 `tests/`。
+4. 涉及业务改动时，再读 `docs/架构与接口.md`、`docs/执行层与测试台.md`、相关 `prompts/` 和 `tests/`。
 
 当前源码仓库是 `https://github.com/shuaishuaisylas/LifeOS`，主分支是 `main`。开始前检查工作树和分支；已有用户修改时保留它们，只调整本次任务需要的文件。
 
@@ -28,8 +28,10 @@
 - 前端：原生 HTML/CSS/JavaScript，正式文件在 `frontend/`；无需 Node 构建应用。
 - 后端：Python + FastAPI + Uvicorn；Docker 使用 Python 3.12。
 - 模型：`backend/model.py` 用 `httpx` 调用 OpenAI 兼容的 HTTPS Chat Completions 接口。
-- Harness：`AgentService` 在 Python 中组织模型、上下文、工具循环和摘要/回访任务。
-- 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，分发在 `backend/model.py`，检索实现及校验在 `backend/store.py`。
+- Harness：`AgentService` 在 Python 中组织上下文和摘要/回访任务；`backend/executors.py` 提供 native / claude-sdk 两种可替换问答执行层。Docker 默认 claude-sdk，仍使用 DeepSeek。
+- SDK：锁定 claude-agent-sdk 0.2.166，包含 Claude Code CLI；不需要宿主机另装 Claude Code。SDK 使用 Anthropic 兼容入口，摘要/首页继续使用原模型接口。
+- 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，共同分发及权限检查在 `backend/tools.py`，检索实现及结果校验在 `backend/store.py`。
+- 测试页：`frontend/workbench.html` / `workbench.js`，后端 `backend/workbench.py`；登录后切换执行层、连续测试、同输入对比和查看运行记录。测试数据保存在运行目录 workbench 下，与产品记忆隔离。
 - 数据：`data/guide.json` 是 2026-10-12 固定指南快照，共 687 条。SQLite 和账号配置保存在运行目录或 Docker 卷中。
 - 提示词：`prompts/chat.md`、`summary.md`、`home.md`；每次调用读取，Docker 只读挂载。
 - `skills/guide-only.md` 是维护约束文档，未作为运行时 Skill 自动加载。
@@ -47,6 +49,8 @@
 6. 记录的 `active/superseded` 与问题的 `resolved/unresolved/unknown` 是独立状态。
 7. 用户归属、实际回读记录和记忆 revision 由后端校验；删除、纠正和设置变更会使陈旧结果失效。
 8. 调整指南快照、模型输出契约或工具参数时，同步提示词、校验、测试与说明；保留指南署名及许可。
+9. SDK 不读取用户/项目配置，不开放 Bash、文件和 Web 工具。每轮启动新 SDK 会话，仅重放后端已校验的短期历史；不使用 resume / continue 恢复旧记忆。工具失败后 Python 拒绝整轮结果，不允许 SDK 将失败伪装成正常无答案。
+10. 测试执行层选择只作用于该测试会话，不改变产品默认。原生与 SDK 测试不共用会话或记忆；不保存模型私有思维链、API Key 或请求头。未实现完整质量评测台，不能把执行成功写成评测通过。
 
 ## 部署配置与数据
 
@@ -56,6 +60,8 @@
 - `API_CONFIG_FILE`：后端读取配置的路径；本地 Python 在 `.env` 中设置，容器内由 `compose.yml` 设置。它与宿主机的 `API_CONFIG_PATH` 不同。
 - `WEB_PORT`：宿主机前端端口，默认 8780。改变它时同步浏览器地址对应的 `ALLOWED_ORIGINS`。
 - `COOKIE_SECURE`：浏览器通过 HTTPS 访问时设为 `true`；本地或 SSH 隧道的 HTTP 访问保持 `false`。
+- `AGENT_RUNTIME`：产品默认执行层 native / claude-sdk；SDK 失败会明确报错，不自动回退。无变量的程序默认 native，Compose 和示例配置默认 claude-sdk。
+- `AGENT_SDK_BASE_URL`：SDK 入口，DeepSeek 官方为 https://api.deepseek.com/anthropic。第三方模型代理需要操作者提供真实兼容地址，不猜测路径。
 - `COMPOSE_PROJECT_NAME`：固定一个部署项目名，并在启动、日志、更新及备份时使用同一配置。更换名字会指向另一套卷和账号。
 - `memory_data`：包含数据库、账号哈希、profiles 和首次密码；重建应用容器保留卷。
 
@@ -74,6 +80,7 @@
 ```sh
 python -m pytest -q
 node --check frontend/app.js
+node --check frontend/workbench.js
 node --check preview/adapter.js
 python3 scripts/build_preview.py
 python3 scripts/check_publish.py

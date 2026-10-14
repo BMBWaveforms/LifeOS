@@ -9,6 +9,8 @@ services:
       DATA_DIR: /app/runtime
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8780,http://127.0.0.1:8780}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      AGENT_RUNTIME: ${AGENT_RUNTIME:-claude-sdk}
+      AGENT_SDK_BASE_URL: ${AGENT_SDK_BASE_URL:-https://api.deepseek.com/anthropic}
     secrets:
       - model_api
     volumes:

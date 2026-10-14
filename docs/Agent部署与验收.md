@@ -63,6 +63,8 @@ API_CONFIG_PATH=./api.json
 WEB_PORT=8780
 ALLOWED_ORIGINS=http://localhost:8780,http://127.0.0.1:8780
 COOKIE_SECURE=false
+AGENT_RUNTIME=claude-sdk
+AGENT_SDK_BASE_URL=https://api.deepseek.com/anthropic
 ```
 
 | 参数 | 位置与作用 | 常见误解 |
@@ -73,6 +75,8 @@ COOKIE_SECURE=false
 | `ALLOWED_ORIGINS` | 浏览器地址的完整 origin，含协议及非默认端口，不带路径或末尾斜杠；多个用逗号分隔且不加空格 | 填服务器 IP 不等于允许本机隧道地址 |
 | `COOKIE_SECURE` | 浏览器使用 HTTPS 时为 true；本机/隧道 HTTP 为 false | HTTP 开启 true 会导致登录 Cookie 不发送 |
 | `COMPOSE_PROJECT_NAME` | 识别容器和数据卷，部署后保持固定 | 改名字会创建另一套账号和记忆卷 |
+| `AGENT_RUNTIME` | 产品默认 native / claude-sdk | 测试页切换不改变产品默认；失败不自动回退 |
+| `AGENT_SDK_BASE_URL` | SDK 的 Anthropic 兼容入口 | 与 api.json 的 Chat Completions base_url 不同 |
 
 `api.json` 中的 `base_url` 必须是无账号密码、查询参数和片段的 HTTPS 地址；客户端在末尾追加 `/chat/completions`。Docker 部署把模型名和 Key 放在挂载 JSON 中；当前 Compose 没有把宿主机的 `MODEL_API_KEY`、`MODEL_NAME` 等变量直接传入容器。
 
@@ -290,3 +294,7 @@ docker compose --env-file .env.compose logs --tail 100 backend frontend
 > 请拉取 `https://github.com/shuaishuaisylas/LifeOS` 的 `main`，先读根目录 `AGENTS.md` 和 `docs/Agent部署与验收.md`。我的目标是部署完整 Python/Docker 应用，而不是 GitHub Pages 模拟页面。请在我指定的机器与目录中执行；保留已有配置、账号和记忆卷。新部署按 `deploy/compose.env.example` 建立 `.env.compose`，模型凭据使用我提供的私有文件路径。先检查 Docker 和端口，再构建、启动并按手册验证路由、登录、真实问答、摘要、回访及持久化。缺少 SSH、模型配置或域名时只询问缺失信息，并继续完成独立的准备工作。最后报告访问地址、提交 SHA、Compose 项目名、实际验收结果和未验证项，不在报告中包含密钥、密码或 Cookie。
 
 若只需要前端体验，请将目标句替换为：“我只需要静态交互预览，运行 `scripts/build_preview.py`，不接入真实模型，也不把模拟摘要描述成模型验收成功。”
+
+## 执行层与测试台验收
+
+本轮增加锁定 Claude Agent SDK、DeepSeek Anthropic 兼容入口和 /workbench.html。部署后用现有账号登录测试页，分别选择 native / claude-sdk，核对来源、工具轨迹、摘要保存和连续测试。对比使用独立测试会话；原产品数据不复制或修改。回切设置 AGENT_RUNTIME=native 后重启 backend。详细接口、上下文策略、功能边界见 [执行层与测试台](执行层与测试台.md)。

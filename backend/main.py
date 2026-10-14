@@ -11,14 +11,16 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from backend.store import Store
 from backend.model import AgentService, ModelClient, ModelError
+from backend.workbench import Workbench
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def create_app(directory=None, client=None):
+def create_app(directory=None, client=None, executors=None):
     directory = Path(directory or os.getenv('DATA_DIR', str(ROOT / '.runtime')))
     directory.mkdir(parents=True, exist_ok=True)
     store = Store(directory)
-    service = AgentService(store, client)
+    service = AgentService(store, client, executors)
+    workbench = Workbench(directory, service.client, executors)
     auth_path = directory / 'auth.json'
     if not auth_path.exists():
         credentials = {owner: {'name': p['name'], 'password': secrets.token_urlsafe(16)} for owner, p in store.profiles.items()}
@@ -36,10 +38,12 @@ def create_app(directory=None, client=None):
     attempts = {}
     login_lock = threading.Lock()
     locks = {owner: threading.Lock() for owner in store.profiles}
+    test_locks = {owner: threading.Lock() for owner in store.profiles}
     origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:8780,http://127.0.0.1:8780').split(',')
     app = FastAPI(title='苟活独立 API', version='1.0.0')
     app.state.store = store
     app.state.service = service
+    app.state.workbench = workbench
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True,
                        allow_methods=['GET', 'POST'], allow_headers=['Content-Type'])
 
@@ -88,7 +92,7 @@ def create_app(directory=None, client=None):
     @app.get('/health')
     def health():
         return {'status': 'ok', 'entries': len(store.entries), 'content_version': store.guide['content_version'],
-                'model': service.client.ready(), 'backend': 'python-direct-api'}
+                'model': service.client.ready(), 'backend': 'python-direct-api', 'agent_runtime': service.runtime_status()}
 
     @app.post('/api/login')
     def login(data: dict, request: Request):
@@ -131,6 +135,33 @@ def create_app(directory=None, client=None):
     @app.get('/api/memories')
     def memories(request: Request):
         return store.state(owner(request))
+
+    @app.get('/api/runtimes')
+    def runtimes(request: Request):
+        owner(request)
+        return service.runtime_status()
+
+    @app.post('/api/test-sessions')
+    def test_session(data: dict, request: Request):
+        return workbench.create_session(owner(request), data.get('runtime', service.default_runtime), data.get('memory_enabled', True))
+
+    @app.post('/api/test-run')
+    def test_run(data: dict, request: Request):
+        user = owner(request)
+        if not test_locks[user].acquire(blocking=False):
+            return JSONResponse({'message': '上一轮测试仍在运行，请稍后重试。'}, status_code=409)
+        try:
+            return workbench.run(user, data)
+        finally:
+            test_locks[user].release()
+
+    @app.get('/api/test-runs')
+    def test_results(request: Request):
+        return {'runs': workbench.results(owner(request))}
+
+    @app.get('/api/test-runs/{run_id}')
+    def test_result(run_id: str, request: Request):
+        return workbench.result(owner(request), run_id)
 
     @app.post('/api/memory-action')
     def change(data: dict, request: Request):
