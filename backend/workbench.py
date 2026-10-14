@@ -1,4 +1,4 @@
-"""Authenticated, isolated execution tests; full quality evaluation is a later phase."""
+"""Authenticated, isolated execution tests, also used by evaluation batch runners."""
 import json
 import secrets
 import sqlite3
@@ -11,12 +11,13 @@ from backend.store import Store
 
 
 class Workbench:
-    def __init__(self, directory, client, executors=None):
+    def __init__(self, directory, client, executors=None, registry=None):
         self.directory = Path(directory) / 'workbench'
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.path = self.directory / 'tests.sqlite'
         self.client, self.executors = client, executors
         self.services = {}
+        self.registry = registry
         with self.db() as db:
             db.executescript('''
                 CREATE TABLE IF NOT EXISTS sessions (
@@ -26,13 +27,23 @@ class Workbench:
                     query TEXT NOT NULL, created REAL NOT NULL, elapsed_ms INTEGER NOT NULL,
                     status TEXT NOT NULL, payload TEXT NOT NULL);
             ''')
+            if 'bundle' not in {r['name'] for r in db.execute('PRAGMA table_info(sessions)')}:
+                db.execute("ALTER TABLE sessions ADD COLUMN bundle TEXT NOT NULL DEFAULT ''")
+            if 'scope' not in {r['name'] for r in db.execute('PRAGMA table_info(sessions)')}:
+                db.execute("ALTER TABLE sessions ADD COLUMN scope TEXT NOT NULL DEFAULT 'free'")
+            if self.registry:
+                for row in db.execute("SELECT id,bundle FROM sessions WHERE bundle<>''").fetchall():
+                    snapshot = json.loads(row['bundle'])
+                    if 'contracts' not in snapshot:
+                        snapshot['contracts'] = self.registry.bundle(snapshot['id'])['contracts']
+                        db.execute('UPDATE sessions SET bundle=? WHERE id=?', (json.dumps(snapshot, ensure_ascii=False), row['id']))
 
     def db(self):
         connection = sqlite3.connect(str(self.path), timeout=10)
         connection.row_factory = sqlite3.Row
         return connection
 
-    def create_session(self, owner, runtime, memory_enabled=True):
+    def create_session(self, owner, runtime, memory_enabled=True, bundle_id=None, snapshot=None):
         runtime = validate_runtime(runtime)
         if not isinstance(memory_enabled, bool):
             raise ValueError('memory_enabled 必须为布尔值。')
@@ -44,15 +55,18 @@ class Workbench:
         profiles.chmod(0o600)
         store = Store(directory)
         store.change(owner, 'settings', {'enabled': memory_enabled})
+        snapshot = snapshot or (self.registry.snapshot(bundle_id) if self.registry else None)
         with self.db() as db:
-            db.execute('INSERT INTO sessions VALUES (?,?,?,?)', (sid, owner, runtime, time.time()))
-        return {'session_id': sid, 'runtime': runtime, 'memory_enabled': memory_enabled}
+            db.execute('INSERT INTO sessions(id,owner,runtime,created,bundle) VALUES (?,?,?,?,?)',
+                       (sid, owner, runtime, time.time(), json.dumps(snapshot) if snapshot else ''))
+        return {'session_id': sid, 'runtime': runtime, 'memory_enabled': memory_enabled,
+                'bundle_id': snapshot['id'] if snapshot else None}
 
     def session(self, owner, sid):
         if not isinstance(sid, str):
             raise ValueError('测试会话 ID 无效。')
         with self.db() as db:
-            row = db.execute('SELECT * FROM sessions WHERE id=? AND owner=?', (sid, owner)).fetchone()
+            row = db.execute("SELECT * FROM sessions WHERE id=? AND owner=? AND scope='free'", (sid, owner)).fetchone()
         if row is None:
             raise PermissionError('测试会话不存在或不属于当前账号。')
         return dict(row)
@@ -60,7 +74,8 @@ class Workbench:
     def service(self, session):
         sid, owner = session['id'], session['owner']
         if sid not in self.services:
-            service = AgentService(Store(self.directory / sid), self.client, self.executors)
+            snapshot = json.loads(session['bundle']) if session.get('bundle') else None
+            service = AgentService(Store(self.directory / sid), self.client, self.executors, snapshot)
             # Restore only approved exchanges whose final memory revision still matches.
             with self.db() as db:
                 rows = db.execute('SELECT payload FROM results WHERE session_id=? AND status=? ORDER BY created DESC LIMIT 6',
@@ -104,15 +119,21 @@ class Workbench:
                   'memories_before': service.store.state(owner), 'trace': []}
         start = time.monotonic()
         try:
-            _, record['prompt_versions']['chat'] = prompt('chat')
-            _, record['prompt_versions']['summary'] = prompt('summary')
+            snapshot = service.prompt_snapshot()
+            _, record['prompt_versions']['chat'] = service.resolve_prompt('chat', snapshot)
+            _, record['prompt_versions']['summary'] = service.resolve_prompt('summary', snapshot)
+            if snapshot:
+                record['bundle_id'] = snapshot['id']
+                record['module_versions'] = snapshot['versions']
             result = service.chat(owner, {'query': query, 'runtime': runtime,
-                                  'conversation_id': last.get('result', {}).get('conversation_id', '')}, include_trace=True)
+                                  'conversation_id': '' if data.get('new_conversation') else last.get('result', {}).get('conversation_id', '')}, include_trace=True)
             record.update(status='success', result=result, trace=result.pop('trace'), prompt_versions=result['prompt_versions'])
         except (ModelError, ValueError, KeyError) as error:
             record.update(status='error', message=str(error) if isinstance(error, (ModelError, ValueError))
                           and not isinstance(error, json.JSONDecodeError) else '模型结果格式或字段无效。',
-                          trace=getattr(error, 'trace', []))
+                          trace=getattr(error, 'trace', []), observations=getattr(error, 'observations', {}))
+            if getattr(error, 'http_status', None):
+                record['provider_http_status'] = error.http_status
         record['elapsed_ms'] = round((time.monotonic() - start) * 1000)
         record['memories_after'] = service.store.state(owner)
         record['memory_revision'] = record['memories_after']['revision']
@@ -125,11 +146,11 @@ class Workbench:
     def results(self, owner):
         with self.db() as db:
             return [dict(row) for row in db.execute(
-                'SELECT id,session_id,runtime,query,created,elapsed_ms,status FROM results WHERE owner=? ORDER BY created DESC LIMIT 30', (owner,))]
+                "SELECT r.id,r.session_id,r.runtime,r.query,r.created,r.elapsed_ms,r.status FROM results r JOIN sessions s ON s.id=r.session_id WHERE r.owner=? AND s.scope='free' ORDER BY r.created DESC LIMIT 30", (owner,))]
 
     def result(self, owner, rid):
         with self.db() as db:
-            row = db.execute('SELECT payload FROM results WHERE id=? AND owner=?', (rid, owner)).fetchone()
+            row = db.execute("SELECT r.payload FROM results r JOIN sessions s ON s.id=r.session_id WHERE r.id=? AND r.owner=? AND s.scope='free'", (rid, owner)).fetchone()
         if row is None:
             raise PermissionError('测试结果不存在或不属于当前账号。')
         return json.loads(row['payload'])

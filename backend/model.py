@@ -8,6 +8,7 @@ import httpx
 from backend.config import load_local_env
 from backend.errors import ModelError
 from backend.tools import GuideTools, tool_definitions
+from backend.prompts import PromptRegistry
 from backend.executors import (ClaudeSDKExecutor, ExecutionRequest, NativeExecutor,
                                runtime_status, validate_runtime)
 load_local_env()
@@ -71,7 +72,8 @@ class ModelClient:
                 r = client.post(base + '/chat/completions', json=payload,
                                 headers={'Authorization': 'Bearer ' + key})
                 if r.status_code != 200:
-                    raise ModelError('模型接口返回 HTTP %d，请检查模型名、余额和接口配置。' % r.status_code)
+                    raise ModelError('模型接口返回 HTTP %d，请检查模型名、余额和接口配置。' % r.status_code,
+                                     http_status=r.status_code)
                 d = r.json()
                 result = d['choices'][0]['message']
                 if not isinstance(result, dict):
@@ -91,18 +93,25 @@ def prompt(name):
 
 
 class AgentService:
-    def __init__(self, store, client=None, executors=None):
+    def __init__(self, store, client=None, executors=None, prompt_source=None):
         self.store = store
         self.client = client or ModelClient()
         self.conversations = {}
         self.executors = executors or {'native': NativeExecutor(self.client), 'claude-sdk': ClaudeSDKExecutor(self.client)}
         self.default_runtime = validate_runtime(os.getenv('AGENT_RUNTIME', 'native'))
+        self.prompt_source = prompt_source
+
+    def prompt_snapshot(self):
+        return self.prompt_source() if callable(self.prompt_source) else self.prompt_source
+
+    def resolve_prompt(self, name, snapshot=None):
+        return PromptRegistry.resolve(snapshot, name) if snapshot else prompt(name)
 
     def runtime_status(self):
         return runtime_status(self.default_runtime)
 
-    def json_call(self, name, data):
-        instruction, version = prompt(name)
+    def json_call(self, name, data, snapshot=None):
+        instruction, version = self.resolve_prompt(name, snapshot)
         message = self.client.complete([{'role': 'system', 'content': instruction},
                                        {'role': 'user', 'content': json.dumps(data, ensure_ascii=False)}])
         return message.get('content') or '', version
@@ -116,7 +125,8 @@ class AgentService:
             raise ValueError('请输入 1—2000 字的问题。')
         c = self.store.context(owner, query, 'chat', followup_memory_id=str(data.get('followup_memory_id') or ''))
         rid = c['run_id']
-        instruction, version = prompt('chat')
+        snapshot = self.prompt_snapshot()
+        instruction, version = self.resolve_prompt('chat', snapshot)
         tools = GuideTools(self.store, owner, rid)
         tool_version = hashlib.sha256(json.dumps(tools.definitions, sort_keys=True).encode()).hexdigest()
         cid = str(data.get('conversation_id') or '')
@@ -132,15 +142,37 @@ class AgentService:
         start = time.monotonic()
         request = ExecutionRequest(instruction, messages, tools,
                   self.store.directory / 'agent-runtime' / hashlib.sha256(owner.encode()).hexdigest()[:24])
+        observations = {
+            'understanding': {'input': {'query': query, 'memories': c['memories'], 'history': history[-12:]},
+                              'output': None, 'status': 'unobserved'},
+            'retrieval': {'input': {'query': query, 'candidate_titles': c['candidate_titles']},
+                          'output': tools.trace, 'status': 'observed'},
+            'reply': {'input': {'query': query}, 'output': None, 'status': 'unobserved'},
+        }
         try:
             executed = self.executors[runtime].execute(request)
+            parsed = self.store.model_json(executed.raw)
+            understanding = parsed.get('understanding')
+            if isinstance(understanding, dict):
+                # Only documented task labels; no raw response, reasoning_content or thinking blocks.
+                clean = {key: understanding[key] for key in ('intent', 'scope')
+                         if isinstance(understanding.get(key), str) and len(understanding[key]) <= 600}
+                for key in ('explicit_facts', 'unknowns'):
+                    value = understanding.get(key)
+                    if isinstance(value, list) and len(value) <= 12 and all(isinstance(v, str) and len(v) <= 600 for v in value):
+                        clean[key] = value
+                observations['understanding'].update(output=clean, status='observed' if set(clean) == {'intent', 'scope', 'explicit_facts', 'unknowns'} else 'partial')
             result = self.store.finalize(owner, rid, executed.raw)
+            observations['reply'].update(output=result, status='observed')
         except (ModelError, ValueError, KeyError) as error:
             error.trace = tools.trace
+            error.observations = observations
             raise
         agent_ms = round((time.monotonic() - start) * 1000)
         summary = {'saved': False, 'message': '记忆已关闭，本轮不保存摘要。'}
         versions = {'chat': version}
+        observations['memory'] = {'input': None, 'output': None, 'status': 'disabled'}
+        observations['summary'] = {'input': None, 'output': None, 'status': 'disabled'}
         if c['memory_enabled']:
             inp = {'query': query, 'followup_memory_id': (c['followup'] or {}).get('id', ''),
                    'previous_memories': [m for m in c['memories'] if m.get('origin') == 'model_summary'],
@@ -148,12 +180,24 @@ class AgentService:
                    'assistant_answer': result['markdown'][:6000],
                    'consulted_guides': [{'guide_id': g['guide_id'], 'title': g['title']} for g in result['cards']]}
             try:
-                summary_raw, versions['summary'] = self.json_call('summary', inp)
+                observations['memory']['input'] = inp
+                observations['summary']['input'] = inp
+                summary_raw, versions['summary'] = self.json_call('summary', inp, snapshot)
+                summary_data = self.store.model_json(summary_raw)
+                observations['memory'].update(status='candidate', output={k: summary_data.get(k) for k in
+                    ('user_state', 'state_evidence', 'problem', 'problem_status', 'status_evidence', 'followup_of', 'guide_ids')})
+                observations['summary'].update(status='candidate', output={'summary': summary_data.get('summary')})
                 summary = self.store.save_summary(owner, rid, summary_raw)
-            except (ModelError, ValueError, KeyError):
+                for stage in ('memory', 'summary'):
+                    observations[stage].update(status='saved', persistence=summary)
+            except (ModelError, ValueError, KeyError) as error:
                 # If memories were edited/deleted while model ran, invalidate whole response.
                 self.store.run(rid)
                 summary = {'saved': False, 'message': '本轮摘要生成或校验失败，未写入记忆；答复仍可查看。'}
+                if getattr(error, 'http_status', None):
+                    summary['provider_http_status'] = error.http_status
+                for stage in ('memory', 'summary'):
+                    observations[stage].update(status='error', persistence=summary)
         # Atomic final revision check prevents deletion from being undone by in-flight results.
         with self.store.lock:
             current = self.store.state(owner)['revision']
@@ -173,15 +217,24 @@ class AgentService:
                               'elapsed_ms': round((time.monotonic() - start) * 1000),
                               'auxiliary_runtime': 'direct-api', 'tool_version': tool_version,
                               'content_version': c['content_version'], **executed.metadata}}
+        if snapshot:
+            response['prompt_bundle_id'] = snapshot['id']
+            response['module_versions'] = snapshot['versions']
         if include_trace:
             response['trace'] = tools.trace
+            response['observations'] = observations
         return response
 
-    def home(self, owner):
+    def home(self, owner, include_trace=False):
+        snapshot = self.prompt_snapshot()
         c = self.store.context(owner, '', 'home')
         if c['cold_start']:
             return {'markdown': '暂时没有需要回访的问题。开启记忆后聊一个困扰，下次回来会询问问题进展。',
                     'result': {'status': 'empty', 'followups': []}}
-        raw, version = self.json_call('home', {'followups': [{'memory_id': m['id'], 'problem': m['problem'], 'problem_status': m['problem_status'], 'updated': m['updated']} for m in c['followups']]})
+        inp = {'followups': [{'memory_id': m['id'], 'problem': m['problem'], 'problem_status': m['problem_status'], 'updated': m['updated']} for m in c['followups']]}
+        raw, version = self.json_call('home', inp, snapshot)
         result = self.store.finalize_home(owner, c['run_id'], raw)
-        return {'markdown': result['markdown'], 'result': result, 'prompt_versions': {'home': version}}
+        response = {'markdown': result['markdown'], 'result': result, 'prompt_versions': {'home': version}}
+        if include_trace:
+            response['observations'] = {'reply': {'input': inp, 'output': result, 'status': 'observed'}}
+        return response

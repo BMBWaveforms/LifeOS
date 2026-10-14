@@ -13,7 +13,7 @@
 | 在线静态预览 | [GitHub Pages](https://shuaishuaisylas.github.io/LifeOS/) | 虚构账号、固定指南示例、浏览器模拟记忆与回访交互 |
 | 完整应用 | 在自己电脑启动 Docker，访问 `http://localhost:8780` | 真实模型问答、自动模型摘要、SQLite 长期记忆与回访 |
 | 架构与流程 | [团队讲解材料](docs/团队讲解/苟活项目架构与流程说明.md) | 整体架构、四张图、十分钟讲解顺序和常见问题 |
-| 执行层测试台 | 完整应用地址下 `/workbench.html` | 切换执行层、连续测试、同输入对比、工具记录和记忆变化；需登录 |
+| 评测工作台 | 完整应用地址下 `/workbench.html` | 评测集、批量 A/B、五环节及整体评测、系统判定与人工复核、提示词版本和产品启用；需登录 |
 
 在线预览不连接模型或 Python 后端，记忆仅保存在当前浏览器，不用于验证模型质量或后端权限。Pages 发布状态见 [Actions](https://github.com/shuaishuaisylas/LifeOS/actions)。完整联调见 [团队调试与预览](docs/团队调试与预览.md)。
 
@@ -79,6 +79,12 @@ cp .env.example .env
 
 CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交文件检查与 Compose 配置检查。CI 使用 FakeModel 校验业务约束，不代表真实模型效果评测。
 
+## 评测工作台
+
+完整应用登录后访问 `/workbench.html`。在“评测集”填写输入、步骤和预期，可批量运行同一版本，用两个执行层或两个提示词组合做 A/B。结果展示五个环节与独立整体判定，支持人工复核和 JSON / CSV 导出。“提示词管理”可编辑模块、保存版本、对比差异、创建组合；测试与产品启用分开。七个初始虚构用例用于熟悉工具，不代表通过的质量基准。具体限制、API 和操作顺序见 [评测工作台手册](docs/评测工作台.md)。
+
+[PR #1](https://github.com/shuaishuaisylas/LifeOS/pull/1) 合并前，团队调试此版本请检出 `feat/replaceable-agent-runtime`。新拉取可执行 `git clone --branch feat/replaceable-agent-runtime https://github.com/shuaishuaisylas/LifeOS.git`，然后按上面的 Docker 步骤配置与启动；合并后可使用 main。已有部署更新继续保留原配置、项目名和卷。
+
 ## 文件在哪里维护
 
 | 内容 | 位置 |
@@ -86,7 +92,8 @@ CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交
 | FastAPI、工具调用循环、记忆及校验 | `backend/` |
 | 可替换执行层、共用工具、隔离测试记录 | `backend/executors.py`、`tools.py`、`workbench.py` |
 | 正式前端页面与交互 | `frontend/` |
-| 问答、摘要、回访提示词 | `prompts/chat.md`、`summary.md`、`home.md` |
+| 模块化提示词初始文档 | `prompts/modules/*.md`（七模块）；部署后版本在工作台维护，可导出/导入独立文档 |
+| 评测集、批量判定与提示词管理 | `backend/evaluation.py`、`prompts.py`；[工作台手册](docs/评测工作台.md) |
 | 两个只读工具定义 | `prompts/tools.json` |
 | 指南能力维护约束 | `skills/guide-only.md` |
 | 固定指南全文、来源与许可证 | `data/` |
@@ -95,7 +102,7 @@ CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交
 | 团队调试、架构、部署与验收说明 | `docs/` |
 | 自动测试与 Pages 发布 | `.github/workflows/` |
 
-提示词每轮从独立文件读取；Docker 只读挂载 `prompts/`，修改后对后续调用生效。`skills/guide-only.md` 是维护约束，当前没有作为运行时 Skill 自动加载。业务 harness 保留上下文、来源和记忆版本校验；工具循环交给选定执行层。切换、部署和测试方式见 [执行层与测试台](docs/执行层与测试台.md)。
+提示词从独立模块文档初始化，工作台保存不可变版本和组合；每次请求固定产品启用组合。Docker 只读挂载 `prompts/`；已有部署通过工作台导入/编辑、测试并单独启用。`skills/guide-only.md` 是维护约束，当前没有作为运行时 Skill 自动加载。业务 harness 保留上下文、来源和记忆版本校验；工具循环交给选定执行层。切换、部署和测试方式见 [执行层与测试台](docs/执行层与测试台.md)。
 
 ## 当前范围
 
