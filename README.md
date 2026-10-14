@@ -35,13 +35,13 @@ docker compose --env-file .env.compose up -d --build
 docker compose --env-file .env.compose ps
 ```
 
-访问 `http://localhost:8780`。首次启动会为 `alice` 和 `bob` 生成独立的随机密码，查看：
+访问 `http://localhost:8780`。团队测试账号为 `test1` 到 `test10`；在私有 `.env.compose` 设置 `TEST_ACCOUNT_PASSWORD` 后，启动时自动补齐十个账号并同步这些测试账号的密码。原有账号、身份和数据保留；未配置测试密码时保持已有账号。部署者可查看私有凭据文件：
 
 ```sh
 docker compose --env-file .env.compose exec backend python -c 'from pathlib import Path; print(Path("/app/runtime/login.json").read_text())'
 ```
 
-启用自动摘要后，尝试“工作时被手机通知打断，怎么改善？”，查看指南来源、长期摘要和首页回访；点击已解决后，该问题退出回访。两个账号数据隔离。
+启用自动摘要后，尝试“工作时被手机通知打断，怎么改善？”，查看指南来源、长期摘要和首页回访；点击已解决后，该问题退出回访。各账号数据隔离。
 
 如果 8780 已被占用，可用下面的替代启动命令：
 
@@ -101,7 +101,7 @@ CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交
 
 当前是单机 Demo：一个问答 Agent、两个只读工具，另有摘要和回访两个模型任务。指南使用 2026-10-12 固定快照，共 687 条，检索采用中文双字片段匹配和标题加权。
 
-账号为两个预置体验账号；尚未实现注册、找回密码、SSO、多实例状态协调或正式用户上线验收。后端保持一个 worker。公网完整服务需要 HTTPS、正式账号和运维配置，不能直接把静态 Pages 预览当成 Python 服务。
+团队测试支持 `test1` 到 `test10`，原 `alice` / `bob` 仍保留。测试密码通过私有配置提供；尚未实现注册、找回密码、SSO、多实例状态协调或正式用户上线验收。后端保持一个 worker。公网完整服务需要 HTTPS、正式账号和运维配置，不能直接把静态 Pages 预览当成 Python 服务。
 
 旧 Dify 版本和原始源码交付包仍保存在项目所有者电脑的 `保留版本/Dify-v0.2/`，不包含在这个仓库中。本机的密钥、密码、SQLite、个人记忆和历史运行 JSON 不提交。已有验证及边界见 [验收记录](docs/验收记录.md)。
 

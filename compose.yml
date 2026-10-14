@@ -11,6 +11,7 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       AGENT_RUNTIME: ${AGENT_RUNTIME:-claude-sdk}
       AGENT_SDK_BASE_URL: ${AGENT_SDK_BASE_URL:-https://api.deepseek.com/anthropic}
+      TEST_ACCOUNT_PASSWORD: ${TEST_ACCOUNT_PASSWORD:-}
     secrets:
       - model_api
     volumes:

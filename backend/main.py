@@ -12,6 +12,7 @@ from starlette.middleware.cors import CORSMiddleware
 from backend.store import Store
 from backend.model import AgentService, ModelClient, ModelError
 from backend.workbench import Workbench
+from backend.accounts import initialize_accounts
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,21 +20,9 @@ def create_app(directory=None, client=None, executors=None):
     directory = Path(directory or os.getenv('DATA_DIR', str(ROOT / '.runtime')))
     directory.mkdir(parents=True, exist_ok=True)
     store = Store(directory)
+    auth = initialize_accounts(store, os.getenv('TEST_ACCOUNT_PASSWORD'))
     service = AgentService(store, client, executors)
     workbench = Workbench(directory, service.client, executors)
-    auth_path = directory / 'auth.json'
-    if not auth_path.exists():
-        credentials = {owner: {'name': p['name'], 'password': secrets.token_urlsafe(16)} for owner, p in store.profiles.items()}
-        credentials_path = directory / 'login.json'
-        credentials_path.write_text(json.dumps(credentials, ensure_ascii=False, indent=2))
-        credentials_path.chmod(0o600)
-        hashed = {}
-        for owner, p in credentials.items():
-            salt = secrets.token_hex(16)
-            hashed[owner] = {'salt': salt, 'hash': hashlib.pbkdf2_hmac('sha256', p['password'].encode(), salt.encode(), 260000).hex()}
-        auth_path.write_text(json.dumps(hashed))
-        auth_path.chmod(0o600)
-    auth = json.loads(auth_path.read_text())
     sessions = {}
     attempts = {}
     login_lock = threading.Lock()

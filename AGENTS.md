@@ -31,6 +31,7 @@
 - Harness：`AgentService` 在 Python 中组织上下文和摘要/回访任务；`backend/executors.py` 提供 native / claude-sdk 两种可替换问答执行层。Docker 默认 claude-sdk，仍使用 DeepSeek。
 - SDK：锁定 claude-agent-sdk 0.2.166，包含 Claude Code CLI；不需要宿主机另装 Claude Code。SDK 使用 Anthropic 兼容入口，摘要/首页继续使用原模型接口。
 - 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，共同分发及权限检查在 `backend/tools.py`，检索实现及结果校验在 `backend/store.py`。
+- 团队账号：`backend/accounts.py` 按私有 `TEST_ACCOUNT_PASSWORD` 补齐 test1 到 test10，并同步这些测试账号的密码；保留已有身份、其他账号凭据和数据。新密码经独立盐的 PBKDF2 保存，账号文件原子更新；密码不写入公开文档或源码配置。
 - 测试页：`frontend/workbench.html` / `workbench.js`，后端 `backend/workbench.py`；登录后切换执行层、连续测试、同输入对比和查看运行记录。测试数据保存在运行目录 workbench 下，与产品记忆隔离。
 - 数据：`data/guide.json` 是 2026-10-12 固定指南快照，共 687 条。SQLite 和账号配置保存在运行目录或 Docker 卷中。
 - 提示词：`prompts/chat.md`、`summary.md`、`home.md`；每次调用读取，Docker 只读挂载。
@@ -62,6 +63,7 @@
 - `COOKIE_SECURE`：浏览器通过 HTTPS 访问时设为 `true`；本地或 SSH 隧道的 HTTP 访问保持 `false`。
 - `AGENT_RUNTIME`：产品默认执行层 native / claude-sdk；SDK 失败会明确报错，不自动回退。无变量的程序默认 native，Compose 和示例配置默认 claude-sdk。
 - `AGENT_SDK_BASE_URL`：SDK 入口，DeepSeek 官方为 https://api.deepseek.com/anthropic。第三方模型代理需要操作者提供真实兼容地址，不猜测路径。
+- `TEST_ACCOUNT_PASSWORD`：私有统一测试密码，仅作用于 test1 到 test10；为空时不创建或重设测试账号，不删除已有账号。登录字段必须传字符串，保留前导零。
 - `COMPOSE_PROJECT_NAME`：固定一个部署项目名，并在启动、日志、更新及备份时使用同一配置。更换名字会指向另一套卷和账号。
 - `memory_data`：包含数据库、账号哈希、profiles 和首次密码；重建应用容器保留卷。
 

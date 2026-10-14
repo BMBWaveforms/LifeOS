@@ -65,6 +65,7 @@ ALLOWED_ORIGINS=http://localhost:8780,http://127.0.0.1:8780
 COOKIE_SECURE=false
 AGENT_RUNTIME=claude-sdk
 AGENT_SDK_BASE_URL=https://api.deepseek.com/anthropic
+TEST_ACCOUNT_PASSWORD=
 ```
 
 | 参数 | 位置与作用 | 常见误解 |
@@ -77,6 +78,7 @@ AGENT_SDK_BASE_URL=https://api.deepseek.com/anthropic
 | `COMPOSE_PROJECT_NAME` | 识别容器和数据卷，部署后保持固定 | 改名字会创建另一套账号和记忆卷 |
 | `AGENT_RUNTIME` | 产品默认 native / claude-sdk | 测试页切换不改变产品默认；失败不自动回退 |
 | `AGENT_SDK_BASE_URL` | SDK 的 Anthropic 兼容入口 | 与 api.json 的 Chat Completions base_url 不同 |
+| `TEST_ACCOUNT_PASSWORD` | 私有统一测试密码，启动时补齐 test1 到 test10 | 仅更新这些测试账号的密码；原账号及数据保留；密码不提交到 Git |
 
 `api.json` 中的 `base_url` 必须是无账号密码、查询参数和片段的 HTTPS 地址；客户端在末尾追加 `/chat/completions`。Docker 部署把模型名和 Key 放在挂载 JSON 中；当前 Compose 没有把宿主机的 `MODEL_API_KEY`、`MODEL_NAME` 等变量直接传入容器。
 
@@ -139,7 +141,7 @@ curl --silent --show-error --max-time 5 -o /dev/null -w '%{http_code}\n' http://
 
 ### 4.2 登录及真实模型链路
 
-首次密码是每个部署独立随机生成的，不是 GitHub Pages 的 `preview` 口令。可将首次登录文件复制到忽略的私有目录，让操作者安全读取：
+团队测试账号 test1 到 test10 使用私有配置 TEST_ACCOUNT_PASSWORD；启动时创建或同步这些账号，密码字段必须传字符串以保留前导零。旧 alice / bob 的密码仍是部署独立生成的值。GitHub Pages 使用自己的虚构预览账号。可将首次登录文件复制到忽略的私有目录，让操作者安全读取：
 
 ```sh
 mkdir -p .private-backups
@@ -210,7 +212,7 @@ COOKIE_SECURE=true
 
 重新创建应用容器，确认 HTTPS 登录 Cookie 与 API 均正常。网关上游读取超时匹配项目内置 Nginx 的 300 秒配置，保留 Host 转发。若网关运行在另一个容器中，它的 `127.0.0.1` 不是宿主机，应按目标网络设计确定上游，不能照抄此地址。
 
-目前仅有两个体验账号，适合受控团队调试。对正式用户开放仍需账号、并发、数据和运维方案；部署任务不自动等于新增注册、SSO 或多实例架构。
+配置统一测试密码后提供十个团队测试账号，并保留已有体验账号，适合受控团队调试。对正式用户开放仍需账号、并发、数据和运维方案；部署任务不自动等于新增注册、SSO 或多实例架构。
 
 ## 6. 日常更新、备份和回退
 
