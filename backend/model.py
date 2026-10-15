@@ -8,6 +8,7 @@ from backend.config import load_local_env
 from backend.errors import ModelError
 from backend.tools import GuideTools, tool_definitions
 from backend.prompts import PromptRegistry
+from backend.memory_maintenance import MemoryMaintenance
 from backend.executors import (ClaudeSDKExecutor, ExecutionRequest,
                                runtime_status, validate_runtime)
 load_local_env()
@@ -74,7 +75,7 @@ def prompt(name):
 
 
 class AgentService:
-    def __init__(self, store, client=None, executors=None, prompt_source=None):
+    def __init__(self, store, client=None, executors=None, prompt_source=None, maintenance_enabled=True):
         self.store = store
         self.client = client or ModelClient()
         self.executors = executors if executors is not None else {'claude-sdk': ClaudeSDKExecutor(self.client)}
@@ -83,6 +84,8 @@ class AgentService:
             raise ValueError('当前仅支持 Claude Agent SDK 执行层。')
         self.store.change_listeners.append(self.invalidate_conversations)
         self.prompt_source = prompt_source
+        self.memory_maintenance = MemoryMaintenance(store, self.client)
+        self.maintenance_enabled = maintenance_enabled
 
     def runtime_directory(self, owner):
         import hashlib
@@ -143,6 +146,7 @@ class AgentService:
                    'content_version': c['content_version'],
                    'content_hash': hashlib.sha256(json.dumps(self.store.guide, sort_keys=True).encode()).hexdigest(),
                    'memory_enabled': c['memory_enabled'],
+                   'memory_policy': 'topic-retrieval-v1',
                    'expires_at': min((m['expires'] for m in c['memories'] if m.get('expires')), default=None)}
         start = time.monotonic()
         request = ExecutionRequest(instruction, messages, tools, self.runtime_directory(owner),
@@ -150,6 +154,7 @@ class AgentService:
                                    memory_revision=c['memory_revision'], context_binding=binding)
         observations = {
             'understanding': {'input': {'query': query, 'memories': c['memories'],
+                                         'memory_selection': c['memory_selection'],
                                          'history': {'managed_by': 'claude-sdk', 'restored': None}},
                               'output': None, 'status': 'unobserved'},
             'retrieval': {'input': {'query': query, 'candidate_titles': c['candidate_titles'],
@@ -225,6 +230,8 @@ class AgentService:
                 # the final memory revision check. Failed rounds are never resumable.
                 if executed.session is not None:
                     executed.session.commit(current)
+            if summary.get('saved') and self.maintenance_enabled:
+                self.memory_maintenance.schedule(owner, summary.get('topic_id'))
             response = {'markdown': result['markdown'] + '\n\n' + summary['message'], 'result': result,
                     'summary': summary, 'conversation_id': cid, 'prompt_versions': versions, 'tool_calls': tools.calls,
                     'execution': {'runtime': runtime, 'agent_elapsed_ms': agent_ms,

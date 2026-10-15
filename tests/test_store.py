@@ -156,7 +156,8 @@ def test_explicit_active_followup_is_not_lost_outside_recent_memory_window(tmp_p
     for index in range(13):
         store.change('alice', 'save', {'confirmed': True, 'text': f'较新的其他记录 {index}'})
     context = store.context('alice', '继续旧问题', 'chat', followup_memory_id=first)
-    assert len(context['memories']) == 12
+    assert len(context['memories']) <= context['memory_selection']['max_items']
+    assert context['memory_selection']['estimated_tokens'] <= context['memory_selection']['token_budget']
     assert context['followup']['id'] == context['memories'][0]['id'] == first
 
 

@@ -503,9 +503,10 @@
     });
   }
   function invalidateMemoryContext(id='') {
+    const ids=new Set(Array.isArray(id)?id:[id]);
     for(const c of conversations){
       c.serverId='';c.context=null;
-      if(!id||c.memoryId===id||c.followupId===id){c.memoryId=null;c.followupId='';c.resumeNotice='个人记忆已更新；可以继续聊。';}
+      if(!id||ids.has(c.memoryId)||ids.has(c.followupId)){c.memoryId=null;c.followupId='';c.resumeNotice='个人记忆已更新；可以继续聊。';}
       persist(c);
     }
   }
@@ -522,13 +523,17 @@
   }
   function renderProfile(box,actions) {
     box.replaceChildren();actions.replaceChildren();
-    P(box,'开启后，自动保存对话摘要，用于之后的交流和问题回访。你可以随时关闭或删除。','hint');
+    const topics=!mock()&&Array.isArray(memories?.topics)?memories.topics:null;
+    P(box,topics?'开启后，保存相关原话和主题摘要，用于之后的交流和问题回访。可展开来源，并删除单条记录或整个主题；你也可以随时关闭个人记忆。':'开启后，自动保存对话摘要，用于之后的交流和问题回访。你可以随时关闭或删除。','hint');
     if(user&&memories){const setting=E('label',undefined,'memory-setting'),toggle=E('input');toggle.type='checkbox';toggle.id='memory-enabled';toggle.checked=!!memories.enabled;toggle.dataset.control='true';
       const text=E('span','个人记忆 '+(memories.enabled?'已开启':'已关闭'));setting.append(toggle,text);box.append(setting);
       toggle.onchange=async()=>{await changeMemorySetting(toggle.checked);if(toggle.isConnected)toggle.checked=!!memories?.enabled;};
       P(box,memories.enabled?'接下来的每轮回复会尝试保存摘要，保存结果会单独显示。':'现有摘要仍可查看和删除。关闭期间不读取或新增个人记忆。','hint');}
-    const records=mock()?memories?.events||[]:(memories?.memories||memories?.effective||[]).filter(m=>m.state==='active');
-    for(const m of records){const card=E('article',undefined,'memory'),head=E('div',undefined,'section-heading');head.append(E('h3',mock()?m.title:m.problem||'生活话题'));
+    const records=topics||(mock()?memories?.events||[]:(memories?.memories||memories?.effective||[]).filter(m=>m.state==='active'));
+    if(topics&&topics.length)P(box,'按话题整理，展开可查看每次交流的来源记录。','hint');
+    for(const m of records){
+      if(topics){renderMemoryTopic(box,m);continue;}
+      const card=E('article',undefined,'memory'),head=E('div',undefined,'section-heading');head.append(E('h3',mock()?m.title:m.problem||'生活话题'));
       button(head,'删除',()=>confirmDeleteMemory(m),'text-button');card.append(head);
       if(m.text)P(card,m.text,'memory-summary');
       if(m.problem_status)P(card,'进展：'+(UI.labels[m.problem_status]||'未说明'),'hint');
@@ -539,6 +544,40 @@
     if(user)button(actions,'退出登录',logout,'',false);else button(actions,'登录',()=>{closeModal();$('login').hidden=false;$('username').focus();},'',false);
     button(actions,'关闭',closeModal,'',false);sync();
   }
+  function renderMemoryTopic(box,topic) {
+    const card=E('article',undefined,'memory memory-topic'),head=E('div',undefined,'section-heading');card.dataset.topicId=topic.id;
+    head.append(E('h3',topic.title||'生活话题'));button(head,'删除主题',()=>confirmDeleteMemory(topic,{topic,wholeTopic:true}),'text-button');card.append(head);
+    if(Array.isArray(topic.excerpts)&&topic.excerpts.length){
+      for(const excerpt of topic.excerpts){
+        if(!excerpt.quote)continue;
+        const section=E('div',undefined,'memory-excerpt');P(section,excerpt.quote,'memory-summary');memoryDate(section,excerpt.created,'hint memory-excerpt-time');card.append(section);
+      }
+    }else if(topic.text)P(card,topic.text,'memory-summary');
+    if(topic.problem_status)P(card,'进展：'+(UI.labels[topic.problem_status]||'未说明'),'hint');
+    const status=topic.consolidation?.status;
+    if(status==='pending')P(card,'正在整理这个话题，来源记录已保留。','hint memory-organizing');
+    else if(status==='failed')P(card,'这个话题暂未整理完成，来源记录已保留。','hint memory-organizing');
+    const sources=topic.sources||[],details=E('details',undefined,'memory-sources');
+    details.append(E('summary','查看来源记录（'+(topic.source_count??sources.length)+' 条）'));
+    for(const source of sources){
+      const record=E('article',undefined,'memory-source');record.dataset.memoryId=source.id;
+      const sourceHead=E('div',undefined,'section-heading');sourceHead.append(E('h4','来源记录'));
+      button(sourceHead,'删除记录',()=>confirmDeleteMemory(source,{topic}),'text-button');record.append(sourceHead);
+      if(source.query){P(record,'当时说的','memory-source-label');P(record,source.query,'memory-source-query');}
+      if(source.text&&source.text!==source.query){P(record,'当次摘要','memory-source-label');P(record,source.text,'memory-summary');}
+      memoryDate(record,source.created,'hint memory-source-time');
+      details.append(record);
+    }
+    if(!sources.length)P(details,'暂时没有可查看的来源记录。','hint');
+    card.append(details);
+    if(memories?.enabled&&topic.current_memory_id)button(card,'继续聊 ↗',()=>continueMemory({id:topic.current_memory_id,problem:topic.title}),'text-button');
+    box.append(card);
+  }
+  function memoryDate(box,value,className) {
+    if(value===undefined||value===null||value==='')return;
+    const date=new Date(typeof value==='number'&&Math.abs(value)<1e12?value*1000:value);
+    if(!Number.isNaN(date.getTime()))P(box,new Intl.DateTimeFormat('zh-CN',{dateStyle:'medium',timeStyle:'short'}).format(date),className);
+  }
   async function openProfile() {
     modal('个人档案与设置',(box,actions)=>{if(memories)renderProfile(box,actions);else P(box,user?'正在读取个人档案…':'登录后查看个人档案。','empty');},true);
     if(!user){renderProfile($('modal-body'),$('modal-actions'));return;}
@@ -546,16 +585,23 @@
     await run('profile',async ctx=>{try{await readMemories(ctx);if(current(ctx)&&$('modal').open&&$('modal').classList.contains('profile-dialog'))renderProfile($('modal-body'),$('modal-actions'));}
       catch(e){if(current(ctx)&&$('modal').open&&e.status!==401)button($('modal-actions'),'重试读取',openProfile);throw e;}});
   }
-  function confirmDeleteMemory(m) {
-    modal('删除这条个人记忆？',(box,actions)=>{
-      P(box,m.title||m.problem||'生活话题');P(box,'后续交流不再使用这条摘要。本页已显示的对话仍会保留。');
+  function confirmDeleteMemory(m,{topic=null,wholeTopic=false}={}) {
+    modal(wholeTopic?'删除整个记忆主题？':topic?'删除这条来源记录？':'删除这条个人记忆？',(box,actions)=>{
+      P(box,m.title||m.problem||m.query||'生活话题');
+      P(box,wholeTopic?'这个主题的摘要和全部来源记录都会删除，后续交流不再使用。本页已显示的对话仍会保留。':topic?'这条来源记录将被删除，主题摘要会重新整理。本页已显示的对话仍会保留。':'后续交流不再使用这条摘要。本页已显示的对话仍会保留。');
       button(actions,'取消',()=>openProfile(),'',false);
       button(actions,'确认删除',()=>run('delete',async ctx=>{
-        if(mock())await service.deleteEvent(m.id,m.version);else await service.mutate({action:'delete',id:m.id});
+        if(mock())await service.deleteEvent(m.id,m.version);else await service.mutate({action:wholeTopic?'delete_topic':'delete',id:m.id});
         if(!current(ctx))return;
-        invalidateMemoryContext(m.id);
-        home={...(home||{}),followups:(home?.followups||[]).filter(f=>f.memory_id!==m.id)};
-        if(memories){if(mock())memories.events=(memories.events||[]).filter(record=>record.id!==m.id);else {memories.memories=(memories.memories||[]).filter(record=>record.id!==m.id);memories.effective=(memories.effective||[]).filter(record=>record.id!==m.id);}}
+        const affected=new Set(topic?[topic.current_memory_id,...(topic.sources||[]).map(source=>source.id)].filter(Boolean):[m.id]);
+        invalidateMemoryContext([...affected]);
+        home={...(home||{}),followups:(home?.followups||[]).filter(f=>!affected.has(f.memory_id))};
+        if(memories){if(mock())memories.events=(memories.events||[]).filter(record=>record.id!==m.id);else {
+          const removed=wholeTopic?affected:new Set([m.id]);
+          memories.memories=(memories.memories||[]).filter(record=>!removed.has(record.id));memories.effective=(memories.effective||[]).filter(record=>!removed.has(record.id));
+          // A topic summary may contain facts from the deleted source. Hide it until a fresh authoritative read succeeds.
+          if(Array.isArray(memories.topics))memories.topics=memories.topics.filter(record=>record.id!==topic?.id&&!(record.sources||[]).some(source=>source.id===m.id));
+        }}
         renderHome();renderChat();renderProfile($('modal-body'),$('modal-actions'));$('modal-title').textContent='个人档案与设置';$('modal').classList.add('profile-dialog');say('记忆已删除。');
         try{await readMemories(ctx);if(!current(ctx))return;renderProfile($('modal-body'),$('modal-actions'));}
         catch(e){if(!current(ctx))return;if(e.status===401)throw e;
