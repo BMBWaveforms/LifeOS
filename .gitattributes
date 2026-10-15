@@ -1,0 +1,2 @@
+# Keep the authoritative upstream license byte-for-byte, including its final blank line.
+frontend/assets/GUIDE-LICENSE.txt whitespace=-blank-at-eof

@@ -33,7 +33,8 @@ const Evals = (() => {
     currentJob = null,
     timer = null,
     module = "understanding",
-    loadedVersion = null;
+    loadedVersion = null,
+    overallMode = "free";
   const q = (id) => document.getElementById(id);
   const el = (tag, text, cls) => {
     const n = document.createElement(tag);
@@ -124,10 +125,23 @@ const Evals = (() => {
     ]);
   }
   function tab(name) {
+    if (["dataset", "jobs", "free"].includes(name)) {
+      overallMode = name;
+      name = "overall";
+    }
     for (const panel of document.querySelectorAll("[data-bench-panel]"))
       panel.hidden = panel.dataset.benchPanel !== name;
     for (const b of document.querySelectorAll("[data-bench-tab]"))
       b.setAttribute("aria-selected", String(b.dataset.benchTab === name));
+    for (const panel of document.querySelectorAll("[data-overall-panel]"))
+      panel.hidden = panel.dataset.overallPanel !== overallMode;
+    for (const b of document.querySelectorAll("[data-overall-tab]"))
+      b.setAttribute("aria-selected", String(b.dataset.overallTab === overallMode));
+    q("bench-context").textContent = {
+      single: "固定上游输入，单独检查一段提示词。实验不会改动产品启用版本。",
+      overall: "用完整提示词组合运行真实流程，再查看系统判定和人工复核。",
+      prompt: "保存版本、比较差异、组装方案。产品启用仍需单独操作。",
+    }[name] || "";
   }
   function stop() {
     user = null;
@@ -143,6 +157,7 @@ const Evals = (() => {
   async function enter(account) {
     const token = ++version;
     user = account;
+    makeTabs();
     const values = await Promise.all([
       scopedApi("/api/prompts"),
       scopedApi("/api/eval/datasets"),
@@ -150,7 +165,6 @@ const Evals = (() => {
     if (token !== version) return;
     catalog = values[0];
     datasets = values[1].datasets;
-    makeTabs();
     await showDatasets();
     await showJobs();
     await showPrompts();
@@ -160,32 +174,39 @@ const Evals = (() => {
     const nav = q("bench-tabs");
     nav.replaceChildren();
     for (const [key, label] of [
-      ["dataset", "评测集"],
-      ["jobs", "批量运行与结果"],
+      ["single", "单环节测试"],
+      ["overall", "整体测试"],
       ["prompt", "提示词管理"],
-      ["free", "自由测试"],
     ]) {
       const b = button(nav, label, () => tab(key));
       b.dataset.benchTab = key;
       b.setAttribute("role", "tab");
       b.setAttribute("aria-selected", "false");
     }
-    tab("dataset");
-    note("评测集和提示词为团队共享；运行结果与测试记忆仅当前账号可见。");
+    const modes = q("overall-tabs");
+    modes.replaceChildren();
+    for (const [key, label] of [["free", "交互测试"], ["jobs", "批量对比与结果"], ["dataset", "评测集"]]) {
+      const b = button(modes, label, () => tab(key));
+      b.dataset.overallTab = key;
+      b.setAttribute("role", "tab");
+    }
+    overallMode = "free";
+    tab("single");
+    note("提示词和评测集为团队共享；实验记录与测试记忆仅当前账号可见。");
   }
   function populateFree() {
     const box = q("free-prompt");
     box.replaceChildren();
     select(
       box,
-      "自由测试使用的提示词组合",
+      "整体交互测试使用的提示词组合",
       "free-bundle",
       choices(),
       catalog.active_bundle_id,
     ).onchange = () => {
       sessions = {};
       controls();
-      message("提示词组合已更换，下一次自由测试创建新会话。");
+      message("提示词组合已更换，下一次整体交互测试创建新会话。");
     };
   }
   async function refreshLibrary() {
@@ -630,7 +651,7 @@ const Evals = (() => {
     const panel = q("ev-jobs");
     panel.replaceChildren();
     const setup = append(panel, "section");
-    append(setup, "h2", "批量运行");
+    append(setup, "h2", "批量对比");
     const ds = select(
       setup,
       "评测集",
@@ -1392,7 +1413,7 @@ const Evals = (() => {
       q("ev-bundle-module-" + key).value = value;
     q("ev-bundle-name").value = bundle.name + "（新版本）";
   }
-  return { enter, stop };
+  return { enter, stop, tab };
 })();
 document.addEventListener("lifeos-login", (event) =>
   Evals.enter(event.detail).catch(
@@ -1401,3 +1422,4 @@ document.addEventListener("lifeos-login", (event) =>
   ),
 );
 document.addEventListener("lifeos-logout", () => Evals.stop());
+document.addEventListener("lifeos-bench-navigate", (event) => Evals.tab(event.detail));

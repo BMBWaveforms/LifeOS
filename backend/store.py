@@ -58,6 +58,16 @@ class Store:
         db.row_factory = sqlite3.Row
         return db
 
+    def enable_product_memory(self):
+        """Apply the product's automatic-memory policy, once per disabled account.
+
+        Isolated workbench Stores retain explicit settings for regression cases.
+        Advancing the revision invalidates SDK restores made under the old policy.
+        Existing records and account credentials are preserved.
+        """
+        with self.lock, self.db() as db:
+            db.execute('UPDATE profiles SET enabled=1, revision=revision+1 WHERE enabled=0')
+
     def owner(self, token):
         for owner, p in self.profiles.items():
             if token and secrets.compare_digest(token, p['token']):

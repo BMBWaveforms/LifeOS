@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "kind": "frontend-to-backend-agent-handoff",
+  "upstream_repository": "shuaishuaisylas/LifeOS",
+  "baseline_commit": "633ccba4f4f9245e467be5c03426f00f18f313fb",
+  "candidate_entry": null,
+  "default_entry_changed": true,
+  "backend_changed": true,
+  "production_data_migrated": false,
+  "read_order": [
+    "AGENTS.md",
+    "docs/handoff/horizon/README.md",
+    "docs/handoff/horizon/BACKEND_AGENT_TASK.md",
+    "docs/handoff/horizon/FEATURE_MATRIX.md",
+    "docs/handoff/horizon/CONTRACT.md",
+    "docs/handoff/horizon/ACCEPTANCE.md",
+    "docs/handoff/horizon/VERIFICATION.md"
+  ],
+  "adapter": "frontend/service.mjs",
+  "runtime_discovery": "frontend/runtime-config.mjs",
+  "capabilities": {
+    "default_provider": "demo",
+    "real_transport": "final-json",
+    "demo_streaming": true,
+    "public_backend_streaming": false,
+    "server_cancel": false,
+    "server_idempotency": false,
+    "history": {
+      "demo": "browser-localStorage",
+      "real": "browser-sessionStorage-per-account",
+      "server_persistence": false,
+      "manual_order": "same-group-ID-order; demo-localStorage; real-sessionStorage-per-account; new-conversations-first; no-server-sync"
+    },
+    "projects": "demo-group-only",
+    "understanding": "frontend-explicit-text-rules-not-agent-reasoning",
+    "guide_share": "local-png-no-private-fields",
+    "static_preview_real_api": false
+  },
+  "preserve": [
+    "frontend/index.html",
+    "frontend/workbench.html",
+    "backend",
+    "prompts",
+    "account-data",
+    "runtime-volumes",
+    "source-validation",
+    "memory-revision",
+    "account-isolation"
+  ],
+  "not_in_scope": [
+    "deployment",
+    "server-history-list",
+    "cross-device-history",
+    "public-streaming",
+    "registration",
+    "real-contact-link"
+  ],
+  "handoff_response_required": [
+    "baseline-sha",
+    "changed-files",
+    "protocol-version",
+    "implemented-blocked-deferred",
+    "compatibility-and-migration",
+    "tests-and-results",
+    "real-model-acceptance-status",
+    "remaining-decisions",
+    "rollback"
+  ],
+  "status": "integrated-not-deployed",
+  "source_delivery_commit": "b205c20aa81d37c304bd2640a597b630240c3756",
+  "integration_base_commit": "515f548177aacc9473da9efd260e7190b600b73a",
+  "product_entry": "/",
+  "current_spec": "docs/前端接入与验收.md",
+  "original_tasks": [
+    {
+      "id": "memory-policy",
+      "priority": "P0",
+      "owner": "backend-agent",
+      "status": "blocked-by-policy-mismatch",
+      "detail": "Horizon requires automatic immutable memories; baseline backend defaults off and permits editing. No automatic account mutation in this delivery."
+    },
+    {
+      "id": "json-api",
+      "priority": "P0",
+      "owner": "integration-agent",
+      "status": "adapter-present-synthetic-contract-tested",
+      "detail": "Real-model end-to-end acceptance remains required."
+    },
+    {
+      "id": "history-origin",
+      "priority": "P0",
+      "owner": "backend-agent",
+      "status": "client-only-fallback-ready",
+      "detail": "Need authorized persistent conversation/turn origin; current backend context is not a history API."
+    },
+    {
+      "id": "public-stream",
+      "priority": "P0",
+      "owner": "backend-and-frontend-agents",
+      "status": "container-ready-transport-absent",
+      "detail": "Only public validated text, final guide validation and memory result required; no internal SDK traces."
+    },
+    {
+      "id": "cancel-idempotency",
+      "priority": "P1",
+      "owner": "backend-and-frontend-agents",
+      "status": "browser-abort-only"
+    },
+    {
+      "id": "project-groups",
+      "priority": "P2",
+      "owner": "product-and-backend-agents",
+      "status": "demo-only"
+    },
+    {
+      "id": "understanding-map",
+      "priority": "P2",
+      "owner": "backend-and-frontend-agents",
+      "status": "semantics-mapping-required"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "memory-policy",
+      "status": "implemented",
+      "detail": "Automatic product memory; deletion only. Upgrade enables legacy disabled profiles and advances revision on deployment startup."
+    },
+    {
+      "id": "topic-memory",
+      "status": "implemented",
+      "detail": "Source-backed topics, excerpts, source/topic deletion and stale reference invalidation."
+    },
+    {
+      "id": "prompt-workbench",
+      "status": "implemented",
+      "detail": "Seven controlled prompt experiments and real overall tests; per-owner evidence records and no product writes."
+    },
+    {
+      "id": "real-model-smoke",
+      "status": "passed-synthetic-samples",
+      "detail": "Seven modules plus overall SDK answer/summary passed; quality remains pending human assessment."
+    }
+  ]
+}

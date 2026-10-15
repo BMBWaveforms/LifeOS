@@ -1,0 +1,36 @@
+[
+  {
+    "variant": "normal",
+    "start": 391.30000001192093,
+    "chunks": 13,
+    "errors": [],
+    "user": 23.299999982118607,
+    "userSettled": 1157.2999999821186,
+    "thinking": 1576.2999999821186,
+    "reply": 2290,
+    "lastDelta": 4224.399999976158,
+    "completed": 4596.399999976158,
+    "userMessages": 1,
+    "rightGap": 0
+  },
+  {
+    "variant": "reduced-cpu4",
+    "start": 319.30000001192093,
+    "chunks": 13,
+    "errors": [],
+    "user": 59.599999994039536,
+    "userSettled": 59.599999994039536,
+    "thinking": 1568.5,
+    "reply": 2288.699999988079,
+    "lastDelta": 4233.5,
+    "completed": 4607.9000000059605,
+    "userMessages": 1,
+    "rightGap": 0
+  },
+  {
+    "variant": "abort-before-reply",
+    "partial": "",
+    "memories": 0,
+    "recovery": "已停止演示，本轮未写入记忆。重新发送继续编辑"
+  }
+]

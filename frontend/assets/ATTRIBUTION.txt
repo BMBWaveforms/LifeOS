@@ -1,0 +1,8 @@
+指南来源：《高性价比人生指南》HowToLiveBetter
+作者：eternity4719 及项目贡献者
+项目：https://github.com/eternity4719/HowToLiveBetter
+许可：Creative Commons Attribution 4.0 International (CC BY 4.0)
+许可链接：https://creativecommons.org/licenses/by/4.0/
+快照日期：2026-10-12
+本包修改：把 book/*.md 的 687 个完整条目转为结构化 JSON；增加稳定条目编号、来源位置、快照内容哈希，用于固定版本检索。原文完整保留。
+每张展示卡片会保留原条目的来源与备注；项目指南自身的陈述不等于本 Demo 独立验证的事实。

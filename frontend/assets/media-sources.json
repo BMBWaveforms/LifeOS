@@ -1,0 +1,75 @@
+{
+  "license": "https://mixkit.co/license/#videoFree",
+  "clips": [
+    {
+      "name": "commute",
+      "mixkit_id": 3473,
+      "author_handle": "rubenvelasco",
+      "page": "https://mixkit.co/free-stock-video/large-buildings-from-the-window-of-a-train-3473/",
+      "license": "Mixkit Stock Video Free License"
+    },
+    {
+      "name": "home",
+      "mixkit_id": 3112,
+      "author_handle": "edgarfernandez",
+      "page": "https://mixkit.co/free-stock-video/interior-of-a-department-room-3112/",
+      "license": "Mixkit Stock Video Free License"
+    },
+    {
+      "name": "focus",
+      "mixkit_id": 39838,
+      "author_handle": "edgarfernandez",
+      "page": "https://mixkit.co/free-stock-video/man-working-in-an-office-at-night-39838/",
+      "license": "Mixkit Stock Video Free License"
+    },
+    {
+      "name": "night",
+      "mixkit_id": 4087,
+      "author_handle": "dubassy",
+      "page": "https://mixkit.co/free-stock-video/new-york-city-view-at-night-4087/",
+      "license": "Mixkit Stock Video Free License"
+    }
+  ],
+  "files": [
+    {
+      "file": "web/assets/scenes/commute.mp4",
+      "bytes": 3545390,
+      "source": "https://assets.mixkit.co/videos/3473/3473-720.mp4"
+    },
+    {
+      "file": "web/assets/scenes/commute.jpg",
+      "bytes": 112395,
+      "source": "https://assets.mixkit.co/videos/3473/3473-thumb-720-0.jpg"
+    },
+    {
+      "file": "web/assets/scenes/home.mp4",
+      "bytes": 3261856,
+      "source": "https://assets.mixkit.co/videos/3112/3112-720.mp4"
+    },
+    {
+      "file": "web/assets/scenes/home.jpg",
+      "bytes": 66531,
+      "source": "https://assets.mixkit.co/videos/3112/3112-thumb-720-0.jpg"
+    },
+    {
+      "file": "web/assets/scenes/focus.mp4",
+      "bytes": 3546425,
+      "source": "https://assets.mixkit.co/videos/39838/39838-720.mp4"
+    },
+    {
+      "file": "web/assets/scenes/focus.jpg",
+      "bytes": 68297,
+      "source": "https://assets.mixkit.co/videos/39838/39838-thumb-720-0.jpg"
+    },
+    {
+      "file": "web/assets/scenes/night.mp4",
+      "bytes": 5377946,
+      "source": "https://assets.mixkit.co/videos/4087/4087-720.mp4"
+    },
+    {
+      "file": "web/assets/scenes/night.jpg",
+      "bytes": 159507,
+      "source": "https://assets.mixkit.co/videos/4087/4087-thumb-720-0.jpg"
+    }
+  ]
+}

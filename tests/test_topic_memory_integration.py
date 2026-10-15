@@ -49,6 +49,17 @@ def test_deleted_ancestor_cannot_survive_through_cumulative_descendant(tmp_path)
 
 
 def test_text_only_correction_cannot_restore_deleted_fact_from_old_model_fields(tmp_path):
+    def fact_text(value):
+        # Random opaque IDs can coincidentally contain the tested four digits.
+        # Check every user-facing/evidence text field rather than UUID bytes.
+        if isinstance(value, dict):
+            return '\n'.join(str(item) if key in {
+                'text', 'query', 'problem', 'title', 'quote', 'user_state',
+                'state_evidence', 'status_evidence'} else fact_text(item)
+                for key, item in value.items())
+        if isinstance(value, list):
+            return '\n'.join(fact_text(item) for item in value)
+        return ''
     store = Store(tmp_path)
     store.change('alice', 'settings', {'enabled': True})
     first = save_turn(store, '我的信用卡尾号是9988，担心还款', problem='信用卡9988还款')
@@ -60,15 +71,15 @@ def test_text_only_correction_cannot_restore_deleted_fact_from_old_model_fields(
         db.execute('UPDATE memory_summaries SET user_state=? WHERE memory_id=?',
                    ('曾经继承的信用卡9988信息', latest['memory_id']))
     store.change('alice', 'delete', {'id': first['memory_id']})
-    assert '9988' not in json.dumps(store.state('alice'), ensure_ascii=False)
+    assert '9988' not in fact_text(store.state('alice'))
 
     store.change('alice', 'correct_summary', {'id': latest['memory_id'], 'text': '我今天完成了一步'})
     state = store.state('alice')
     context = store.context('alice', '后续安排', 'chat', followup_memory_id=latest['memory_id'])
-    assert '9988' not in json.dumps([state, context], ensure_ascii=False)
+    assert '9988' not in fact_text([state, context])
     assert context['followup']['query'] == '我今天完成了一步'
     assert '我今天完成了一步' in context['followup']['text']
-    assert '9988' not in json.dumps(Store(tmp_path).state('alice'), ensure_ascii=False)
+    assert '9988' not in fact_text(Store(tmp_path).state('alice'))
 
 
 def test_topic_delete_api_is_account_scoped_and_removes_all_sources(tmp_path):

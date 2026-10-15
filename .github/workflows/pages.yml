@@ -6,6 +6,7 @@ on:
       - 'frontend/**'
       - 'preview/**'
       - 'scripts/build_preview.py'
+      - 'scripts/build_horizon_preview.py'
       - 'data/**'
       - 'docs/团队讲解/**'
       - '.github/workflows/pages.yml'
