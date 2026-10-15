@@ -1,3 +1,4 @@
+import pytest
 import json
 import sys
 import tempfile
@@ -146,3 +147,26 @@ class MemoryAndGuideTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+
+def test_explicit_active_followup_is_not_lost_outside_recent_memory_window(tmp_path):
+    store = Store(tmp_path)
+    store.change('alice', 'settings', {'enabled': True})
+    first = store.change('alice', 'save', {'confirmed': True, 'text': '需要继续跟进的早期问题'})['effective'][0]['id']
+    for index in range(13):
+        store.change('alice', 'save', {'confirmed': True, 'text': f'较新的其他记录 {index}'})
+    context = store.context('alice', '继续旧问题', 'chat', followup_memory_id=first)
+    assert len(context['memories']) == 12
+    assert context['followup']['id'] == context['memories'][0]['id'] == first
+
+
+def test_inflight_result_cannot_use_fact_that_expired_after_context_creation(tmp_path, monkeypatch):
+    store = Store(tmp_path)
+    store.change('alice', 'settings', {'enabled': True})
+    import time
+    now = time.time()
+    store.change('alice', 'save', {'confirmed': True, 'text': '仅暂时有效的合成事实', 'expires': now + 10})
+    context = store.context('alice', '你好', 'chat')
+    monkeypatch.setattr('backend.store.time.time', lambda: now + 11)
+    with pytest.raises(ValueError, match='记忆已到期'):
+        store.run(context['run_id'])

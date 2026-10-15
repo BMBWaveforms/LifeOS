@@ -88,7 +88,7 @@ def create_app(directory=None, client=None, executors=None):
     @app.get('/health')
     def health():
         return {'status': 'ok', 'entries': len(store.entries), 'content_version': store.guide['content_version'],
-                'model': service.client.ready(), 'backend': 'python-direct-api', 'agent_runtime': service.runtime_status()}
+                'model': service.client.ready(), 'backend': 'python-sdk', 'agent_runtime': service.runtime_status()}
 
     @app.post('/api/login')
     def login(data: dict, request: Request):
@@ -255,6 +255,13 @@ def create_app(directory=None, client=None, executors=None):
         if data.get('action') not in ('settings', 'correct_summary', 'delete', 'clear', 'feedback'):
             raise ValueError('未知的记忆管理操作。')
         return store.change(user, data['action'], data)
+
+    @app.post('/api/conversation-action')
+    def conversation_action(data: dict, request: Request):
+        user = owner(request)
+        if data.get('action') != 'delete':
+            raise ValueError('未知的对话操作。')
+        return service.delete_conversation(user, data.get('conversation_id'))
 
     @app.get('/api/guide-entry')
     def guide(guide_id: str, request: Request):

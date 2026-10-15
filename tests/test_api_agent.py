@@ -5,18 +5,71 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.main import create_app
 from backend.model import AgentService, ModelClient, ModelError
+from backend.executors import ExecutionResult
 from backend.store import Store
 
 class FakeModel:
     def __init__(self, responses):
         self.responses = list(responses)
         self.inputs = []
+        self.sessions = {}
     def ready(self): return {'configured': True, 'model': 'test-only'}
     def complete(self, messages, **kwargs):
         self.inputs.append(messages)
         result = self.responses.pop(0)
         if isinstance(result, Exception): raise result
         return result
+
+class ScriptedSDKExecutor:
+    """Offline business-test transport; production has no native executor."""
+    name = 'claude-sdk'
+
+    def __init__(self, client):
+        self.client = client
+
+    def invalidate(self, directory):
+        prefix = str(directory)
+        self.client.invalidated = True
+        self.client.sessions = {key: value for key, value in self.client.sessions.items() if key[0] != prefix}
+
+    def execute(self, request):
+        import secrets
+        cid = request.conversation_id
+        key = (str(request.directory), cid)
+        previous = self.client.sessions.get(key)
+        if previous and (previous['revision'] != request.memory_revision or previous['binding'] != request.context_binding):
+            previous = None
+        executor = self
+        class Session:
+            conversation_id = cid
+            committed = False
+            def ensure_active(self):
+                pass
+            def commit(self, revision):
+                executor.client.sessions[(str(request.directory), cid)] = {'revision': revision, 'binding': request.context_binding}
+                self.committed = True
+            def discard(self):
+                if not self.committed:
+                    executor.client.sessions.pop((str(request.directory), cid), None)
+        messages = list(request.messages)
+        for turn in range(7):
+            message = self.client.complete(messages, tools=request.tools.definitions)
+            calls = message.get('tool_calls') or []
+            if not calls:
+                return ExecutionResult(message.get('content') or '', {'session_resumed': bool(previous)}, session=Session())
+            if len(calls) > 12 or request.tools.calls + len(calls) > 24:
+                raise ModelError('指南工具调用达到上限。')
+            messages.append({k: v for k, v in message.items() if k in ('role', 'content', 'tool_calls')})
+            for call in calls:
+                function = call['function']
+                output = request.tools.invoke(function['name'], json.loads(function['arguments']))
+                messages.append({'role': 'tool', 'tool_call_id': call['id'], 'content': json.dumps(output, ensure_ascii=False)})
+        raise ModelError('指南检索达到轮次上限，请重试。')
+
+
+def agent_service(store, client):
+    return AgentService(store, client, {'claude-sdk': ScriptedSDKExecutor(client)})
+
 
 def text(value): return {'role': 'assistant', 'content': json.dumps(value, ensure_ascii=False)}
 def read_call(gid='03-01', name='get_entry'):
@@ -32,21 +85,21 @@ def s(tmp_path):
 
 def test_complete_agent_has_real_read_then_summary(s):
     client=FakeModel([read_call(),text({'status':'answer','cards':[{'guide_id':'03-01','memory_ids':[]}]}),summary()])
-    result=AgentService(s,client).chat('alice',{'query':'我工作时被手机通知打断，怎么办？'})
+    result=agent_service(s,client).chat('alice',{'query':'我工作时被手机通知打断，怎么办？'})
     assert result['summary']['saved'] and result['tool_calls']==1
     assert s.state('alice')['effective'][0]['guide_ids']==['03-01']
     assert 'full_text' in json.loads(client.inputs[1][-1]['content'])
 
 def test_model_cannot_skip_read(s):
     client=FakeModel([text({'status':'answer','cards':[{'guide_id':'03-01'}]})])
-    with pytest.raises(ValueError,match='全文回读'):AgentService(s,client).chat('alice',{'query':'手机通知'})
+    with pytest.raises(ValueError,match='全文回读'):agent_service(s,client).chat('alice',{'query':'手机通知'})
     assert not s.state('alice')['memories']
 
 
 def test_selected_situation_uses_snapshot_metadata_and_still_reads_full_entry(s):
     query = '我被手机通知打断，先看看这个情境'
     client = FakeModel([read_call(), text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]}), summary()])
-    result = AgentService(s, client).chat('alice', {
+    result = agent_service(s, client).chat('alice', {
         'query': query, 'guide_id': '03-01', 'title': '客户端伪造标题', 'source_url': 'https://example.invalid'},
         include_trace=True)
     current = json.loads(client.inputs[0][1]['content'])
@@ -63,7 +116,7 @@ def test_selected_situation_uses_snapshot_metadata_and_still_reads_full_entry(s)
 def test_selected_situation_does_not_count_as_full_read(s):
     client = FakeModel([text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]})])
     with pytest.raises(ValueError, match='全文回读'):
-        AgentService(s, client).chat('alice', {'query': '我想了解这个情境', 'guide_id': '03-01'})
+        agent_service(s, client).chat('alice', {'query': '我想了解这个情境', 'guide_id': '03-01'})
     assert not s.state('alice')['memories']
 
 
@@ -71,7 +124,7 @@ def test_selected_situation_is_only_a_candidate_and_not_carried_to_next_turn(s):
     s.change('alice', 'settings', {'enabled': False})
     client = FakeModel([text({'status': 'clarification', 'clarification': '想咨询哪方面？', 'cards': []}),
                         text({'status': 'acknowledged', 'cards': []})])
-    service = AgentService(s, client)
+    service = agent_service(s, client)
     first = service.chat('alice', {'query': '我想问别的问题', 'guide_id': '03-01'})
     assert first['result']['status'] == 'clarification' and first['result']['cards'] == []
     service.chat('alice', {'query': '谢谢', 'conversation_id': first['conversation_id']})
@@ -91,23 +144,23 @@ def test_invalid_selected_situation_returns_400_before_model_call(tmp_path, guid
 
 def test_unauthorized_tool_rejected(s):
     client=FakeModel([read_call(name='delete_memory')])
-    with pytest.raises(ModelError,match='未授权工具'):AgentService(s,client).chat('alice',{'query':'手机通知'})
+    with pytest.raises(ModelError,match='未授权工具'):agent_service(s,client).chat('alice',{'query':'手机通知'})
 
 def test_summary_failure_is_visible(s):
     client=FakeModel([text({'status':'clarification','clarification':'主要被什么打断？','cards':[]}),ModelError('test')])
-    result=AgentService(s,client).chat('alice',{'query':'工作很烦'})
+    result=agent_service(s,client).chat('alice',{'query':'工作很烦'})
     assert not result['summary']['saved']
     assert '失败' in result['markdown'] and not s.state('alice')['memories']
 
 def test_disabled_memory_does_not_call_summarizer(s):
     s.change('alice','settings',{'enabled':False})
     client=FakeModel([text({'status':'acknowledged','cards':[]})])
-    result=AgentService(s,client).chat('alice',{'query':'谢谢'})
+    result=agent_service(s,client).chat('alice',{'query':'谢谢'})
     assert not result['summary']['saved'] and len(client.inputs)==1
 
 def test_tool_iteration_limit(s):
     client=FakeModel([read_call() for _ in range(7)])
-    with pytest.raises(ModelError,match='轮次上限'):AgentService(s,client).chat('alice',{'query':'手机通知'})
+    with pytest.raises(ModelError,match='轮次上限'):agent_service(s,client).chat('alice',{'query':'手机通知'})
     assert not s.state('alice')['memories']
 
 def test_local_config_is_not_executed(tmp_path,monkeypatch):
@@ -161,19 +214,19 @@ def test_frontend_not_served_from_backend(tmp_path):
 
 def test_deleted_memory_is_not_reintroduced_from_conversation(s):
     fake=FakeModel([read_call(),text({'status':'answer','cards':[{'guide_id':'03-01'}]}),summary()])
-    service=AgentService(s,fake)
+    service=agent_service(s,fake)
     first=service.chat('alice',{'query':'我被手机通知打断'})
     mid=first['summary']['memory_id']
     s.change('alice','delete',{'id':mid})
     fake.responses=[text({'status':'acknowledged','cards':[]}),text({'summary':'用户打了招呼。','user_state':'','state_evidence':'','problem':'','problem_status':'unknown','status_evidence':'','followup_of':'','guide_ids':[]})]
     second=service.chat('alice',{'query':'你好','conversation_id':first['conversation_id']})
-    assert second['conversation_id']!=first['conversation_id']
+    assert second['conversation_id']==first['conversation_id']
     assert '手机通知' not in json.dumps(fake.inputs[-2],ensure_ascii=False)
 
 
 def test_home_uses_current_status_and_explicit_memory_id(s):
     model=FakeModel([read_call(),text({'status':'answer','cards':[{'guide_id':'03-01'}]}),summary()])
-    service=AgentService(s,model)
+    service=agent_service(s,model)
     first=service.chat('alice',{'query':'我被手机通知打断'})
     mid=first['summary']['memory_id']
     with s.db() as db:
@@ -191,7 +244,7 @@ def test_home_uses_current_status_and_explicit_memory_id(s):
 
 def test_followup_rolls_summary_id_for_two_turns_then_resolved_leaves_home(s):
     model = FakeModel([read_call(), text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]}), summary()])
-    service = AgentService(s, model)
+    service = agent_service(s, model)
     first = service.chat('alice', {'query': '我被手机通知打断', 'guide_id': '03-01'})
     original_id = first['summary']['memory_id']
     model.responses = [text({'followups': [{'memory_id': original_id}]})]
@@ -224,3 +277,31 @@ def test_followup_rolls_summary_id_for_two_turns_then_resolved_leaves_home(s):
     assert memories[resolved_id]['guide_ids'] == ['03-01']
     assert service.home('alice')['result']['followups'] == []
     assert not model.responses
+
+
+def test_private_conversation_delete_is_authenticated_owner_scoped_and_keeps_memories(tmp_path):
+    from backend.sdk_sessions import SDKSessionStore
+    from uuid import uuid4
+    app = create_app(tmp_path, FakeModel([]))
+    alice, bob = TestClient(app), TestClient(app)
+    credentials = json.loads((tmp_path / 'login.json').read_text())
+    for name, client in [('alice', alice), ('bob', bob)]:
+        assert client.post('/api/login', json={'username': name, 'password': credentials[name]['password']}).status_code == 200
+    manager = SDKSessionStore(app.state.service.runtime_directory('alice'))
+    lease = manager.begin('alice', str(uuid4()), 0, {})
+    sid = str(uuid4())
+    path = lease.config_directory / 'projects' / 'session' / (sid + '.jsonl')
+    path.parent.mkdir(parents=True)
+    path.write_text('{"synthetic":true}\n')
+    lease.ready(sid)
+    lease.commit(0)
+    cid = lease.conversation_id
+    before = app.state.store.state('alice')
+    assert TestClient(app).post('/api/conversation-action', json={'action': 'delete', 'conversation_id': cid}).status_code == 401
+    assert alice.post('/api/conversation-action', json={'action': 'delete', 'conversation_id': '../invalid'}).status_code == 400
+    assert bob.post('/api/conversation-action', json={'action': 'delete', 'conversation_id': cid}).status_code == 200
+    assert path.exists()
+    assert alice.post('/api/conversation-action', json={'action': 'delete', 'conversation_id': cid}).json() == {'deleted': True}
+    assert not lease.directory.exists()
+    assert app.state.store.state('alice') == before
+    assert alice.post('/api/conversation-action', json={'action': 'delete', 'conversation_id': cid}).status_code == 200

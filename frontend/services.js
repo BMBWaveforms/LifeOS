@@ -16,6 +16,7 @@ window.RealProduct = function (api) {
     },
     submitMessage: input => api.request('/api/run',{mode:'chat',query:input.query,conversation_id:input.conversationId||'',followup_memory_id:input.followupId||'',guide_id:input.guideId||''}),
     mutate: input => api.request('/api/memory-action',input),
+    deleteConversation: id => api.request('/api/conversation-action',{action:'delete',conversation_id:id}),
     guide: id => api.request('/api/guide-entry?guide_id='+encodeURIComponent(id)),
     unsupported() { const error=new Error('此功能待接口接入。'); error.code='unsupported_capability'; throw error; }
   };
