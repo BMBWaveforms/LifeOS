@@ -1,0 +1,348 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "cpu": 1,
+    "hierarchy": {
+      "sectionLabels": [
+        "项目",
+        "最近对话"
+      ],
+      "recent": 6,
+      "projects": 3,
+      "total": "21",
+      "titleSize": "14px",
+      "metaSize": "12px",
+      "selectedBg": "rgba(0, 0, 0, 0)",
+      "marker": {
+        "height": "1px",
+        "width": "12px"
+      },
+      "metadata": [
+        "10/15 20:00 · 1 次交流",
+        "10/15 19:00 · 2 次交流",
+        "10/15 18:00 · 3 次交流",
+        "10/15 17:00 · 1 次交流",
+        "10/15 16:00 · 2 次交流",
+        "10/15 15:00 · 3 次交流"
+      ],
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 260,
+        "height": 900,
+        "top": 0,
+        "right": 260,
+        "bottom": 900,
+        "left": 0
+      },
+      "profile": {
+        "x": 20,
+        "y": 825.625,
+        "width": 220,
+        "height": 56.375,
+        "top": 825.625,
+        "right": 240,
+        "bottom": 882,
+        "left": 20
+      },
+      "mainRight": 1440,
+      "overflow": 0
+    },
+    "motion": [
+      0.185,
+      1,
+      0.185
+    ],
+    "accordion": {
+      "collapsed": true,
+      "focusKept": true,
+      "expanded": true,
+      "projectRows": 3
+    },
+    "orderState": {
+      "label": "完成",
+      "handles": 9,
+      "trash": 0,
+      "searchHidden": true
+    },
+    "during": {
+      "ghost": 1,
+      "placeholder": 1,
+      "shifted": 3
+    },
+    "after": {
+      "ids": [
+        "qa-1",
+        "qa-2",
+        "qa-3",
+        "qa-0",
+        "qa-4",
+        "qa-5"
+      ],
+      "saved": {
+        "version": 1,
+        "groups": {
+          "recent": [
+            "qa-1",
+            "qa-2",
+            "qa-3",
+            "qa-0",
+            "qa-4",
+            "qa-5",
+            "qa-6",
+            "qa-7",
+            "qa-8",
+            "qa-9",
+            "qa-10",
+            "qa-11",
+            "qa-12",
+            "qa-13",
+            "qa-14",
+            "qa-15",
+            "qa-16",
+            "qa-17"
+          ]
+        }
+      },
+      "active": "qa-0",
+      "total": "21",
+      "ghost": false,
+      "focused": "qa-0"
+    },
+    "keyboard": [
+      "qa-1",
+      "qa-2",
+      "qa-0",
+      "qa-3",
+      "qa-4",
+      "qa-5"
+    ],
+    "persisted": {
+      "recent": [
+        "qa-1",
+        "qa-2",
+        "qa-0",
+        "qa-3",
+        "qa-4",
+        "qa-5"
+      ],
+      "project": [
+        "project-demo-visits",
+        "project-demo-needs",
+        "project-demo-packing"
+      ],
+      "mode": "排序"
+    },
+    "reset": {
+      "ids": [
+        "qa-0",
+        "qa-1",
+        "qa-2",
+        "qa-3",
+        "qa-4",
+        "qa-5"
+      ],
+      "order": {
+        "version": 1,
+        "groups": {}
+      },
+      "resetHidden": true
+    },
+    "branch": {
+      "path": "M1 0 V12 Q1 20 9 20 H18",
+      "rowHeight": 40
+    },
+    "search": {
+      "count": 1,
+      "snippet": "生活安排的合成验收问题，预算3017元。"
+    },
+    "selected": {
+      "active": [
+        "qa-17"
+      ],
+      "highlight": false
+    },
+    "renamed": "下次旅行的预算",
+    "preserved": 18,
+    "deleted": {
+      "saved": 17,
+      "total": "20",
+      "errors": []
+    }
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "cpu": 4,
+    "hierarchy": {
+      "sectionLabels": [
+        "项目",
+        "最近对话"
+      ],
+      "recent": 6,
+      "projects": 3,
+      "total": "21",
+      "titleSize": "14px",
+      "metaSize": "12px",
+      "selectedBg": "rgba(0, 0, 0, 0)",
+      "marker": {
+        "height": "1px",
+        "width": "12px"
+      },
+      "metadata": [
+        "10/15 20:00 · 1 次交流",
+        "10/15 19:00 · 2 次交流",
+        "10/15 18:00 · 3 次交流",
+        "10/15 17:00 · 1 次交流",
+        "10/15 16:00 · 2 次交流",
+        "10/15 15:00 · 3 次交流"
+      ],
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 240,
+        "height": 720,
+        "top": 0,
+        "right": 240,
+        "bottom": 720,
+        "left": 0
+      },
+      "profile": {
+        "x": 20,
+        "y": 645.625,
+        "width": 200,
+        "height": 56.375,
+        "top": 645.625,
+        "right": 220,
+        "bottom": 702,
+        "left": 20
+      },
+      "mainRight": 1280,
+      "overflow": 0
+    },
+    "motion": [
+      0,
+      0,
+      0
+    ],
+    "accordion": {
+      "collapsed": true,
+      "focusKept": true,
+      "expanded": true,
+      "projectRows": 3
+    },
+    "orderState": {
+      "label": "完成",
+      "handles": 9,
+      "trash": 0,
+      "searchHidden": true
+    },
+    "during": {
+      "ghost": 1,
+      "placeholder": 1,
+      "shifted": 3
+    },
+    "after": {
+      "ids": [
+        "qa-1",
+        "qa-2",
+        "qa-3",
+        "qa-0",
+        "qa-4",
+        "qa-5"
+      ],
+      "saved": {
+        "version": 1,
+        "groups": {
+          "recent": [
+            "qa-1",
+            "qa-2",
+            "qa-3",
+            "qa-0",
+            "qa-4",
+            "qa-5",
+            "qa-6",
+            "qa-7",
+            "qa-8",
+            "qa-9",
+            "qa-10",
+            "qa-11",
+            "qa-12",
+            "qa-13",
+            "qa-14",
+            "qa-15",
+            "qa-16",
+            "qa-17"
+          ]
+        }
+      },
+      "active": "qa-0",
+      "total": "21",
+      "ghost": false,
+      "focused": "qa-0"
+    },
+    "keyboard": [
+      "qa-1",
+      "qa-2",
+      "qa-0",
+      "qa-3",
+      "qa-4",
+      "qa-5"
+    ],
+    "persisted": {
+      "recent": [
+        "qa-1",
+        "qa-2",
+        "qa-0",
+        "qa-3",
+        "qa-4",
+        "qa-5"
+      ],
+      "project": [
+        "project-demo-visits",
+        "project-demo-needs",
+        "project-demo-packing"
+      ],
+      "mode": "排序"
+    },
+    "reset": {
+      "ids": [
+        "qa-0",
+        "qa-1",
+        "qa-2",
+        "qa-3",
+        "qa-4",
+        "qa-5"
+      ],
+      "order": {
+        "version": 1,
+        "groups": {}
+      },
+      "resetHidden": true
+    },
+    "branch": {
+      "path": "M1 0 V12 Q1 20 9 20 H18",
+      "rowHeight": 40
+    },
+    "search": {
+      "count": 1,
+      "snippet": "生活安排的合成验收问题，预算3017元。"
+    },
+    "selected": {
+      "active": [
+        "qa-17"
+      ],
+      "highlight": false
+    },
+    "renamed": "下次旅行的预算",
+    "preserved": 18,
+    "deleted": {
+      "saved": 17,
+      "total": "20",
+      "errors": []
+    }
+  }
+]

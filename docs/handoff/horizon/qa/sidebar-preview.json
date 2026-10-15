@@ -1,0 +1,29 @@
+{
+  "url": "/horizon/#/chat",
+  "before": [
+    "project-demo-needs",
+    "project-demo-visits",
+    "project-demo-packing"
+  ],
+  "handles": 3,
+  "after": {
+    "ids": [
+      "project-demo-visits",
+      "project-demo-needs",
+      "project-demo-packing"
+    ],
+    "saved": {
+      "version": 1,
+      "groups": {
+        "project:moving-demo": [
+          "project-demo-visits",
+          "project-demo-needs",
+          "project-demo-packing"
+        ]
+      }
+    },
+    "active": 0
+  },
+  "requests": [],
+  "errors": []
+}

@@ -65,7 +65,7 @@ async function run(){
  }catch(error){if(version===epoch)message(error.message);}
  finally{busy=false;if(active)controls();}
 }
-async function enter(user){active=user;epoch++;sessions={};$('account').textContent=user.name;$('logout').hidden=false;$('login').hidden=true;$('workspace').hidden=false;runtimes=await api('/api/runtimes');selected='claude-sdk';controls();await history();message('已登录，测试数据与产品数据分开保存。');document.dispatchEvent(new CustomEvent('lifeos-login',{detail:user}));}
+async function enter(user){active=user;const version=++epoch;sessions={};runtimes=null;$('account').textContent=user.name;$('logout').hidden=false;$('login').hidden=true;$('workspace').hidden=false;selected='claude-sdk';controls();document.dispatchEvent(new CustomEvent('lifeos-login',{detail:user}));const outcomes=await Promise.allSettled([api('/api/runtimes'),history()]);if(version!==epoch)return;if(outcomes[0].status==='fulfilled')runtimes=outcomes[0].value;controls();const failures=outcomes.filter(item=>item.status==='rejected');message(failures.length?'已登录。整体交互测试暂未就绪：'+failures.map(item=>item.reason.message).join('；'):'已登录，测试数据与产品数据分开保存。');}
 $('run').onclick=()=>run();
 $('new-session').onclick=()=>{delete sessions[selected];$('results').replaceChildren();controls();message('已开始新测试会话，以往运行记录仍可查看。');};
 $('memory-enabled').onchange=()=>{sessions={};controls();message('记忆设置已变更，下一次运行将使用新测试会话。');};

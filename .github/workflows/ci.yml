@@ -30,7 +30,7 @@ jobs:
         run: python -m pytest -q
       - name: Check frontend JavaScript
         run: |
-          for file in frontend/*.js preview/*.js; do node --check "$file"; done
+          find frontend -type f \( -name '*.js' -o -name '*.mjs' \) -exec node --check {} \;
       - name: Check product and isolated preview contracts
         run: node --test tests/*.cjs
       - name: Build isolated static preview

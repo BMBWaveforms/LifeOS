@@ -27,18 +27,18 @@
 
 ## 当前技术与文件职责
 
-- 前端：原生 HTML/CSS/JavaScript，唯一产品入口是合伙人页面 `frontend/index.html`，固定情境在 `scenes.js`，真实接口在 `services.js`。旧测试页不再作为产品首页；`/workbench.html` 仅作内部测试工具；无需 Node 构建应用。
+- 前端：原生 HTML/CSS/JavaScript，唯一产品入口是团队 Horizon 页面 `frontend/index.html`，固定场景在 `landing-scenes.mjs`，真实接口在 `service.mjs`。来源为 BMBWaveforms/LifeOS b205c20，模块已提升至根目录，旧产品不再提供入口。旧测试页不再作为产品首页；`/workbench.html` 仅作内部测试工具；无需 Node 构建应用。
 - 后端：Python + FastAPI + Uvicorn；Docker 使用 Python 3.12。
 - 模型：问答统一由 SDK 使用 Anthropic 兼容入口调用 DeepSeek；`backend/model.py` 的摘要、首页任务和评测语义判定同样使用无工具、无历史恢复的SDK临时任务，不再直接调用 Chat Completions。
 - Harness：`AgentService` 每轮提供权威业务状态和两个指南工具；`backend/executors.py` 仅提供 claude-sdk，SDK 负责连续对话及普通历史压缩；`backend/sdk_sessions.py` 管隔离持久化、恢复授权与过期。旧 AGENT_RUNTIME 不再选择执行层，显式 native 请求拒绝。
 - SDK：锁定 claude-agent-sdk 0.2.166，包含 Claude Code CLI；不需要宿主机另装 Claude Code。所有模型任务使用 Anthropic 兼容入口；摘要/首页/判定不续接聊天历史。
 - 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，共同分发及权限检查在 `backend/tools.py`，检索实现及结果校验在 `backend/store.py`。
 - 团队账号：`backend/accounts.py` 按私有 `TEST_ACCOUNT_PASSWORD` 补齐 test1 到 test10，并同步这些测试账号的密码；保留已有身份、其他账号凭据和数据。新密码经独立盐的 PBKDF2 保存，账号文件原子更新；密码不写入公开文档或源码配置。
-- 评测工作台：`frontend/workbench.html`、`evaluation.js` / `evaluation.css`；`workbench.js` 保留自由测试。`backend/workbench.py` 管隔离会话，`evaluation.py` 管版本化评测集、队列、五环节及整体判定、复核与导出。共享定义，个人运行与结果；用例/方案分别隔离。批量会话放在 evaluation-runs/{job_id}/workbench，自由测试 API 不能续接；旧批量会话保留并标 scope=evaluation。
+- 评测工作台：`frontend/workbench.html`、`evaluation.js` / `evaluation.css`；`workbench.js` 保留自由测试。`backend/workbench.py` 管隔离会话，`prompt_tests.py` 管七个提示词环节的隔离实验；`evaluation.py` 管版本化评测集、队列、五环节及整体判定、复核与导出。共享定义，个人运行与结果；用例/方案分别隔离。批量会话放在 evaluation-runs/{job_id}/workbench，自由测试 API 不能续接；旧批量会话保留并标 scope=evaluation。
 - 数据：`data/guide.json` 是 2026-10-12 固定指南快照，共 687 条。SQLite 和账号配置保存在运行目录或 Docker 卷中。
 - 提示词：`prompts/modules/*.md` 为七个业务初始文档；`prompts/contracts/*.md` 单独维护输出契约。组合固定契约全文，导入采用本部署契约；不得通过工作台编辑扩权或绕过后端校验。`backend/prompts.py` 首次初始化不可变版本；已有部署以 prompts.sqlite 的版本和启用记录为准，改仓库文档不会自动覆盖。工作台可导入/导出 .md 和组合 JSON；编辑、测试、产品启用分别操作。旧 chat.md/summary.md/home.md 仅保留独立 AgentService 无 registry 时的兼容入口。
 - `skills/guide-only.md` 是维护约束文档，未作为运行时 Skill 自动加载。
-- `preview/mock-service.js` 与 `preview/adapter.js` 只由静态构建注入，提供独立 PreviewProduct，不拦截 fetch。预览仅含产品资源、虚构固定场景和许可证，不打包测试台、后端、账号文件或运行数据；刷新后重置模拟记录。
+- 静态预览由 `scripts/build_preview.py` 复制同一 Horizon 产品白名单，并固定 `runtime.json` 的 real_api_enabled=false；DemoService 只使用虚构浏览器记录。不得打包工作台、后端、账号或运行数据。
 
 后端只提供 JSON API，静态页面由前端服务提供。Docker 前端通过同源 `/api` 转发到 `backend:8781`；应用代码、模型接入和运行不需要 Dify。
 
@@ -46,14 +46,14 @@
 
 1. 建议只能来自固定指南。候选标题不是证据；引用前必须在本轮完整回读条目，后端负责核对并生成来源正文。
 2. 技术错误与“指南未覆盖”分开；模型或工具失败不能伪装成正常无答案。
-3. 开启记忆时，每轮已校验的回话后生成模型摘要，记录明确的用户状态、问题、真实咨询过的指南及进展。记忆关闭后停止长期读写。
+3. 产品自动记忆，每轮已校验的回话后生成模型摘要，记录明确的用户状态、问题、真实咨询过的指南及进展。产品不提供记忆开关或手动纠正，仅允许删除；隔离评测仍可模拟开关与纠正。部署启动会将产品账号旧关闭状态迁移为开启并提升 revision，保留账号与来源。
 4. 当前答复会等待摘要处理，再一起返回答复与保存状态。摘要失败应显示未写入。
 5. 首页只问进展和是否继续咨询，不直接输出指南正文。已解决经历可保留，但退出回访。
 6. 记录的 `active/superseded` 与问题的 `resolved/unresolved/unknown` 是独立状态。
 7. 用户归属、实际回读记录和记忆 revision 由后端校验；删除、纠正和设置变更会使陈旧结果失效。
 8. 调整指南快照、模型输出契约或工具参数时，同步提示词、校验、测试与说明；保留指南署名及许可。
 9. SDK 不读取用户/项目配置，不开放 Bash、文件和 Web 工具。每轮创建新工具绑定和 run_id，通过私有提交标记恢复该用户该对话的 SDK 历史，不使用 continue 查最近会话。首轮发送前分配稳定应用ID，删除先写跨重启的私有撤销标记；begin、摘要保存前及commit都须校验。仅在来源校验、摘要处理及最终 revision 检查通过后提交恢复标记；失败/中断记录不得恢复。工具失败后 Python 拒绝整轮结果。
-10. 产品、自由测试和批量任务统一 SDK；A/B 比较提示词方案。历史 native 结果可查看/导出，不能续接或用旧快照重跑；不保存模型私有思维链、API Key 或请求头。执行成功与质量判定独立；系统语义判定可能出错，保留人工复核和待确认，整体结果不能取五项平均。
+10. 单环节提示词测试是固定上游输入的受控实验，不表示生产链路独立执行七次；自动校验只检查契约/来源，质量需人工判断。产品、自由测试和批量任务统一 SDK；A/B 比较提示词方案。历史 native 结果可查看/导出，不能续接或用旧快照重跑；不保存模型私有思维链、API Key 或请求头。执行成功与质量判定独立；系统语义判定可能出错，保留人工复核和待确认，整体结果不能取五项平均。
 
 11. 批量任务固定用例版本、提示词全文、判定版本、模型配置和指南/工具哈希。最多 200 用例、每例 20 步、两方案；单队列执行，重启将未结束任务标为 interrupted，用原快照手动重跑。不要增加后端 worker。
 12. 新提示词组合至少完成一个成功执行的评测用例才能启用；这不是质量门槛证明。产品启用需要独立调用与原因，并校验 expected_active 防止覆盖队友操作。既有启用组合可回滚。
@@ -90,7 +90,7 @@
 
 ```sh
 python -m pytest -q
-for file in frontend/*.js preview/*.js; do node --check "$file"; done
+find frontend -type f \( -name '*.js' -o -name '*.mjs' \) -exec node --check {} \;
 node --test tests/*.cjs
 python3 scripts/build_preview.py
 python3 scripts/check_publish.py
