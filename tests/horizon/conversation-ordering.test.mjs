@@ -30,3 +30,11 @@ test('invalid targets, cross-group IDs and unchanged positions never produce a r
  assert.equal(movedConversationIds(source,[],'c1','c1'),null);
  assert.deepEqual(orderedConversations([{id:'empty',turns:[]}],[]),[]);
 });
+
+test('opening chats keeps default and manual row positions stable; new messages update the default list',()=>{
+ const source=items(),initial=ids(orderedConversations(source));
+ for(const c of source){c.lastOpened=Date.now();assert.deepEqual(ids(orderedConversations(source)),initial);}
+ source[5].updated=1000;assert.deepEqual(ids(orderedConversations(source)),['c5',...initial.filter(id=>id!=='c5')]);
+ const manual=movedConversationIds(source,[],'c5','c3');source[7].lastOpened=Date.now()+1000;
+ assert.deepEqual(ids(orderedConversations(source,manual)),manual);
+});

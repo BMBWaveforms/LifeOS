@@ -10,6 +10,7 @@
   "read_order": [
     "AGENTS.md",
     "docs/handoff/horizon/README.md",
+    "docs/handoff/horizon/FRONTEND_UPDATE_2026-10-16.md",
     "docs/handoff/horizon/BACKEND_AGENT_TASK.md",
     "docs/handoff/horizon/FEATURE_MATRIX.md",
     "docs/handoff/horizon/CONTRACT.md",
@@ -140,5 +141,24 @@
       "status": "passed-synthetic-samples",
       "detail": "Seven modules plus overall SDK answer/summary passed; quality remains pending human assessment."
     }
-  ]
+  ],
+  "frontend_update": {
+    "date": "2026-10-16",
+    "base_commit": "b291ded0d1b020d9d544c359f124a3fb54071086",
+    "scope": "presentation-only; preserve integrated backend/session/memory/prompt-workbench",
+    "read_first": "docs/handoff/horizon/FRONTEND_UPDATE_2026-10-16.md",
+    "product_root": "frontend/",
+    "scene_count": 15,
+    "brand": "LEVO",
+    "markdown": "DOM-only subset; no raw HTML",
+    "ledger_body": "automatic staggered word reveal",
+    "seal": "full-visible only; repeated ring words; overlay, no layout column",
+    "homepage_followups": false,
+    "backend_changed": false,
+    "tests": {
+      "python_passed": 289,
+      "python_skipped": 1,
+      "node_passed": 97
+    }
+  }
 }

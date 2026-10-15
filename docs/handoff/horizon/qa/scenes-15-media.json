@@ -1,0 +1,156 @@
+[
+  {
+    "scene": "action",
+    "duration": 10.0,
+    "bytes": 707800,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "budget",
+    "duration": 5.166667,
+    "bytes": 684845,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "career",
+    "duration": 10.0,
+    "bytes": 862323,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "learning",
+    "duration": 10.0,
+    "bytes": 853860,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "travel",
+    "duration": 12.0,
+    "bytes": 2191249,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "kitchen",
+    "duration": 10.0,
+    "bytes": 630941,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "exercise",
+    "duration": 8.083333,
+    "bytes": 1131443,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "pressure",
+    "duration": 10.0,
+    "bytes": 1310842,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "rest",
+    "duration": 7.5,
+    "bytes": 334067,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "relationships",
+    "duration": 10.0,
+    "bytes": 495639,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  },
+  {
+    "scene": "companionship",
+    "duration": 10.0,
+    "bytes": 1597994,
+    "video": {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1"
+    },
+    "faststart": true
+  }
+]

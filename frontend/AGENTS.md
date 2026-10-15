@@ -1,13 +1,17 @@
-# LifeOS 产品前端
+# LEVO 产品前端
 
 先遵守根 AGENTS.md。本目录根 `index.html` 是唯一产品入口 `/`，已融合 Horizon 团队交付；`workbench.html`、`workbench.js` 与 `evaluation.*` 是独立内部评测工具。
 
-产品使用原生 ES modules，不需要 npm 构建。保留团队确认的桌面、黑白、视频 Landing、场景点击直接发问、独立无输入进入对话、历史搜索/重命名与排序、只读理解面板、产品内指南阅读和不含私人对话的 PNG 分享。演示项目只作分组示例，不代表真实项目 API。
+产品使用原生 ES modules，不需要 npm 构建。当前界面为 LEVO 品牌与 15 个本地生活视频场景；保留桌面、黑白、场景点击直接发问、输入框下独立“直接进入”不发问且保留草稿、历史搜索/重命名与直接拖动或 Alt + 上下键排序、只读理解面板、产品内指南阅读和不含私人对话的 PNG 分享。场景视频、封面、标题、输入提示与提问以 `landing-scenes.mjs` 配对。演示项目只作分组示例，不代表真实项目 API。
+
+按最新首页设计移除回访卡片、暂停按钮与产品前端 `getHome()` 调用。后台 `mode=home`、首页回访提示词及其测试仍保留；从记忆来源或主题继续聊不受影响。不能为恢复旧首页而擅自改动后台或恢复回访调用。
 
 真实服务已实施自动记忆策略：所有产品账号自动开启，页面和产品接口均不提供关闭或纠正。`GET /api/memories` 返回主题、原话来源与 `policy=automatic_delete_only`；用户可删除单条来源、整个主题或全部记忆。相关原话会持久保存，必须在界面明确说明并支持查看/删除。主题摘要是缓存；删除来源后不能继续显示或恢复含已删事实的摘要、续聊关联和恢复卡片。
 
-`service.mjs` 是真实/演示协议边界；`memory-topics.mjs` 管主题呈现与本地删除失效。DemoService 仅演示，不能代替真实 Agent 或伪装模型流。真实问答仍等待最终校验 JSON；SDK 私有事件和思维链不得进入产品页面。
+`service.mjs` 是真实/演示协议边界；`memory-topics.mjs` 管主题呈现与本地删除失效，`session-guard.mjs` 与记忆读取代次保护账号切换后的状态。保留现有 SDK 会话恢复/压缩与撤销、来源校验、迟到响应防护、删除后缓存失效，以及独立工作台的单环节/整体测试和提示词管理；不能用旧原型后端覆盖这些实现。DemoService 仅演示，不能代替真实 Agent 或伪装模型流。真实问答仍等待最终校验 JSON；SDK 私有事件和思维链不得进入产品页面。
 
-`runtime.json` 只有公开开关，不放密钥。静态预览复用同一根产品并强制 `real_api_enabled=false`，不得打包工作台、账号、配置或运行数据。指南副本必须和权威 `data/guide.json` 及许可保持一致；视频许可随 assets 保存。
+`answer-markdown.mjs` 仅用 DOM 节点渲染受限 Markdown。原始 HTML 保持文本，Markdown 图片不得触发图片加载，链接须保留协议白名单与外链保护；不要改为直接插入不可信 HTML。账本动效和卡片渐显应保留减少动效与键盘可达，展示印章不代表系统替用户批准选择。
 
-修改后运行 `node --test tests/horizon/*.test.mjs`、`node --test tests/*.cjs`、`python scripts/build_preview.py` 和相关后端契约测试。仅自动测试/演示通过不能宣称真实模型、跨设备历史或服务端流式已验收。
+`runtime.json` 只有公开开关，不放密钥。静态预览复用同一根产品并强制 `real_api_enabled=false`，不得打包工作台、账号、配置或运行数据。指南副本必须和权威 `data/guide.json` 及许可保持一致。`assets/media-sources.json` 区分已登记许可的素材和用户提供但未附授权元数据的视频；保留未知状态，不按文件名猜作者/来源/许可，不把全部素材写成已完成授权核验。
+
+修改后运行 `node --test tests/horizon/*.test.mjs`、`node --test tests/*.cjs`、`python scripts/build_preview.py` 和相关后端契约测试。浏览器验证包含 15 场景配对、直接进入/草稿、真实 DOM 的 HTML/链接安全、账本与减少动效，以及来源删除和账号保护；工作台继续独立验收。仅自动测试/演示通过不能宣称真实模型、跨设备历史或服务端流式已验收，也不能把团队 QA 记录当成本次部署已完成。

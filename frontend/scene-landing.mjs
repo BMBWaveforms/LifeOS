@@ -1,4 +1,4 @@
-import {LANDING_SCENES,sceneAt} from './landing-scenes.mjs';
+import {LANDING_SCENES,sceneAt} from './landing-scenes.mjs?v=scenes-15-14';
 export function initSceneLanding({onStart}){
  const $=id=>document.getElementById(id),root=$('landing'),video=$('scene-video'),poster=$('scene-poster'),reel=$('scene-reel'),track=$('scene-reel-track');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -51,8 +51,7 @@ export function initSceneLanding({onStart}){
  }
  function startLoop(){if(!frame&&visible&&!document.hidden){lastTime=0;frame=requestAnimationFrame(tick);}}
  function setVisible(value){visible=value;if(value){playVideo();startLoop();}else{video.pause();cancelAnimationFrame(frame);frame=0;clearTimeout(wheelTimer);drag=null;}}
- function updatePause(){const button=$('scene-pause');button.setAttribute('aria-pressed',String(paused));button.setAttribute('aria-label',paused?'播放视频与缩略图轨道':'暂停视频与缩略图轨道');$('scene-pause-label').textContent=paused?'播放画面':'暂停画面';button.querySelector('use').setAttribute('href',paused?'#play':'#pause');if(paused){video.pause();position=target;paint();}else playVideo();}
- $('scene-pause').onclick=()=>{paused=!paused;updatePause();};
+ function updatePause(){if(paused){video.pause();position=target;paint();}else playVideo();}
  $('scene-media-status').onclick=()=>{paused=false;updatePause();};
  video.addEventListener('loadeddata',()=>{root.dataset.media='video';if(visible&&!paused)playVideo();});
  video.addEventListener('error',()=>{root.dataset.media='poster';$('scene-media-status').textContent='视频暂不可用 · 静态预览';$('scene-media-status').hidden=false;$('scene-media-status').disabled=true;});

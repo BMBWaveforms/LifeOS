@@ -1,0 +1,60 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "landing": {
+      "title": "LEVO — 让每一份投入，都更值得。",
+      "logo": "LEVO",
+      "slogan": "让每一份投入，都更值得。",
+      "logoFilter": "invert(1)",
+      "logoBlend": "normal",
+      "brand": "assets/mark.svg",
+      "overflow": 0
+    },
+    "chat": {
+      "wordmark": "LEVO",
+      "assistant": "LEVO",
+      "filter": "none",
+      "blend": "normal",
+      "oldBrand": false,
+      "overflow": 0
+    },
+    "share": {
+      "width": 1080,
+      "height": 2805,
+      "filename": "LEVO-指南-03-03.png",
+      "type": "image/png",
+      "bytes": 486709
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "landing": {
+      "title": "LEVO — 让每一份投入，都更值得。",
+      "logo": "LEVO",
+      "slogan": "让每一份投入，都更值得。",
+      "logoFilter": "invert(1)",
+      "logoBlend": "normal",
+      "brand": "assets/mark.svg",
+      "overflow": 0
+    },
+    "chat": {
+      "wordmark": "LEVO",
+      "assistant": "LEVO",
+      "filter": "none",
+      "blend": "normal",
+      "oldBrand": false,
+      "overflow": 0
+    },
+    "share": {
+      "width": 1080,
+      "height": 2805,
+      "filename": "LEVO-指南-03-03.png",
+      "type": "image/png",
+      "bytes": 486709
+    },
+    "errors": []
+  }
+]

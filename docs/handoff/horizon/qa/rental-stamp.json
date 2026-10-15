@@ -1,0 +1,8 @@
+{
+  "parent": "ledger-reading-unit ledger-with-seal",
+  "size": "144px",
+  "noConclusion": true,
+  "overlap": 0,
+  "state": "done",
+  "overflow": 0
+}

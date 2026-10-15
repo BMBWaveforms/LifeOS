@@ -1,0 +1,198 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "cpu": 1,
+    "partial": {
+      "state": "waiting",
+      "stampEvents": [
+        {
+          "type": "seal",
+          "state": "waiting",
+          "time": 1759.5,
+          "fullyVisible": false
+        }
+      ],
+      "slot": {
+        "x": 1107,
+        "y": 708.546875,
+        "width": 96,
+        "height": 96,
+        "top": 708.546875,
+        "right": 1203,
+        "bottom": 804.546875,
+        "left": 1107
+      },
+      "viewport": {
+        "x": 260,
+        "y": 78,
+        "width": 1180,
+        "height": 641,
+        "top": 78,
+        "right": 1440,
+        "bottom": 719,
+        "left": 260
+      }
+    },
+    "complete": {
+      "events": [
+        {
+          "type": "seal",
+          "state": "waiting",
+          "time": 1759.5,
+          "fullyVisible": false
+        },
+        {
+          "type": "read",
+          "id": "question-0",
+          "time": 1760.4000000059605
+        },
+        {
+          "type": "read",
+          "id": "guides-0",
+          "time": 3212.0999999940395
+        },
+        {
+          "type": "seal",
+          "state": "stamping",
+          "time": 5813.799999982119,
+          "fullyVisible": true
+        },
+        {
+          "type": "seal",
+          "state": "waiting",
+          "time": 5994,
+          "fullyVisible": false
+        },
+        {
+          "type": "seal",
+          "state": "stamping",
+          "time": 7686.699999988079,
+          "fullyVisible": true
+        },
+        {
+          "type": "seal",
+          "state": "done",
+          "time": 8789,
+          "fullyVisible": true
+        }
+      ],
+      "stamp": "依据已列LEVO",
+      "footerButtons": [
+        "收起账本",
+        "直接看全文",
+        "第15节第1条租房时押金的数额、退还时间和扣减情形，必须写进合同A",
+        "第15节第6条租房签约前核对产权证和抵押情况，所有款项走转账并备注用途A",
+        "第4节第18条选住处时把通勤时长放在前面，缩短单程通勤B",
+        "查看完整指南与来源"
+      ],
+      "pending": 0,
+      "grade": "B",
+      "fields": "金钱投入多时间投入中毅力投入否收益量级大",
+      "numbers": [
+        "5",
+        "260"
+      ],
+      "overflow": 0
+    },
+    "restored": {
+      "open": "true",
+      "seal": "done",
+      "numbers": [
+        "2.5",
+        "130"
+      ]
+    },
+    "changed": {
+      "grade": "A",
+      "calculator": 0,
+      "seal": "waiting"
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "cpu": 4,
+    "partial": {
+      "state": "waiting",
+      "stampEvents": [
+        {
+          "type": "seal",
+          "state": "waiting",
+          "time": 3675.800000011921,
+          "fullyVisible": false
+        }
+      ],
+      "slot": {
+        "x": 1017,
+        "y": 528.546875,
+        "width": 96,
+        "height": 96,
+        "top": 528.546875,
+        "right": 1113,
+        "bottom": 624.546875,
+        "left": 1017
+      },
+      "viewport": {
+        "x": 240,
+        "y": 66,
+        "width": 1040,
+        "height": 473,
+        "top": 66,
+        "right": 1280,
+        "bottom": 539,
+        "left": 240
+      }
+    },
+    "complete": {
+      "events": [
+        {
+          "type": "seal",
+          "state": "waiting",
+          "time": 3675.800000011921,
+          "fullyVisible": false
+        },
+        {
+          "type": "seal",
+          "state": "done",
+          "time": 5617.300000011921,
+          "fullyVisible": true
+        }
+      ],
+      "stamp": "依据已列LEVO",
+      "footerButtons": [
+        "收起账本",
+        "直接看全文",
+        "第15节第1条租房时押金的数额、退还时间和扣减情形，必须写进合同A",
+        "第15节第6条租房签约前核对产权证和抵押情况，所有款项走转账并备注用途A",
+        "第4节第18条选住处时把通勤时长放在前面，缩短单程通勤B",
+        "查看完整指南与来源"
+      ],
+      "pending": 0,
+      "grade": "B",
+      "fields": "金钱投入多时间投入中毅力投入否收益量级大",
+      "numbers": [
+        "5",
+        "260"
+      ],
+      "overflow": 0
+    },
+    "restored": {
+      "open": "true",
+      "seal": "done",
+      "numbers": [
+        "2.5",
+        "130"
+      ]
+    },
+    "changed": {
+      "grade": "A",
+      "calculator": 0,
+      "seal": "waiting"
+    },
+    "errors": []
+  }
+]

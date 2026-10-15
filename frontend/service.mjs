@@ -38,7 +38,7 @@ export class DemoService{
     const cards=searchGuides(this.entries,query);
 
     const greeting=/^(你好|您好|嗨|hello|hi|谢谢|谢谢你)[！!。\s]*$/i.test(query);
-    const response={conversation_id:conversationId||uid(),result:{status:cards.length?'answer':greeting?'acknowledged':'unsupported',message:cards.length?'先把眼前的事拆小一点。以下是固定指南里与这个话题相关的条目，你可以先挑一条了解。':greeting?'你好。可以先说说最近正在经历的一件事，不用组织得很完整。':'这次关键词检索没有找到足够相关的条目。可以补充一下具体情境，或试试“手机总打断工作”“租房押金”“重要的事总拖着”这些示例。',cards:clone(cards)},summary:{saved:false,message:'本轮没有创建咨询主题。'}};
+    const response={conversation_id:conversationId||uid(),result:{status:cards.length?'answer':greeting?'acknowledged':'unsupported',message:cards.length?'先把眼前的事**拆小一点**。\n\n以下是固定指南里与这个话题相关的条目，你可以先挑一条了解。':greeting?'你好。可以先说说最近正在经历的一件事，不用组织得很完整。':'这次关键词检索没有找到足够相关的条目。可以补充一下具体情境，或试试“手机总打断工作”“租房押金”“重要的事总拖着”这些示例。',cards:clone(cards)},summary:{saved:false,message:'本轮没有创建咨询主题。'}};
     const selectedMemory=followupId?this.state.memories.find(m=>m.id===followupId&&m.state==='active'):null;
     if(selectedMemory)response.result.cards=response.result.cards.map(card=>({...card,memory_ids:[selectedMemory.id],match_reason:'接续你明确选择的咨询主题。'}));
     if(cards.length&&typeof onProgress==='function'){

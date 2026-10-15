@@ -1,5 +1,7 @@
 # Horizon 前端 → 后端 Agent 交接
 
+> 最新界面更新已合入正式根入口，请先读 [LEVO前端更新交接](FRONTEND_UPDATE_2026-10-16.md)。本轮保留上游主题记忆、来源删除、SDK和工作台接线。
+
 > 融合后的现状：本文件保留团队原交付说明。用户已指定以最新 b205c20 为唯一产品基准，模块提升至 frontend 根，旧产品移除；自动记忆/主题来源与 SDK 接线以 [当前接入说明](../../前端接入与验收.md) 为准。下文候选 /horizon/、双入口、旧开关及旧执行层描述仅记录交付时状态。
 
 > 后端 Agent 从本文件开始。先读取根 `AGENTS.md`，再读本目录 `BACKEND_AGENT_TASK.md`、`FEATURE_MATRIX.md`、`CONTRACT.md`、`ACCEPTANCE.md` 和 `handoff.json`。不要根据演示效果推断后端能力已经接好。

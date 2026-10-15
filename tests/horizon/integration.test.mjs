@@ -9,13 +9,13 @@ const guide=JSON.parse(readFileSync(new URL('../../data/guide.json',import.meta.
 // These are public baseline payloads. Unknown execution metadata is deliberately not consumed.
 test('real JSON provider preserves server IDs, validated cards and separate summary failure',async()=>{
  const calls=[],service=new RealService();
- const response={conversation_id:'server-rotated',result:{status:'answer',cards:[guide],message:'固定指南'},summary:{saved:false,message:'摘要未能保存。'},execution:{runtime:'claude-sdk'}};
+ const response={conversation_id:'server-conversation-returned-001',result:{status:'answer',cards:[guide],message:'固定指南'},summary:{saved:false,message:'摘要未能保存。'},execution:{runtime:'claude-sdk'}};
  service.request=async(path,body,signal)=>{calls.push({path,body,signal});return path==='/api/memories'?{enabled:true}:response;};
  const signal=new AbortController().signal;
- const result=await service.submit({query:'手机打断工作',conversationId:'previous',followupId:'memory-a',requestId:'future-only',onProgress:()=>assert.fail('no fake real stream'),signal});
+ const result=await service.submit({query:'手机打断工作',conversationId:'client-conversation-previous-001',followupId:'memory-a',requestId:'future-only',onProgress:()=>assert.fail('no fake real stream'),signal});
  assert.equal(result,response);assert.deepEqual(resultOf({response:result}).cards[0],guide);
  assert.deepEqual(calls.map(c=>c.path),['/api/memories','/api/run']);
- assert.deepEqual(calls[1].body,{mode:'chat',query:'手机打断工作',conversation_id:'previous',followup_memory_id:'memory-a'});
+ assert.deepEqual(calls[1].body,{mode:'chat',query:'手机打断工作',conversation_id:'client-conversation-previous-001',followup_memory_id:'memory-a'});
  assert.equal(calls[0].signal,signal);assert.equal(calls[1].signal,signal);assert.equal(result.summary.saved,false);
 });
 

@@ -94,19 +94,23 @@ def test_stable_parent_topic_exact_grouping_and_owner_boundary(topics):
 
 
 def test_delete_ancestor_cannot_leak_through_descendant_fields_api_or_context(topics):
-    tid = add(topics, 'first', '独有秘密：银行卡尾号9988')
+    # Use a textual fact, not four digits that can coincidentally occur in a
+    # generated ID, timestamp or other non-content metadata on a different run.
+    deleted_fact = '独有删除事实：合成银行卡尾号玖玖捌捌'
+    tid = add(topics, 'first', deleted_fact)
     add(topics, 'later', '今天稍有进展', parent='first',
-        text='独有秘密：银行卡尾号9988，今天稍有进展')
+        text=deleted_fact + '，今天稍有进展')
     job = topics.prepare('alice', tid)
     assert topics.commit(job, quote(job))
     change(topics, 'delete', {'id': 'first'})
-    memory = {'id': 'later', 'origin': 'model_summary', 'state': 'active', 'text': '银行卡尾号9988',
-              'problem': '银行卡尾号9988', 'user_state': '银行卡尾号9988',
-              'state_evidence': '银行卡尾号9988', 'status_evidence': '银行卡尾号9988'}
+    memory = {'id': 'later', 'origin': 'model_summary', 'state': 'active', 'text': deleted_fact,
+              'problem': deleted_fact, 'user_state': deleted_fact,
+              'state_evidence': deleted_fact, 'status_evidence': deleted_fact}
     view = topics.annotate('alice', [memory])
-    projected = topics.context_memories('alice', [memory], '9988')
+    projected = topics.context_memories('alice', [memory], deleted_fact)
     serialized = json.dumps([view, memory, projected], ensure_ascii=False)
-    assert '9988' not in serialized
+    assert deleted_fact not in serialized
+    assert '玖玖捌捌' not in serialized  # A partial retained fact must also fail.
     assert '今天稍有进展' in serialized
     assert view[0]['source_count'] == 1
     assert view[0]['current_memory_id'] == 'later'

@@ -123,3 +123,5 @@ CI 会运行后端测试、产品/预览 JavaScript 语法检查与契约测试�
 团队页面保留随附[视频素材来源](frontend/assets/media-sources.json)。指南内容按 CC BY 4.0 保留署名；见 [来源说明](data/ATTRIBUTION.txt) 和 [指南许可证](data/GUIDE-LICENSE.txt)。
 
 会话按用户隔离，只有通过来源及记忆版本校验的轮次可恢复。默认提前至 SDK 计算窗口的 60% 尝试压缩，闲置 7 天或超过每用户 30 个会话时在后续访问清理；重要事实、问题状态仍在 SQLite，压缩摘要不作为唯一依据。产品可以从当前浏览器的历史侧栏继续聊天；服务端暂未提供跨设备历史列表。配置与边界见 [SDK 执行层与测试台](docs/执行层与测试台.md)。Mac 系统应用目前仅完成[接入调研](docs/Mac备忘录与提醒事项接入调研.md)，尚未连接私人数据。
+
+LEVO界面更新与前后端接手边界见[2026-10-16前端更新交接](docs/handoff/horizon/FRONTEND_UPDATE_2026-10-16.md)。

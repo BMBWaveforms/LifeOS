@@ -71,7 +71,11 @@ def test_horizon_preview_is_allowlisted_and_cannot_select_real_api(tmp_path):
     module.build_horizon(target)
     assert json.loads((target / 'runtime.json').read_text()) == {'real_api_enabled': False}
     assert (target / 'assets/guide.json').read_bytes() == (ROOT / 'data/guide.json').read_bytes()
-    assert len(list((target / 'assets/scenes').glob('*.mp4'))) == 4
+    media = json.loads((target / 'assets/media-sources.json').read_text())
+    names = {clip['name'] for clip in media['clips']}
+    assert len(names) >= 15
+    assert {p.stem for p in (target / 'assets/scenes').glob('*.mp4')} == names
+    assert {p.stem for p in (target / 'assets/scenes').glob('*.jpg')} == names
     assert not (target / 'AGENTS.md').exists()
     assert (target / 'app.mjs').exists()
     assert (target / 'memory-topics.mjs').exists()

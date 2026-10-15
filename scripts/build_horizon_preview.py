@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULES = (
-    'app', 'service', 'runtime-config', 'chat-presentation', 'conversation-library',
+    'app', 'answer-markdown', 'answer-reveals', 'service', 'runtime-config', 'chat-presentation', 'conversation-library',
     'conversation-ordering', 'conversation-understanding', 'decision-ledger', 'guide-detail', 'guide-share',
     'guide-share-card', 'scene-landing', 'landing-scenes', 'memory-navigation',
     'project-demo', 'workspace-shell', 'memory-topics', 'session-guard',
@@ -32,7 +32,15 @@ def build_horizon(destination):
         shutil.copyfile(ROOT / 'data' / name, assets / name)
     scenes = assets / 'scenes'
     scenes.mkdir()
-    for scene in ('commute', 'home', 'focus', 'night'):
+    # Ship every registered scene, including new user-supplied local footage.
+    # Only simple basenames are accepted; the manifest cannot escape assets/scenes.
+    media = json.loads((source / 'assets/media-sources.json').read_text())
+    scene_names = [clip['name'] for clip in media['clips']]
+    if len(set(scene_names)) != len(scene_names):
+        raise ValueError('Duplicate Horizon scene media name')
+    for scene in scene_names:
+        if not scene or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-' for c in scene):
+            raise ValueError(f'Invalid Horizon scene media name: {scene!r}')
         for ext in ('mp4', 'jpg'):
             shutil.copyfile(source / 'assets/scenes' / f'{scene}.{ext}', scenes / f'{scene}.{ext}')
     (destination / 'runtime.json').write_text(json.dumps({'real_api_enabled': False}) + '\n')
