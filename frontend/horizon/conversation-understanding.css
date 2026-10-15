@@ -1,0 +1,76 @@
+/* Conversation context lives beside its title, above the reading surface. */
+.understanding-toggle {
+  position: absolute;
+  right: 38px;
+  top: 0;
+  bottom: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 38px;
+  margin: auto 0;
+  padding: 8px 11px;
+  border: 1px solid #e6e6e6;
+  border-radius: 9px;
+  background: #f2f2f2;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.understanding-toggle .icon { width: 15px; height: 15px; }
+.understanding-toggle:hover,
+.understanding-toggle[aria-expanded="true"] { background: #e7e7e7; opacity: 1; }
+.understanding-dot { width: 4px; height: 4px; margin-left: 2px; border-radius: 50%; background: #555; }
+.understanding-panel {
+  --understanding-text: 14px;
+  --understanding-meta: 12px;
+  position: fixed;
+  inset: 90px 38px auto auto;
+  width: 418px;
+  max-width: calc(100vw - 40px);
+  max-height: min(650px, calc(100dvh - 114px));
+  margin: 0;
+  padding: 0;
+  border: 1px solid #dedede;
+  border-radius: 14px;
+  color: #202020;
+  background: #fff;
+  box-shadow: 0 12px 48px #00000016;
+  overflow: hidden;
+  transform-origin: top right;
+  font-family: var(--body);
+  font-size: var(--understanding-text);
+  font-weight: 400;
+  line-height: 1.75;
+}
+.understanding-panel:popover-open { display: flex; flex-direction: column; animation: understanding-open 300ms cubic-bezier(.22,1,.36,1) both; }
+.understanding-panel::backdrop { background: transparent; }
+.understanding-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 18px 10px 24px; flex-shrink: 0; }
+.understanding-header h2 { font-size: var(--understanding-text); font-weight: 600; }
+.understanding-header .icon { width: 17px; height: 17px; }
+.understanding-header .icon-button { width: 36px; min-width: 36px; height: 36px; }
+.understanding-body { padding: 5px 24px 22px; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: #d7d7d7 transparent; overscroll-behavior: contain; }
+.understanding-intro { padding: 3px 0 1px; }
+.understanding-intro h3 { font-size: var(--understanding-text); font-weight: 600; }
+.understanding-intro > p { font-size: var(--understanding-meta); color: #666; margin-top: 8px; }
+.understanding-section { margin-top: 24px; }
+.understanding-section > h3 { font-size: var(--understanding-meta); color: #666; font-weight: 400; margin-bottom: 8px; }
+.understanding-goal { display: flex; align-items: flex-start; gap: 16px; padding: 10px 0; border-bottom: 1px solid #ececec; }
+.understanding-goal > p { flex: 1; font-size: var(--understanding-text); overflow-wrap: anywhere; }
+.understanding-source { flex-shrink: 0; font-size: var(--understanding-meta); color: #666; min-height: 32px; padding: 3px 0; text-decoration: underline; text-decoration-color: #ccc; text-underline-offset: 4px; }
+.understanding-source:hover { color: #171717; text-decoration-color: #171717; opacity: 1; }
+.understanding-statement { padding: 12px 0; border-bottom: 1px solid #ececec; }
+.understanding-statement > p { font-size: var(--understanding-text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.understanding-evidence { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 5px; font-size: var(--understanding-meta); color: #666; }
+.understanding-memory { font-size: var(--understanding-text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.understanding-question { font-size: var(--understanding-text); overflow-wrap: anywhere; }
+.understanding-footer { flex-shrink: 0; padding: 15px 24px 16px; background: #fafafa; border-top: 1px solid #ececec; }
+.understanding-footer > p { font-size: var(--understanding-meta); color: #666; }
+.understanding-empty { padding: 38px 0 42px; }
+.understanding-empty h3 { font-size: var(--understanding-text); font-weight: 600; margin-bottom: 16px; }
+.understanding-empty p { font-size: var(--understanding-text); color: #626262; }
+.user-message:focus { outline: 1px solid #888; outline-offset: 5px; }
+@keyframes understanding-open { from { opacity: 0; transform: translateY(-6px) scale(.99); } to { opacity: 1; transform: none; } }
+@media (max-height: 800px) { .understanding-panel { top: 78px; max-height: min(650px, calc(100dvh - 102px)); } }
+@media (prefers-reduced-motion: reduce) { .understanding-panel:popover-open { animation: none; } }

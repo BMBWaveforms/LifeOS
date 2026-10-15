@@ -3,6 +3,7 @@ import json
 import re
 import shutil
 from pathlib import Path
+from build_horizon_preview import build_horizon
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / '.preview-site'
@@ -59,6 +60,7 @@ def build():
         shutil.copyfile(ROOT / 'data' / name, DEST / name)
     (DEST / '.nojekyll').touch()
     copy_architecture()
+    build_horizon(DEST / 'horizon')
     print('Static product demo built at', DEST, '(synthetic in-page records; no model or backend).')
 
 

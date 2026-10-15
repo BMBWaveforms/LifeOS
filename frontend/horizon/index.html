@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="看清投入，做更值得的选择。结合生活情境，了解建议的成本、收益与依据。">
+  <meta name="theme-color" content="#ffffff">
+  <title>LifeOS — 看清投入，做更值得的选择</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="decision-ledger.css">
+  <link rel="stylesheet" href="guide-detail.css">
+  <link rel="stylesheet" href="guide-share.css">
+  <link rel="stylesheet" href="scene-landing.css">
+  <link rel="stylesheet" href="workspace-shell.css">
+  <link rel="stylesheet" href="conversation-understanding.css">
+  <link rel="stylesheet" href="conversation-library.css">
+  <link rel="stylesheet" href="chat-enhancements.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="mark" viewBox="0 0 32 32"><path d="M16 16C4-4-4 4 16 16S36 4 16 16 4 36 16 16 36 36 16 16"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+  <symbol id="up" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="memory" viewBox="0 0 24 24"><path d="M8 3H5v18h14V3h-3M9 3h6v4H9zM8 12h8m-8 4h5"/></symbol>
+  <symbol id="settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9m-10 12v-8h6v8"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+  <symbol id="pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="link" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14m10 0v6H4V4h6"/></symbol>
+  <symbol id="share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V3h8v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+</defs></svg>
+
+<div id="landing" class="scene-landing" data-scene="commute" data-media="poster">
+  <div class="scene-media" aria-hidden="true"><img id="scene-poster" class="scene-poster" src="assets/scenes/commute.jpg" alt=""><video id="scene-video" class="scene-video" muted loop playsinline preload="metadata" disablepictureinpicture></video></div>
+  <div class="scene-shade" aria-hidden="true"></div>
+  <header class="scene-nav">
+    <button class="scene-entry" data-action="start">进入对话<svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
+    <a href="#/" class="scene-wordmark" aria-label="LifeOS 首页"><svg class="brand-mark"><use href="#mark"/></svg><span>LifeOS</span></a>
+    <nav aria-label="主导航"><button class="text-button" data-action="about">关于</button><button class="text-button" data-action="contact">联系我</button><button class="mode-button" data-action="settings"><span class="mode-label">交互演示</span><svg class="icon"><use href="#settings"/></svg></button></nav>
+  </header>
+  <main id="main" class="scene-stage" tabindex="-1">
+    <button id="scene-open" class="scene-open" aria-label="聊聊「通勤与生活」" disabled></button>
+    <div class="scene-caption"><h1 id="landing-slogan"><span>看清投入，</span><span>做更值得的选择。</span></h1></div>
+    <div class="scene-conversation" role="group" aria-label="开始或继续对话">
+    <button id="followup-card" class="followup-card" hidden></button>
+    <form id="landing-composer" class="scene-form"><label class="sr-only" for="landing-query">说说你想聊的事</label><textarea id="landing-query" rows="1" maxlength="2000" placeholder="聊聊通勤，或者说说你自己的事…" disabled></textarea><button id="landing-send" type="submit" aria-label="开始对话" disabled><svg class="icon"><use href="#up"/></svg></button></form>
+    </div>
+  </main>
+  <div class="scene-toolbar"><div class="scene-context" aria-live="polite" aria-atomic="true"><span id="scene-counter" class="scene-counter">01 / 04</span><span aria-hidden="true">·</span><span id="scene-name">通勤与生活</span></div><div class="scene-playback"><button id="scene-media-status" class="scene-media-status" hidden></button><button id="scene-pause" class="scene-pause" aria-label="暂停视频与缩略图轨道" aria-pressed="false"><svg class="icon"><use href="#pause"/></svg><span id="scene-pause-label">暂停画面</span></button></div></div>
+  <div id="scene-reel" class="scene-reel" role="group" aria-label="场景浏览，可滚动或拖动"><div id="scene-reel-track" class="scene-reel-track"></div></div>
+  <div class="scene-credit"><button data-action="guide-info">687 条指南，有据可查</button><span>滚动或拖动，看看生活的其他切面</span></div>
+</div>
+
+<div id="workspace" class="workspace" data-sidebar-open="true" hidden>
+  <aside id="conversation-sidebar" class="sidebar" aria-label="对话导航">
+    <a href="#/" class="wordmark"><svg class="brand-mark"><use href="#mark"/></svg><span>LifeOS</span></a>
+    <button class="new-chat" data-action="new-chat"><svg class="icon"><use href="#plus"/></svg>开始新对话</button>
+    <div class="history-heading"><span>最近聊过</span><button class="icon-button" id="history-search-toggle" aria-label="搜索对话"><svg class="icon"><use href="#search"/></svg></button></div>
+    <div id="history" class="history"></div>
+    <button id="history-all" class="history-all" data-action="conversation-library">全部对话<span id="history-total">0</span></button>
+    <div class="sidebar-bottom">
+      <div id="profile-menu" class="profile-menu" aria-label="个人选项" hidden>
+        <button data-action="memories"><svg class="icon"><use href="#memory"/></svg><span>我的记忆</span><span class="memory-count">0</span></button>
+        <button data-action="settings"><svg class="icon"><use href="#settings"/></svg><span>体验设置</span></button>
+      </div>
+      <button id="profile-button" class="profile-button" data-action="profile" aria-label="个人选项" aria-expanded="false" aria-controls="profile-menu"><span class="avatar">L</span><span><strong id="profile-name">访客体验</strong><small class="mode-label">交互演示</small></span><svg class="icon"><use href="#settings"/></svg></button>
+    </div>
+  </aside>
+  <main class="conversation-main" id="conversation-main" tabindex="-1">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="收起对话侧栏" aria-expanded="true" aria-controls="conversation-sidebar"><svg class="icon" aria-hidden="true"><use href="#chevron"/></svg><span class="sidebar-toggle-label" aria-hidden="true">收起侧栏</span></button>
+    <header class="chat-header"><div><h1 id="conversation-title" hidden></h1></div><button id="understanding-toggle" class="understanding-toggle" type="button" popovertarget="understanding-panel" aria-expanded="false" aria-controls="understanding-panel"><svg class="icon" aria-hidden="true"><use href="#memory"/></svg><span>我对你的理解</span><span class="understanding-dot" aria-hidden="true" hidden></span></button></header>
+    <div class="conversation-scroll" id="conversation-scroll">
+      <section id="empty-state" class="empty-state">
+        <h2>今天，想从哪里聊起？</h2>
+        <p class="welcome-description">说说正在经历的事。我们一起理清它，<br>再找一个真正做得到的开始。</p>
+        <div class="prompt-list"><button data-prompt="我工作时总被手机通知打断，很难集中注意力。可以怎么改善？"><span>总被手机打断，想找回专注</span><svg class="icon"><use href="#arrow"/></svg></button><button data-prompt="我最近准备租房，签合同前有什么需要注意的？"><span>准备租房，哪些事要先确认</span><svg class="icon"><use href="#arrow"/></svg></button><button data-prompt="我总把重要的事拖到最后，想改变拖延的习惯。"><span>想做的事很多，却一直拖着</span><svg class="icon"><use href="#arrow"/></svg></button></div>
+      </section>
+      <section id="recovered-memory-context" class="recovered-memory-context" aria-label="已带入的记忆" hidden><span>已带入之前保存的记忆</span><h2 id="recovered-memory-topic"></h2><p id="recovered-memory-text"></p></section>
+      <p id="project-example-note" class="project-example-note" hidden></p>
+      <div id="messages" class="messages" aria-label="当前对话"></div>
+      <div id="thinking" class="thinking" role="status" hidden><svg class="brand-mark thinking-mark"><use href="#mark"/></svg><div><p id="thinking-text">正在查找与你相关的指南</p><span>答复和记忆保存状态会一起返回</span></div><span class="thinking-dots"><i></i><i></i><i></i></span></div>
+    </div>
+    <div class="composer-wrap"><button id="jump-to-latest" class="jump-latest" type="button" hidden>回到最新消息</button><div id="followup-context" class="followup-context" hidden></div><div id="request-error" class="request-error" role="alert" hidden></div><form id="composer" class="composer"><label class="sr-only" for="query">说说你正在经历的事</label><textarea id="query" rows="2" maxlength="2000" placeholder="说说你正在经历的事…"></textarea><div class="composer-bottom"><div><button id="send" type="submit" class="send-button" aria-label="发送消息"><svg class="icon"><use href="#up"/></svg></button><button id="stop" type="button" class="stop-button" hidden>停止等待</button></div></div></form><p class="composer-note" id="composer-note">内容仅供参考，不构成专业意见。请结合自身情况判断并作出决定。</p></div>
+  </main>
+  <section id="understanding-panel" class="understanding-panel" popover="auto" role="dialog" aria-modal="false" aria-labelledby="understanding-title" tabindex="-1">
+    <header class="understanding-header"><h2 id="understanding-title">我对你的理解</h2><button class="icon-button" type="button" popovertarget="understanding-panel" popovertargetaction="hide" aria-label="收起我的理解"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></header>
+    <div id="understanding-body" class="understanding-body"></div>
+    <footer class="understanding-footer"><p id="understanding-note">只看这段对话，随着你的补充而更新。</p></footer>
+  </section>
+</div>
+
+<dialog id="dialog" aria-labelledby="dialog-title"><div class="dialog-header"><div class="dialog-heading"><p id="dialog-kicker" class="dialog-kicker" hidden></p><h2 id="dialog-title" tabindex="-1"></h2></div><button class="icon-button" id="close-dialog" aria-label="关闭弹窗"><svg class="icon"><use href="#close"/></svg></button></div><div id="dialog-body" class="dialog-body"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+<div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<noscript><p class="noscript">开始聊天需要开启 JavaScript。LifeOS 的建议来自固定指南，对话后会自动记忆。</p></noscript>
+</body></html>

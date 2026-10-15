@@ -117,3 +117,7 @@ CI 会运行后端测试、产品/预览 JavaScript 语法检查与契约测试�
 旧 Dify 版本和原始源码交付包仍保存在项目所有者电脑的 `保留版本/Dify-v0.2/`，不包含在这个仓库中。本机的密钥、密码、SQLite、个人记忆和历史运行 JSON 不提交。已有验证及边界见 [验收记录](docs/验收记录.md)。
 
 合作方页面保留随附素材和 Noto Serif SC 的 [字体许可](frontend/assets/fonts/OFL.txt)。指南内容按 CC BY 4.0 保留署名；见 [来源说明](data/ATTRIBUTION.txt) 和 [指南许可证](data/GUIDE-LICENSE.txt)。
+
+## Horizon 候选前端与 Agent 交接
+
+新版前端作为独立入口 `/horizon/` 交付，默认首页和内部工作台保留。后端 Agent 请从 [Horizon 交接索引](docs/handoff/horizon/README.md) 开始；功能差异、现有/建议协议、记忆策略冲突、验收与机器可读清单都在该目录。演示默认使用本地固定指南；真实模式复用同源 API，尚需完成服务端策略与真实模型验收。运行 `python3 scripts/frontend_server.py --port 8892` 后打开 `http://127.0.0.1:8892/horizon/`。

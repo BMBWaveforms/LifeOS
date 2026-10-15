@@ -97,3 +97,7 @@ docker compose --env-file .env.compose config --quiet
 `/health` 返回 200 只证明后端能响应；`model.configured=true` 只证明配置可解析，不证明模型 Key、余额或模型名可用。真实模型、摘要、解决后退出回访和重启后的持久化按手册分别验收。
 
 交付时报告部署机器/访问地址、Git SHA、Compose 项目名、检查结果及尚未验证的能力。缺少模型凭据时明确写“已启动，真实模型未验收”；只有静态 Pages 时明确写“静态交互预览”。不要把容器启动、静态模拟或测试模型通过写成真实服务全部验收完成。
+
+## Horizon 候选前端交接
+
+`frontend/horizon/` 是独立候选入口 `/horizon/`，不替换上述默认产品或工作台。接手融合先读 `docs/handoff/horizon/README.md` 及机器清单 `handoff.json`。新版“自动记忆且仅删除”要求与本文描述的当前后端记忆策略存在明确差异；不得通过静默开启账号、覆写生产数据或恢复新版开关来掩盖冲突。原后端 SDK/native、校验、提示词与评测保持完整。CI 经原有测试入口额外检查 `frontend/horizon/*.mjs` 与 `tests/horizon/*.test.mjs`（见 `tests/horizon.test.cjs`）；静态预览另含 `/horizon/` 且禁用真实 API 模式。

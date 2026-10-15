@@ -1,0 +1,16 @@
+.workspace .history-row>.history-select{display:block;padding:9px 12px;line-height:1.5;min-height:58px}
+.history-select strong,.history-select small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+.history-select strong{font-size:13px}.history-select small{font-size:12px;color:var(--secondary);margin-top:3px}
+.workspace .project-conversations .history-select{min-height:40px;padding-top:9px;padding-bottom:9px}
+.history-all{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;width:100%;min-height:40px;margin-top:8px;padding:8px 12px;border-radius:8px;font-size:12px;text-align:left;color:var(--secondary)}
+.history-all:hover{background:#ededed;color:var(--ink)}.history-all span{font-variant-numeric:tabular-nums}
+dialog.history-dialog{width:760px}.history-dialog .dialog-header h2{font:600 14px/1.5 var(--body)}
+.history-library-search{position:sticky;top:0;z-index:1;padding:4px 0 16px;background:var(--surface)}
+.history-library-search input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;font:400 14px/1.6 var(--body)}
+.history-library-count{font-size:12px;color:var(--secondary);margin:0 0 8px}.history-library-list{display:flex;flex-direction:column}
+.history-library-item{border-bottom:1px solid var(--line);padding:12px 0;display:flex;align-items:center;gap:12px}
+.history-library-open{display:block;text-align:left;flex:1;min-width:0;padding:4px 0}.history-library-open strong{display:block;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.history-library-open p{font-size:14px;color:var(--secondary);line-height:1.65;margin:6px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.history-library-open small{font-size:12px;color:var(--secondary)}.history-library-actions{display:flex;align-items:center;flex-shrink:0;gap:8px}
+.history-library-actions button{font-size:12px;min-height:36px;padding:6px}.history-library-actions button:hover{text-decoration:underline;text-underline-offset:4px}
+.history-library-empty{font-size:14px;color:var(--secondary);padding:28px 0}
