@@ -1,0 +1,124 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "example": {
+      "headings": [
+        {
+          "text": "提前一周",
+          "size": "18px"
+        },
+        {
+          "text": "提前两三天",
+          "size": "18px"
+        },
+        {
+          "text": "搬家当天",
+          "size": "18px"
+        }
+      ],
+      "bold": 3,
+      "ordered": 2,
+      "unordered": 1,
+      "quote": 1,
+      "body": "15px",
+      "text": "可以先排一份能调整的准备顺序。提前一周确认搬家时间、交通安排和新旧住处的交接事项。整理不再需要的东西，先打包低频物品。提前两三天按房间分装，箱子上写清内容和放置位置。单独留一包随身必需品：证件、充电器、洗漱用品和换洗衣物。搬家当天先核对重要物品，再按清单检查遗漏。到新住处后先整理床铺和洗漱区，让当晚可以正常休息。这份顺序只是项目演示。实际安排可以继续在这段对话里细化。",
+      "overflow": 0
+    },
+    "safety": {
+      "before": {
+        "images": 0,
+        "links": [
+          {
+            "href": "https://example.com/guide",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "text": "<img src=x onerror=\"window.qaUnsafe=1\"><script>window.qaUnsafe=2</script>[危险](javascript:alert)来源"
+      },
+      "after": {
+        "lists": 1,
+        "bold": 1,
+        "items": 2
+      },
+      "executed": 0
+    },
+    "stream": {
+      "bold": "拆小一点",
+      "container": "DIV",
+      "paragraphs": 1,
+      "busy": "true"
+    },
+    "final": {
+      "bold": "拆小一点",
+      "stream": false,
+      "messages": 1,
+      "ledger": false,
+      "overflow": 0
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "example": {
+      "headings": [
+        {
+          "text": "提前一周",
+          "size": "18px"
+        },
+        {
+          "text": "提前两三天",
+          "size": "18px"
+        },
+        {
+          "text": "搬家当天",
+          "size": "18px"
+        }
+      ],
+      "bold": 3,
+      "ordered": 2,
+      "unordered": 1,
+      "quote": 1,
+      "body": "15px",
+      "text": "可以先排一份能调整的准备顺序。提前一周确认搬家时间、交通安排和新旧住处的交接事项。整理不再需要的东西，先打包低频物品。提前两三天按房间分装，箱子上写清内容和放置位置。单独留一包随身必需品：证件、充电器、洗漱用品和换洗衣物。搬家当天先核对重要物品，再按清单检查遗漏。到新住处后先整理床铺和洗漱区，让当晚可以正常休息。这份顺序只是项目演示。实际安排可以继续在这段对话里细化。",
+      "overflow": 0
+    },
+    "safety": {
+      "before": {
+        "images": 0,
+        "links": [
+          {
+            "href": "https://example.com/guide",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "text": "<img src=x onerror=\"window.qaUnsafe=1\"><script>window.qaUnsafe=2</script>[危险](javascript:alert)来源"
+      },
+      "after": {
+        "lists": 1,
+        "bold": 1,
+        "items": 2
+      },
+      "executed": 0
+    },
+    "stream": {
+      "bold": "拆小一点",
+      "container": "DIV",
+      "paragraphs": 1,
+      "busy": "true"
+    },
+    "final": {
+      "bold": "拆小一点",
+      "stream": false,
+      "messages": 1,
+      "ledger": false,
+      "overflow": 0
+    },
+    "errors": []
+  }
+]

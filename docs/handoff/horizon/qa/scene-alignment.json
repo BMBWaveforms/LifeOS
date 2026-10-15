@@ -1,0 +1,1822 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 280.984375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 280.984375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 280.984375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 280.984375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 184.015625,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 184.015625,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 184.015625,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 77,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 184.015625,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 160.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 160.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 160.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 160.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 63.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 63.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 63.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 60,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 63.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "reduced": false,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 436.34375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 436.34375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 436.34375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 436.34375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 339.375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 339.375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 339.375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 86,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 339.375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 757,
+    "height": 800,
+    "reduced": true,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 236,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 236,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 236,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 236,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 139.03125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 139.03125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 139.03125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 72,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 139.03125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 660,
+    "reduced": true,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 103.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 103.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 103.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 103.09375,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "01 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 6.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "02 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 6.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "03 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 6.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 57,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryTextOffset": 0,
+        "counterNearTitle": true,
+        "counterText": "04 / 04",
+        "brandSlogan": true,
+        "captionAlign": "left",
+        "navGap": 6.125,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0,
+        "leftEdgeOffsets": [
+          {
+            "selector": ".scene-wordmark",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-caption h1",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-description",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-product-slogan",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-conversation",
+            "delta": 0
+          },
+          {
+            "selector": ".scene-entry",
+            "delta": 0
+          }
+        ]
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  }
+]

@@ -1,0 +1,136 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "cpu": 1,
+    "side": {
+      "heading": "最近对话",
+      "gap": 8,
+      "inside": "history",
+      "total": "15"
+    },
+    "cards": {
+      "pending": 0,
+      "motion": [
+        {
+          "type": "guide-card",
+          "key": "qa-sleep-turn:03-03",
+          "time": 351.80000001192093,
+          "duration": 620,
+          "delay": 0
+        },
+        {
+          "type": "guide-card",
+          "key": "qa-sleep-turn:03-08",
+          "time": 352,
+          "duration": 620,
+          "delay": 90
+        }
+      ]
+    },
+    "opened": {
+      "visible": 9,
+      "pending": 13,
+      "seal": "waiting",
+      "cover": "决策账本1 项建议把这件事，摊开看看。证据等级B先看投入，再看收益与依据。收起账本",
+      "caption": "证据等级"
+    },
+    "layout": {
+      "removedText": true,
+      "directStamp": "ledger-calc-results ledger-with-seal",
+      "stampSize": "144px",
+      "tracked": 22,
+      "units": 22,
+      "autoAnimations": 0
+    },
+    "progress": [
+      {
+        "value": 0.3191,
+        "opacity": 0.3191,
+        "cls": "ledger-reading-unit ledger-scroll-progress"
+      },
+      {
+        "value": 0.8004,
+        "opacity": 0.8004,
+        "cls": "ledger-reading-unit ledger-scroll-progress"
+      },
+      {
+        "value": 0.599,
+        "opacity": 0.599
+      }
+    ],
+    "stamp": {
+      "events": [
+        {
+          "state": "stamping",
+          "visible": true
+        },
+        {
+          "state": "waiting",
+          "visible": false
+        },
+        {
+          "state": "stamping",
+          "visible": true
+        },
+        {
+          "state": "done",
+          "visible": true
+        }
+      ],
+      "grade": "B",
+      "pending": 0,
+      "stamp": "依据已列LEVO",
+      "overflow": 0
+    },
+    "noReplay": true,
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "cpu": 4,
+    "side": {
+      "heading": "最近对话",
+      "gap": 8,
+      "inside": "history",
+      "total": "15"
+    },
+    "cards": {
+      "pending": 0,
+      "motion": []
+    },
+    "opened": {
+      "visible": 22,
+      "pending": 0,
+      "seal": "waiting",
+      "cover": "决策账本1 项建议把这件事，摊开看看。证据等级B先看投入，再看收益与依据。收起账本",
+      "caption": "证据等级"
+    },
+    "layout": {
+      "removedText": true,
+      "directStamp": "ledger-calc-results ledger-with-seal",
+      "stampSize": "144px",
+      "tracked": 0,
+      "units": 22,
+      "autoAnimations": 0
+    },
+    "progress": [],
+    "stamp": {
+      "events": [
+        {
+          "state": "done",
+          "visible": true
+        }
+      ],
+      "grade": "B",
+      "pending": 0,
+      "stamp": "依据已列LEVO",
+      "overflow": 0
+    },
+    "noReplay": true,
+    "errors": []
+  }
+]

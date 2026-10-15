@@ -1,0 +1,434 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 88.96173095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 88.96173095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 88.96173095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 88.96173095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 15.99298095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 15.99298095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 15.99298095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 15.99298095703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 95.33282470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 95.33282470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 95.33282470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 95.33282470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 22.36407470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 22.36407470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 22.36407470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 22.36407470703125,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "reduced": false,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 193.4046630859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 193.4046630859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 193.4046630859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 193.4046630859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 120.4359130859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 120.4359130859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 120.4359130859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 120.4359130859375,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  },
+  {
+    "width": 757,
+    "height": 800,
+    "reduced": true,
+    "layout": [
+      {
+        "scene": "通勤与生活",
+        "followup": false,
+        "captionGap": 123.41250610351562,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": false,
+        "captionGap": 123.41250610351562,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": false,
+        "captionGap": 123.41250610351562,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": false,
+        "captionGap": 123.41250610351562,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "通勤与生活",
+        "followup": true,
+        "captionGap": 50.443756103515625,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "搬家这件事",
+        "followup": true,
+        "captionGap": 50.443756103515625,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "把专注找回来",
+        "followup": true,
+        "captionGap": 50.443756103515625,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      },
+      {
+        "scene": "今晚，早点休息",
+        "followup": true,
+        "captionGap": 50.443756103515625,
+        "entryGap": 8,
+        "toolbarGap": 24,
+        "reelGap": 72,
+        "entryBg": "rgba(0, 0, 0, 0)",
+        "navEntries": 0,
+        "overflow": 0
+      }
+    ],
+    "fresh": {
+      "hash": "#/chat",
+      "messages": 0,
+      "turns": 0,
+      "thinking": false
+    },
+    "current": {
+      "active": "qa-current",
+      "messages": 1,
+      "draft": "当前对话里未发送的草稿",
+      "turns": 1
+    },
+    "errors": []
+  }
+]

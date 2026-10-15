@@ -28,6 +28,204 @@
       "author_handle": "dubassy",
       "page": "https://mixkit.co/free-stock-video/new-york-city-view-at-night-4087/",
       "license": "Mixkit Stock Video Free License"
+    },
+    {
+      "name": "action",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "04-计划与行动/6862470-hd_2048_1080_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 2,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 707800,
+      "poster_bytes": 56594
+    },
+    {
+      "name": "budget",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "05-钱与日常开支/7545831-hd_1920_1080_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 0,
+        "duration_seconds": 5.16,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 684845,
+      "poster_bytes": 81456
+    },
+    {
+      "name": "career",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "06-求职与职业变化/5438891-hd_1920_1080_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 2,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 862323,
+      "poster_bytes": 76336
+    },
+    {
+      "name": "learning",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "08-学习与技能/13099994_1920_1080_24fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 8,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 853860,
+      "poster_bytes": 90398
+    },
+    {
+      "name": "travel",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "09-旅行与出行/13597451_1920_1080_24fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 8,
+        "duration_seconds": 12,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 2191249,
+      "poster_bytes": 182710
+    },
+    {
+      "name": "kitchen",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "11-饮食与厨房/7424483-hd_1920_1080_30fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 1,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 630941,
+      "poster_bytes": 49321
+    },
+    {
+      "name": "exercise",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "12-运动与体能/8343377-hd_1920_1080_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 0,
+        "duration_seconds": 8.08,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 1131443,
+      "poster_bytes": 82354
+    },
+    {
+      "name": "pressure",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "14-情绪与压力/3753690-hd_1920_1080_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 1,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 1310842,
+      "poster_bytes": 74232
+    },
+    {
+      "name": "rest",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "15-休息与放松/4052818-hd_1920_1080_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 0,
+        "duration_seconds": 7.52,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 334067,
+      "poster_bytes": 44124
+    },
+    {
+      "name": "relationships",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "16-亲密关系/4052868-uhd_3840_2160_25fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 4,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 495639,
+      "poster_bytes": 62302
+    },
+    {
+      "name": "companionship",
+      "source_kind": "user_supplied_local_video",
+      "source_file": "20-老人与陪伴/5642392-hd_1920_1080_30fps.mp4",
+      "license": "未附授权元数据；保留用户提供的原文件名，不推断作者或许可",
+      "edit": {
+        "start_seconds": 1,
+        "duration_seconds": 10,
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "codec": "H.264",
+        "audio": false,
+        "poster_seconds": 0.5
+      },
+      "video_bytes": 1597994,
+      "poster_bytes": 69607
     }
   ],
   "files": [
@@ -70,6 +268,161 @@
       "file": "web/assets/scenes/night.jpg",
       "bytes": 159507,
       "source": "https://assets.mixkit.co/videos/4087/4087-thumb-720-0.jpg"
+    },
+    {
+      "file": "web/assets/scenes/action.mp4",
+      "bytes": 707800,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "04-计划与行动/6862470-hd_2048_1080_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/action.jpg",
+      "bytes": 56594,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "04-计划与行动/6862470-hd_2048_1080_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/budget.mp4",
+      "bytes": 684845,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "05-钱与日常开支/7545831-hd_1920_1080_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/budget.jpg",
+      "bytes": 81456,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "05-钱与日常开支/7545831-hd_1920_1080_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/career.mp4",
+      "bytes": 862323,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "06-求职与职业变化/5438891-hd_1920_1080_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/career.jpg",
+      "bytes": 76336,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "06-求职与职业变化/5438891-hd_1920_1080_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/learning.mp4",
+      "bytes": 853860,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "08-学习与技能/13099994_1920_1080_24fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/learning.jpg",
+      "bytes": 90398,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "08-学习与技能/13099994_1920_1080_24fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/travel.mp4",
+      "bytes": 2191249,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "09-旅行与出行/13597451_1920_1080_24fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/travel.jpg",
+      "bytes": 182710,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "09-旅行与出行/13597451_1920_1080_24fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/kitchen.mp4",
+      "bytes": 630941,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "11-饮食与厨房/7424483-hd_1920_1080_30fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/kitchen.jpg",
+      "bytes": 49321,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "11-饮食与厨房/7424483-hd_1920_1080_30fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/exercise.mp4",
+      "bytes": 1131443,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "12-运动与体能/8343377-hd_1920_1080_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/exercise.jpg",
+      "bytes": 82354,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "12-运动与体能/8343377-hd_1920_1080_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/pressure.mp4",
+      "bytes": 1310842,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "14-情绪与压力/3753690-hd_1920_1080_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/pressure.jpg",
+      "bytes": 74232,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "14-情绪与压力/3753690-hd_1920_1080_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/rest.mp4",
+      "bytes": 334067,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "15-休息与放松/4052818-hd_1920_1080_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/rest.jpg",
+      "bytes": 44124,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "15-休息与放松/4052818-hd_1920_1080_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/relationships.mp4",
+      "bytes": 495639,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "16-亲密关系/4052868-uhd_3840_2160_25fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/relationships.jpg",
+      "bytes": 62302,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "16-亲密关系/4052868-uhd_3840_2160_25fps.mp4",
+      "derived": true
+    },
+    {
+      "file": "web/assets/scenes/companionship.mp4",
+      "bytes": 1597994,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "20-老人与陪伴/5642392-hd_1920_1080_30fps.mp4",
+      "derived": false
+    },
+    {
+      "file": "web/assets/scenes/companionship.jpg",
+      "bytes": 69607,
+      "source_kind": "user_supplied_local_video",
+      "source_file": "20-老人与陪伴/5642392-hd_1920_1080_30fps.mp4",
+      "derived": true
     }
-  ]
+  ],
+  "license_note": "license 字段仅对应最初四段 Mixkit 样片；新增本地素材的来源与许可状态逐条记录在 clips。"
 }

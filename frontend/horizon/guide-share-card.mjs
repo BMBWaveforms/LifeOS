@@ -13,7 +13,7 @@ export function buildGuideShareModel(card){
   project:'github.com/eternity4719/HowToLiveBetter',license:'creativecommons.org/licenses/by/4.0/',
   adaptation:'原文未改写，卡片调整了版式与字段顺序。',
   disclaimer:'内容仅供参考，不构成专业意见。\n请结合自身情况判断并作出决定。',
-  filename:'LifeOS-指南-'+card.guide_id.replace(/[^a-z0-9_-]/gi,'-')+'.png',
+  filename:'LEVO-指南-'+card.guide_id.replace(/[^a-z0-9_-]/gi,'-')+'.png',
  };
 }
 const segments=text=>typeof Intl.Segmenter==='function'?[...new Intl.Segmenter('zh-CN',{granularity:'grapheme'}).segment(text)].map(s=>s.segment):[...text];
@@ -42,7 +42,8 @@ const font='-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
 // Logical width 720, exported at 1.5x for a sharp 1080px PNG.
 export async function createGuideShareImage(model){
  if(!model)throw Error('这条指南暂时无法生成卡片。');
- await document.fonts.ready;
+ const mark=new Image();mark.src=new URL('./assets/mark.svg',import.meta.url).href;
+ await Promise.all([document.fonts.ready,mark.decode()]);
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
  if(!ctx)throw Error('当前浏览器暂时无法生成图片。');
  const width=720,pad=48,content=width-pad*2,scale=1.5,commands=[];
@@ -72,9 +73,9 @@ export async function createGuideShareImage(model){
  if(y>12000)throw Error('这条指南内容较长，暂时无法生成图片，请换一条重试。');
  canvas.width=width*scale;canvas.height=Math.ceil(y*scale);ctx.scale(scale,scale);ctx.textBaseline='top';
  ctx.fillStyle='#fff';ctx.fillRect(0,0,width,y);
- // The product mark is drawn locally; no remote images can taint the canvas.
- ctx.save();ctx.translate(pad,52);ctx.lineWidth=1.6;ctx.strokeStyle='#171717';ctx.stroke(new Path2D('M16 16C4-4-4 4 16 16S36 4 16 16 4 36 16 16 36 36 16 16'));ctx.restore();
- ctx.font=`600 36px ${font}`;ctx.fillStyle='#171717';ctx.fillText('LifeOS',pad+46,48);
+ // Self-contained, same-origin artwork keeps PNG export independent of remote media.
+ ctx.drawImage(mark,pad,50,34,34);
+ ctx.font=`600 36px ${font}`;ctx.fillStyle='#171717';ctx.fillText('LEVO',pad+46,48);
  ctx.font=`400 20px ${font}`;ctx.textAlign='right';ctx.fillStyle='#666';ctx.fillText('生活指南 / 摘录',width-pad,60);ctx.textAlign='left';
  ctx.strokeStyle='#dedede';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,112);ctx.lineTo(width-pad,112);ctx.stroke();
  for(const command of commands){

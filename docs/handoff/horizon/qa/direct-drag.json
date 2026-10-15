@@ -1,0 +1,48 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "clickThreshold": true,
+    "directDrag": true,
+    "noAccidentalNavigation": true,
+    "cancelEscape": true,
+    "cancelOutside": true,
+    "keyboard": true,
+    "persistence": true,
+    "groupIsolation": true,
+    "simple": {
+      "selectedBackground": "rgba(0, 0, 0, 0)",
+      "marker": "none",
+      "svgBranches": 0,
+      "titleMotion": "matrix(1, 0, 0, 1, 0, 0)",
+      "overflow": 0,
+      "searchVisible": true,
+      "deleteButtons": 6
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "clickThreshold": true,
+    "directDrag": true,
+    "noAccidentalNavigation": true,
+    "cancelEscape": true,
+    "cancelOutside": true,
+    "keyboard": true,
+    "persistence": true,
+    "groupIsolation": true,
+    "simple": {
+      "selectedBackground": "rgba(0, 0, 0, 0)",
+      "marker": "none",
+      "svgBranches": 0,
+      "titleMotion": "none",
+      "overflow": 0,
+      "searchVisible": true,
+      "deleteButtons": 6
+    },
+    "errors": []
+  }
+]

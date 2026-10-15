@@ -28,7 +28,7 @@ export function conversationMeta(c){
 export function initHistoryLineNavigation(root){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');let pointerY=null,frame=0;
  const rows=()=>[...root.querySelectorAll('.history-row')];
- function paint(){frame=0;const targets=rows().map(row=>{const rect=row.getBoundingClientRect(),distance=pointerY===null?Infinity:Math.abs(pointerY-(rect.top+rect.height/2)),p=Math.max(0,1-distance/80);return [row,reduced.matches||root.dataset.reordering==='true'?0:p*p*(3-2*p)];});for(const [row,value]of targets)row.style.setProperty('--line-proximity',value.toFixed(3));}
+ function paint(){frame=0;const targets=rows().map(row=>{const rect=row.getBoundingClientRect(),distance=pointerY===null?Infinity:Math.abs(pointerY-(rect.top+rect.height/2)),p=Math.max(0,1-distance/80);return [row,reduced.matches||root.classList.contains('is-dragging')?0:p*p*(3-2*p)];});for(const [row,value]of targets)row.style.setProperty('--line-proximity',value.toFixed(3));}
  function refresh(){if(!frame)frame=requestAnimationFrame(paint);}
  root.addEventListener('pointermove',event=>{if(event.pointerType==='touch')return;pointerY=event.clientY;refresh();});
  root.addEventListener('pointerleave',()=>{pointerY=null;refresh();});

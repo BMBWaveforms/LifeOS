@@ -1,0 +1,280 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "reduced": false,
+    "cpu": 1,
+    "initial": {
+      "units": 22,
+      "tracked": 22,
+      "pending": 21,
+      "first": 0.1264,
+      "stamp": "waiting"
+    },
+    "progress": [
+      {
+        "id": "question-0",
+        "lower": 0.3591,
+        "higher": 0.8271
+      },
+      {
+        "id": "guides-0",
+        "lower": 0.3597,
+        "higher": 0.8276
+      },
+      {
+        "id": "tags-title",
+        "lower": 0.3598,
+        "higher": 0.8277
+      },
+      {
+        "id": "tags-0",
+        "lower": 0.3567,
+        "higher": 0.8252
+      },
+      {
+        "id": "tags-1",
+        "lower": 0.3567,
+        "higher": 0.8252
+      },
+      {
+        "id": "tags-2",
+        "lower": 0.3572,
+        "higher": 0.8256
+      },
+      {
+        "id": "tags-3",
+        "lower": 0.3572,
+        "higher": 0.8256
+      },
+      {
+        "id": "proposal-0",
+        "lower": 0.3578,
+        "higher": 0.8261
+      },
+      {
+        "id": "cost-0",
+        "lower": 0.3568,
+        "higher": 0.8253
+      },
+      {
+        "id": "benefit-0",
+        "lower": 0.3574,
+        "higher": 0.8258
+      },
+      {
+        "id": "benefit-1",
+        "lower": 0.3564,
+        "higher": 0.825
+      },
+      {
+        "id": "evidence",
+        "lower": 0.3586,
+        "higher": 0.8267
+      },
+      {
+        "id": "source-0",
+        "lower": 0.3555,
+        "higher": 0.8242
+      },
+      {
+        "id": "source-1",
+        "lower": 0.3598,
+        "higher": 0.8277
+      },
+      {
+        "id": "source-2",
+        "lower": 0.3604,
+        "higher": 0.8282
+      },
+      {
+        "id": "limits-0",
+        "lower": 0.3572,
+        "higher": 0.8256
+      },
+      {
+        "id": "limits-1",
+        "lower": 0.36,
+        "higher": 0.8278
+      },
+      {
+        "id": "read-source",
+        "lower": 0.3584,
+        "higher": 0.8266
+      },
+      {
+        "id": "calculator-intro",
+        "lower": 0.3584,
+        "higher": 0.8266
+      },
+      {
+        "id": "calculator-fields",
+        "lower": 0.3564,
+        "higher": 0.825
+      },
+      {
+        "id": "calculator",
+        "lower": 0.3554,
+        "higher": 0.8241
+      }
+    ],
+    "tail": {
+      "remaining": 0,
+      "hidden": [],
+      "lastOpacity": "1"
+    },
+    "stamp": "done",
+    "rental": "done",
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": false,
+    "cpu": 4,
+    "initial": {
+      "units": 22,
+      "tracked": 22,
+      "pending": 21,
+      "first": 0.1057,
+      "stamp": "waiting"
+    },
+    "progress": [
+      {
+        "id": "question-0",
+        "lower": 0.5904,
+        "higher": 1
+      },
+      {
+        "id": "guides-0",
+        "lower": 0.5912,
+        "higher": 1
+      },
+      {
+        "id": "tags-title",
+        "lower": 0.5915,
+        "higher": 1
+      },
+      {
+        "id": "tags-0",
+        "lower": 0.587,
+        "higher": 1
+      },
+      {
+        "id": "tags-1",
+        "lower": 0.587,
+        "higher": 1
+      },
+      {
+        "id": "tags-2",
+        "lower": 0.5878,
+        "higher": 1
+      },
+      {
+        "id": "tags-3",
+        "lower": 0.5878,
+        "higher": 1
+      },
+      {
+        "id": "proposal-0",
+        "lower": 0.5886,
+        "higher": 1
+      },
+      {
+        "id": "cost-0",
+        "lower": 0.5872,
+        "higher": 1
+      },
+      {
+        "id": "benefit-0",
+        "lower": 0.5881,
+        "higher": 1
+      },
+      {
+        "id": "benefit-1",
+        "lower": 0.5866,
+        "higher": 1
+      },
+      {
+        "id": "evidence",
+        "lower": 0.5897,
+        "higher": 1
+      },
+      {
+        "id": "source-0",
+        "lower": 0.5853,
+        "higher": 1
+      },
+      {
+        "id": "source-1",
+        "lower": 0.5915,
+        "higher": 1
+      },
+      {
+        "id": "source-2",
+        "lower": 0.5923,
+        "higher": 1
+      },
+      {
+        "id": "limits-0",
+        "lower": 0.5878,
+        "higher": 1
+      },
+      {
+        "id": "limits-1",
+        "lower": 0.5917,
+        "higher": 1
+      },
+      {
+        "id": "read-source",
+        "lower": 0.5895,
+        "higher": 1
+      },
+      {
+        "id": "calculator-intro",
+        "lower": 0.5895,
+        "higher": 1
+      },
+      {
+        "id": "calculator-fields",
+        "lower": 0.5866,
+        "higher": 1
+      },
+      {
+        "id": "calculator",
+        "lower": 0.5852,
+        "higher": 1
+      }
+    ],
+    "tail": {
+      "remaining": 0,
+      "hidden": [],
+      "lastOpacity": "1"
+    },
+    "stamp": "done",
+    "rental": "done",
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "reduced": true,
+    "cpu": 4,
+    "initial": {
+      "units": 22,
+      "tracked": 0,
+      "pending": 0,
+      "first": 1,
+      "stamp": "waiting"
+    },
+    "progress": [],
+    "tail": {
+      "remaining": 0,
+      "hidden": [],
+      "lastOpacity": "1"
+    },
+    "stamp": "done",
+    "rental": "done",
+    "errors": []
+  }
+]

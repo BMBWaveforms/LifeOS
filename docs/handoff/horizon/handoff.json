@@ -7,7 +7,18 @@
   "default_entry_changed": false,
   "backend_changed": false,
   "production_data_migrated": false,
-  "read_order": ["AGENTS.md", "docs/handoff/horizon/README.md", "docs/handoff/horizon/BACKEND_AGENT_TASK.md", "docs/handoff/horizon/FEATURE_MATRIX.md", "docs/handoff/horizon/CONTRACT.md", "docs/handoff/horizon/ACCEPTANCE.md", "docs/handoff/horizon/VERIFICATION.md"],
+  "read_order": [
+    "AGENTS.md",
+    "docs/handoff/horizon/README.md",
+    "docs/handoff/horizon/BACKEND_AGENT_TASK.md",
+    "docs/handoff/horizon/FEATURE_MATRIX.md",
+    "docs/handoff/horizon/CONTRACT.md",
+    "docs/handoff/horizon/ACCEPTANCE.md",
+    "docs/handoff/horizon/BRAND.md",
+    "docs/handoff/horizon/SCENES.md",
+    "docs/handoff/horizon/LEDGER_READING.md",
+    "docs/handoff/horizon/VERIFICATION.md"
+  ],
   "adapter": "frontend/horizon/service.mjs",
   "runtime_discovery": "frontend/horizon/runtime-config.mjs",
   "capabilities": {
@@ -17,22 +28,100 @@
     "public_backend_streaming": false,
     "server_cancel": false,
     "server_idempotency": false,
-    "history": {"demo": "browser-localStorage", "real": "browser-sessionStorage-per-account", "server_persistence": false, "manual_order": "same-group-ID-order; demo-localStorage; real-sessionStorage-per-account; new-conversations-first; no-server-sync"},
+    "history": {
+      "demo": "browser-localStorage",
+      "real": "browser-sessionStorage-per-account",
+      "server_persistence": false,
+      "manual_order": "same-group-ID-order; demo-localStorage; real-sessionStorage-per-account; new-conversations-first; no-server-sync",
+      "manual_order_input": "direct-drag after 8px; Alt+Arrow; opening a conversation does not reorder"
+    },
     "projects": "demo-group-only",
     "understanding": "frontend-explicit-text-rules-not-agent-reasoning",
     "guide_share": "local-png-no-private-fields",
-    "static_preview_real_api": false
+    "static_preview_real_api": false,
+    "brand": "LEVO",
+    "landing_scene_count": 15,
+    "homepage_followups": false,
+    "entry_without_message": true,
+    "answer_format": "DOM-only Markdown subset; plain text supported; raw HTML stays text",
+    "decision_ledger": "client evidence presentation; automatic text reveal; viewport-gated overlay seal; no new scoring"
   },
   "tasks": [
-    {"id":"memory-policy", "priority":"P0", "owner":"backend-agent", "status":"blocked-by-policy-mismatch", "detail":"Horizon requires automatic immutable memories; baseline backend defaults off and permits editing. No automatic account mutation in this delivery."},
-    {"id":"json-api", "priority":"P0", "owner":"integration-agent", "status":"adapter-present-synthetic-contract-tested", "detail":"Real-model end-to-end acceptance remains required."},
-    {"id":"history-origin", "priority":"P0", "owner":"backend-agent", "status":"client-only-fallback-ready", "detail":"Need authorized persistent conversation/turn origin; current backend context is not a history API."},
-    {"id":"public-stream", "priority":"P0", "owner":"backend-and-frontend-agents", "status":"container-ready-transport-absent", "detail":"Only public validated text, final guide validation and memory result required; no internal SDK traces."},
-    {"id":"cancel-idempotency", "priority":"P1", "owner":"backend-and-frontend-agents", "status":"browser-abort-only"},
-    {"id":"project-groups", "priority":"P2", "owner":"product-and-backend-agents", "status":"demo-only"},
-    {"id":"understanding-map", "priority":"P2", "owner":"backend-and-frontend-agents", "status":"semantics-mapping-required"}
+    {
+      "id": "memory-policy",
+      "priority": "P0",
+      "owner": "backend-agent",
+      "status": "blocked-by-policy-mismatch",
+      "detail": "Horizon requires automatic immutable memories; baseline backend defaults off and permits editing. No automatic account mutation in this delivery."
+    },
+    {
+      "id": "json-api",
+      "priority": "P0",
+      "owner": "integration-agent",
+      "status": "adapter-present-synthetic-contract-tested",
+      "detail": "Real-model end-to-end acceptance remains required."
+    },
+    {
+      "id": "history-origin",
+      "priority": "P0",
+      "owner": "backend-agent",
+      "status": "client-only-fallback-ready",
+      "detail": "Need authorized persistent conversation/turn origin; current backend context is not a history API."
+    },
+    {
+      "id": "public-stream",
+      "priority": "P0",
+      "owner": "backend-and-frontend-agents",
+      "status": "container-ready-transport-absent",
+      "detail": "Only public validated text, final guide validation and memory result required; no internal SDK traces."
+    },
+    {
+      "id": "cancel-idempotency",
+      "priority": "P1",
+      "owner": "backend-and-frontend-agents",
+      "status": "browser-abort-only"
+    },
+    {
+      "id": "project-groups",
+      "priority": "P2",
+      "owner": "product-and-backend-agents",
+      "status": "demo-only"
+    },
+    {
+      "id": "understanding-map",
+      "priority": "P2",
+      "owner": "backend-and-frontend-agents",
+      "status": "semantics-mapping-required"
+    }
   ],
-  "preserve": ["frontend/index.html", "frontend/workbench.html", "backend", "prompts", "account-data", "runtime-volumes", "source-validation", "memory-revision", "account-isolation"],
-  "not_in_scope": ["deployment", "default-homepage-switch", "production-data-migration", "mobile-layout", "registration", "real-contact-link"],
-  "handoff_response_required": ["baseline-sha", "changed-files", "protocol-version", "implemented-blocked-deferred", "compatibility-and-migration", "tests-and-results", "real-model-acceptance-status", "remaining-decisions", "rollback"]
+  "preserve": [
+    "frontend/index.html",
+    "frontend/workbench.html",
+    "backend",
+    "prompts",
+    "account-data",
+    "runtime-volumes",
+    "source-validation",
+    "memory-revision",
+    "account-isolation"
+  ],
+  "not_in_scope": [
+    "deployment",
+    "default-homepage-switch",
+    "production-data-migration",
+    "mobile-layout",
+    "registration",
+    "real-contact-link"
+  ],
+  "handoff_response_required": [
+    "baseline-sha",
+    "changed-files",
+    "protocol-version",
+    "implemented-blocked-deferred",
+    "compatibility-and-migration",
+    "tests-and-results",
+    "real-model-acceptance-status",
+    "remaining-decisions",
+    "rollback"
+  ]
 }
