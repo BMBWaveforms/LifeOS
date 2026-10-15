@@ -75,7 +75,10 @@ class Workbench:
         sid, owner = session['id'], session['owner']
         if sid not in self.services:
             snapshot = json.loads(session['bundle']) if session.get('bundle') else None
-            service = AgentService(Store(self.directory / sid), self.client, self.executors, snapshot)
+            # Batch/free tests freeze model tasks. Background maintenance must not
+            # race their scripted responses or silently add unrecorded model calls.
+            service = AgentService(Store(self.directory / sid), self.client, self.executors,
+                                   snapshot, maintenance_enabled=False)
             # The approved conversation id is persisted in result payloads. AgentService
             # restores its SDK session mapping; never replay old Python-built histories.
             if len(self.services) >= 30:

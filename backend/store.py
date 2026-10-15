@@ -14,6 +14,8 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+from backend.memory_selection import select_memories
+from backend.memory_topics import TopicMemory
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -48,6 +50,8 @@ class Store:
             ''')
             for owner in self.profiles:
                 db.execute('INSERT OR IGNORE INTO profiles(id) VALUES (?)', (owner,))
+        self.topic_memory = TopicMemory(self)
+        self.topic_memory.initialize()
 
     def db(self):
         db = sqlite3.connect(str(self.path), timeout=10)
@@ -61,6 +65,10 @@ class Store:
         raise PermissionError('无效的体验用户凭据')
 
     def state(self, owner):
+        with self.lock:
+            return self._state(owner)
+
+    def _state(self, owner):
         with self.db() as db:
             p = dict(db.execute('SELECT * FROM profiles WHERE id=?', (owner,)).fetchone())
             memories = [dict(m) for m in db.execute('SELECT * FROM memories WHERE owner=? ORDER BY created', (owner,))]
@@ -73,8 +81,10 @@ class Store:
                 detail['guide_ids']=json.loads(detail['guide_ids'])
                 detail['guides']=[{'guide_id':gid,'title':self.entries[gid]['title']} for gid in detail['guide_ids']]
                 m.update(detail,origin='model_summary')
+        topics = self.topic_memory.annotate(owner, memories)
         effective = [m for m in memories if m['state']=='active' and (m['expires'] is None or m['expires'] > time.time())] if p['enabled'] else []
-        return {'enabled': bool(p['enabled']), 'revision': p['revision'], 'memories': memories, 'effective': effective, 'feedback': feedback}
+        return {'enabled': bool(p['enabled']), 'revision': p['revision'], 'memories': memories,
+                'effective': effective, 'feedback': feedback, 'topics': topics}
 
     def change(self, owner, action, data):
         with self.lock, self.db() as db:
@@ -105,6 +115,8 @@ class Store:
                     raise ValueError('有效期必须是未来时间')
                 db.execute('INSERT INTO memories VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET text=excluded.text,kind=excluded.kind,updated=excluded.updated,state=excluded.state,expires=excluded.expires',
                            (mid,owner,kind,text,now,now,data.get('state','active'),expires))
+                self.topic_memory.on_change(db, owner, 'save', {**data, 'id': mid})
+                self.topic_memory.register(db, mid, owner, text, [], problem=text[:160], now=now)
             elif action == 'correct_summary':
                 mid=data.get('id','')
                 row=db.execute('SELECT m.owner,s.problem_status FROM memories m JOIN memory_summaries s ON m.id=s.memory_id WHERE m.id=?',(mid,)).fetchone()
@@ -113,20 +125,33 @@ class Store:
                 if not text or len(text)>800:raise ValueError('摘要长度应为 1—800 字')
                 problem_status=data.get('problem_status',row['problem_status'])
                 if problem_status not in ('unresolved','resolved','unknown'):raise ValueError('问题状态无效')
-                detail=db.execute('SELECT * FROM memory_summaries WHERE memory_id=?',(mid,)).fetchone()
-                problem=data.get('problem',detail['problem']);user_state=data.get('user_state',detail['user_state'])
+                # Old cumulative fields can contain a subsequently deleted
+                # ancestor. Defaults must come from the current safe projection,
+                # and only explicitly submitted fields become corrected evidence.
+                current = next(m for m in self.state(owner)['memories'] if m['id'] == mid)
+                problem=data.get('problem',current.get('problem', ''));user_state=data.get('user_state',current.get('user_state', ''))
                 if not isinstance(problem,str) or len(problem)>160:raise ValueError('问题主题无效')
                 if not isinstance(user_state,str) or len(user_state)>400:raise ValueError('用户状态无效')
+                self.topic_memory.on_change(db, owner, action, {
+                    **data, 'problem': data.get('problem', ''), 'user_state': data.get('user_state', '')})
                 db.execute('UPDATE memories SET text=?,updated=? WHERE id=?',(text,time.time(),mid))
                 db.execute('UPDATE memory_summaries SET problem_status=?,problem=?,user_state=?,state_evidence=?,status_evidence=? WHERE memory_id=?',(problem_status,problem,user_state,'','',mid))
             elif action == 'delete':
                 row = db.execute('SELECT owner FROM memories WHERE id=?',(data['id'],)).fetchone()
                 if not row or row['owner'] != owner:
                     raise PermissionError('不能读取或删除其他用户记忆')
+                self.topic_memory.on_change(db, owner, action, data)
                 db.execute('DELETE FROM memories WHERE id=? AND owner=?',(data['id'],owner))
                 db.execute('DELETE FROM memory_summaries WHERE memory_id=?',(data['id'],))
                 db.execute('DELETE FROM feedback WHERE owner=?',(owner,))
+            elif action == 'delete_topic':
+                ids = self.topic_memory.on_change(db, owner, action, data)
+                for mid in ids:
+                    db.execute('DELETE FROM memory_summaries WHERE memory_id=?', (mid,))
+                    db.execute('DELETE FROM memories WHERE id=? AND owner=?', (mid, owner))
+                db.execute('DELETE FROM feedback WHERE owner=?', (owner,))
             elif action == 'clear':
+                self.topic_memory.on_change(db, owner, action, data)
                 db.execute('DELETE FROM memory_summaries WHERE memory_id IN (SELECT id FROM memories WHERE owner=?)',(owner,))
                 db.execute('DELETE FROM memories WHERE owner=?',(owner,))
                 db.execute('DELETE FROM feedback WHERE owner=?',(owner,))
@@ -179,10 +204,9 @@ class Store:
             now=time.time()
             self.runs={k:v for k,v in self.runs.items() if v['expires']>now}
             s=self.state(owner)
-            effective=sorted(s['effective'],key=lambda m:m['updated'],reverse=True) if use_memory else []
-            followup=next((m for m in effective if m['id']==followup_memory_id),None)
-            memories=([followup]+[m for m in effective if m['id']!=followup['id']])[:12] if followup else effective[:12]
-            if followup_memory_id and not followup:raise ValueError('回访记录已删除、停用或不属于当前用户')
+            effective = self.topic_memory.context_memories(owner, s['effective'], query, mode) if use_memory else []
+            memories, selection = select_memories(effective, query, mode, followup_memory_id)
+            followup = next((m for m in memories if m['id']==followup_memory_id), None)
             followups=[m for m in memories if m.get('origin')=='model_summary' and m.get('problem') and m.get('problem_status')!='resolved'][:3]
             rid=secrets.token_urlsafe(24)
             self.runs[rid]={'owner':owner,'revision':s['revision'],'reads':set(),'expires':now+600,
@@ -196,7 +220,7 @@ class Store:
                     'cold_start':cold,'personalization_applied':bool(memories),'memories':memories,
                     'query':query,'mode':mode,'feedback':self.runs[rid]['feedback'],
                     'memory_enabled':self.runs[rid]['memory_enabled'],'followup':followup,'followups':followups,
-                    'selected_guide':selected,
+                    'selected_guide':selected, 'memory_selection': selection,
                     'candidate_titles':[{'guide_id':e['guide_id'],'title':e['title']} for e in candidates]}
 
     @staticmethod
@@ -255,9 +279,14 @@ class Store:
                 if parent:db.execute('UPDATE memories SET state=? WHERE id=? AND owner=?',('superseded',parent,owner))
                 db.execute('INSERT INTO memories VALUES (?,?,?,?,?,?,?,?)',(mid,owner,'conversation_summary',text,now,now,'active',None))
                 db.execute('INSERT INTO memory_summaries VALUES (?,?,?,?,?,?,?,?,?)',(mid,rid,user_state,problem,problem_status,json.dumps(guides),parent,evidence,status_evidence))
+                topic_id = self.topic_memory.register(
+                    db, mid, owner, run['query'], [card['guide_id'] for card in result['cards']],
+                    dependencies=[m['id'] for m in run['memories']], parent_id=parent,
+                    problem=problem, now=now)
                 db.execute('UPDATE profiles SET revision=revision+1 WHERE id=?',(owner,))
             run['summary_saved_id']=mid
-            return {'saved':True,'message':'本轮会话摘要已自动保存。','memory_id':mid,'memory_revision':self.state(owner)['revision']}
+            return {'saved':True,'message':'本轮会话摘要已自动保存。','memory_id':mid,
+                    'topic_id':topic_id,'memory_revision':self.state(owner)['revision']}
 
     def finalize_home(self,owner,rid,raw):
         with self.lock:

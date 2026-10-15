@@ -443,6 +443,22 @@ body.home-active #profile-entry { display:inline-flex!important;left:auto;right:
 .memory-setting { display:flex;align-items:center;gap:12px;padding:14px 0;margin:0;font-size:14px;color:var(--ink); }
 .memory-setting input { width:18px;height:18px;accent-color:var(--accent); }
 .memory-summary { white-space:pre-wrap;font-size:13px; }
+.memory-topic { overflow-wrap:anywhere; }
+.memory-excerpt { margin:12px 0; }
+.memory-excerpt .memory-summary { margin-bottom:4px; }
+.memory-excerpt-time { margin-top:0; }
+.memory-topic>.text-button { margin-top:14px; }
+.memory-sources { border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:13px; }
+.memory-sources>summary { cursor:pointer;color:var(--ink-2);padding:4px 0; }
+.memory-sources>summary:focus-visible { outline:2px solid var(--accent);outline-offset:4px;border-radius:4px; }
+.memory-source { padding:16px 0 4px;border-top:1px solid var(--line);margin-top:12px; }
+.memory-source .section-heading { gap:12px; }
+.memory-source h4 { margin:0;font:500 13px/1.6 var(--sans); }
+.memory-source-label { color:var(--ink-3);font-size:11px;margin:12px 0 4px; }
+.memory-source-query { white-space:pre-wrap;font-size:13px;margin:0; }
+.memory-source .memory-summary { margin:0; }
+.memory-source-time { margin-bottom:0; }
+.memory-organizing { margin:10px 0; }
 .answer>.guide-card { padding:18px 20px;border:1px solid var(--line);border-radius:var(--ui-radius-panel);background:var(--surface);margin:14px 0 4px; }
 .answer>.guide-card h3 { font:600 17px/1.6 var(--sans); }
 .answer>.guide-card details { margin-top:12px; }

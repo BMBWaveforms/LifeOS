@@ -252,7 +252,7 @@ def create_app(directory=None, client=None, executors=None):
     @app.post('/api/memory-action')
     def change(data: dict, request: Request):
         user = owner(request)
-        if data.get('action') not in ('settings', 'correct_summary', 'delete', 'clear', 'feedback'):
+        if data.get('action') not in ('settings', 'correct_summary', 'delete', 'delete_topic', 'clear', 'feedback'):
             raise ValueError('未知的记忆管理操作。')
         return store.change(user, data['action'], data)
 
