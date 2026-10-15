@@ -1,14 +1,14 @@
 # Horizon 前端 → 后端 Agent 交接
 
+> 最新界面更新已合入正式根入口，请先读 [LEVO前端更新交接](FRONTEND_UPDATE_2026-10-16.md)。本轮保留上游主题记忆、来源删除、SDK和工作台接线。
+
+> 融合后的现状：本文件保留团队原交付说明。用户已指定以最新 b205c20 为唯一产品基准，模块提升至 frontend 根，旧产品移除；自动记忆/主题来源与 SDK 接线以 [当前接入说明](../../前端接入与验收.md) 为准。下文候选 /horizon/、双入口、旧开关及旧执行层描述仅记录交付时状态。
+
 > 后端 Agent 从本文件开始。先读取根 `AGENTS.md`，再读本目录 `BACKEND_AGENT_TASK.md`、`FEATURE_MATRIX.md`、`CONTRACT.md`、`ACCEPTANCE.md` 和 `handoff.json`。不要根据演示效果推断后端能力已经接好。
-
-## 本轮前端更新（2026-10-16）
-
-LEVO品牌、15个生活视频场景、输入框下方“直接进入 →”、简化侧栏与直接拖动、原生Markdown回答、自动文字渐显账本及可见后落章已整合。首页回访卡片和暂停按钮、排序/恢复默认按钮、账本“直接看全文”入口已移除。最终效果以[BRAND.md](BRAND.md)、[SCENES.md](SCENES.md)、[LEDGER_READING.md](LEDGER_READING.md)和最新验收记录为准；旧QA文件保留为迭代证据。
 
 ## 本次交付与基线
 
-目标仓库：`shuaishuaisylas/LifeOS`；首次交接基线为`633ccba`，本轮已同步当前主分支`12eb522f04dd61b2a5cae371cf516bdb0d96484a`。当前后端统一为SDK执行，支持隔离会话恢复与受控压缩，保留团队账号、提示词版本与评测工作台。Horizon 是另一套候选产品前端，不能拿旧独立项目的后端覆盖这些实现。
+目标仓库：`shuaishuaisylas/LifeOS`；核对基线：`633ccba4f4f9245e467be5c03426f00f18f313fb`。该基线已经合入 partner product frontend，具有真实 SDK/native 执行层、团队账号、提示词版本与评测工作台。Horizon 是另一套候选产品前端，不能拿旧独立项目的后端覆盖这些实现。
 
 - 新版代码：`frontend/horizon/`，入口 `/horizon/`，子路由 `#/`、`#/chat`。
 - 原产品：`frontend/index.html`，入口 `/`。本次不切换默认首页。
@@ -37,7 +37,6 @@ python3 scripts/frontend_server.py --port 8892 --backend-port 8781
 
 ## 文件所有权与改动范围
 
-- 上游新增`POST /api/conversation-action`用于撤销SDK会话；候选前端的删除目前仍只作用于浏览器历史，尚未调用此接口，接手时须统一删除语义。
 - 优先在 `frontend/horizon/service.mjs` 做协议映射；`runtime-config.mjs` 仅使用现有 `/health` 做配置发现。原独立服务的 `/app-config` 未迁入。
 - 本次新增前端运行模块、8 类前端测试、独立预览复制脚本，以及候选路由的 Nginx MIME/CSP 支持。原服务入口/模型执行层不变。
 - 复制了 687 条相同指南正文，使用本仓库 `data/guide.json` 的完整元数据；正文条目与独立前端逐条相同。测试会防止副本漂移。指南来源/许可、样片来源均随代码附带。
@@ -49,7 +48,3 @@ python3 scripts/frontend_server.py --port 8892 --backend-port 8781
 这是可评审、可演示的集成候选，尚非已完成后端融合的上线版本。先保持双入口，完成 P0 接线和验收后，再由产品负责人决定是否把 Horizon 升为 `/`。不要删除原页面或工作台来实现切换。当前回退只需不使用 `/horizon/`；撤回此 PR 的前端/预览改动不会迁移或清空后端数据。根 CI 仍运行原有全部测试，并经已有测试入口加载 Horizon 测试，不需要更改 workflow。
 
 `VERIFICATION.md` 记录本提交实际执行的检查及尚未验证的环境；`handoff.json` 是机器可读的交接索引，不是后端能力公告。
-
-## 最新首页素材
-
-首页已补充至15个生活场景，来源、处理方式与接入边界见[SCENES.md](SCENES.md)。每个场景仍提交普通问题，不新增Agent能力；静态预览打包跟随素材清单。

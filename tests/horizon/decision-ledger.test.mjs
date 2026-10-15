@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {buildLedgerModel,calculateCommute,createLedgerSequence,ledgerRevealTiming,ledgerAutoProgress,ledgerTextPieces,ledgerPieceProgress,ledgerPassages,ledgerEvidence} from '../../frontend/horizon/decision-ledger.mjs';
-import {searchGuides} from '../../frontend/horizon/service.mjs';
+import {buildLedgerModel,calculateCommute,createLedgerSequence,ledgerRevealTiming,ledgerAutoProgress,ledgerTextPieces,ledgerPieceProgress,ledgerPassages,ledgerEvidence} from '../../frontend/decision-ledger.mjs';
+import {searchGuides} from '../../frontend/service.mjs';
 const entries=JSON.parse(readFileSync(new URL('../../data/guide.json',import.meta.url))).entries;
 const commute=entries.find(e=>e.guide_id==='04-18');
 

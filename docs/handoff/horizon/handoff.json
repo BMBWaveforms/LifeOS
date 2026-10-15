@@ -2,25 +2,23 @@
   "schema_version": 1,
   "kind": "frontend-to-backend-agent-handoff",
   "upstream_repository": "shuaishuaisylas/LifeOS",
-  "baseline_commit": "12eb522f04dd61b2a5cae371cf516bdb0d96484a",
-  "candidate_entry": "/horizon/",
-  "default_entry_changed": false,
-  "backend_changed": false,
+  "baseline_commit": "633ccba4f4f9245e467be5c03426f00f18f313fb",
+  "candidate_entry": null,
+  "default_entry_changed": true,
+  "backend_changed": true,
   "production_data_migrated": false,
   "read_order": [
     "AGENTS.md",
     "docs/handoff/horizon/README.md",
+    "docs/handoff/horizon/FRONTEND_UPDATE_2026-10-16.md",
     "docs/handoff/horizon/BACKEND_AGENT_TASK.md",
     "docs/handoff/horizon/FEATURE_MATRIX.md",
     "docs/handoff/horizon/CONTRACT.md",
     "docs/handoff/horizon/ACCEPTANCE.md",
-    "docs/handoff/horizon/BRAND.md",
-    "docs/handoff/horizon/SCENES.md",
-    "docs/handoff/horizon/LEDGER_READING.md",
     "docs/handoff/horizon/VERIFICATION.md"
   ],
-  "adapter": "frontend/horizon/service.mjs",
-  "runtime_discovery": "frontend/horizon/runtime-config.mjs",
+  "adapter": "frontend/service.mjs",
+  "runtime_discovery": "frontend/runtime-config.mjs",
   "capabilities": {
     "default_provider": "demo",
     "real_transport": "final-json",
@@ -32,26 +30,49 @@
       "demo": "browser-localStorage",
       "real": "browser-sessionStorage-per-account",
       "server_persistence": false,
-      "manual_order": "same-group-ID-order; demo-localStorage; real-sessionStorage-per-account; new-conversations-first; no-server-sync",
-      "manual_order_input": "direct-drag after 8px; Alt+Arrow; opening a conversation does not reorder"
+      "manual_order": "same-group-ID-order; demo-localStorage; real-sessionStorage-per-account; new-conversations-first; no-server-sync"
     },
     "projects": "demo-group-only",
     "understanding": "frontend-explicit-text-rules-not-agent-reasoning",
     "guide_share": "local-png-no-private-fields",
-    "static_preview_real_api": false,
-    "brand": "LEVO",
-    "landing_scene_count": 15,
-    "homepage_followups": false,
-    "entry_without_message": true,
-    "answer_format": "DOM-only Markdown subset; plain text supported; raw HTML stays text",
-    "decision_ledger": "client evidence presentation; automatic text reveal; viewport-gated overlay seal; no new scoring",
-    "backend_runtime": "claude-sdk-only",
-    "sdk_private_session_persistence": true,
-    "product_history_api": false,
-    "backend_conversation_delete_api": "/api/conversation-action",
-    "candidate_conversation_delete_calls_backend": false
+    "static_preview_real_api": false
   },
-  "tasks": [
+  "preserve": [
+    "frontend/index.html",
+    "frontend/workbench.html",
+    "backend",
+    "prompts",
+    "account-data",
+    "runtime-volumes",
+    "source-validation",
+    "memory-revision",
+    "account-isolation"
+  ],
+  "not_in_scope": [
+    "deployment",
+    "server-history-list",
+    "cross-device-history",
+    "public-streaming",
+    "registration",
+    "real-contact-link"
+  ],
+  "handoff_response_required": [
+    "baseline-sha",
+    "changed-files",
+    "protocol-version",
+    "implemented-blocked-deferred",
+    "compatibility-and-migration",
+    "tests-and-results",
+    "real-model-acceptance-status",
+    "remaining-decisions",
+    "rollback"
+  ],
+  "status": "integrated-not-deployed",
+  "source_delivery_commit": "b205c20aa81d37c304bd2640a597b630240c3756",
+  "integration_base_commit": "515f548177aacc9473da9efd260e7190b600b73a",
+  "product_entry": "/",
+  "current_spec": "docs/前端接入与验收.md",
+  "original_tasks": [
     {
       "id": "memory-policy",
       "priority": "P0",
@@ -97,44 +118,47 @@
       "priority": "P2",
       "owner": "backend-and-frontend-agents",
       "status": "semantics-mapping-required"
-    },
-    {
-      "id": "conversation-revocation",
-      "priority": "P1",
-      "owner": "frontend-integration-agent",
-      "status": "upstream-api-present-candidate-not-connected",
-      "detail": "Reconcile browser history deletion with owner-scoped SDK session revocation; SDK private transcripts are not product history APIs."
     }
   ],
-  "preserve": [
-    "frontend/index.html",
-    "frontend/workbench.html",
-    "backend",
-    "prompts",
-    "account-data",
-    "runtime-volumes",
-    "source-validation",
-    "memory-revision",
-    "account-isolation"
+  "tasks": [
+    {
+      "id": "memory-policy",
+      "status": "implemented",
+      "detail": "Automatic product memory; deletion only. Upgrade enables legacy disabled profiles and advances revision on deployment startup."
+    },
+    {
+      "id": "topic-memory",
+      "status": "implemented",
+      "detail": "Source-backed topics, excerpts, source/topic deletion and stale reference invalidation."
+    },
+    {
+      "id": "prompt-workbench",
+      "status": "implemented",
+      "detail": "Seven controlled prompt experiments and real overall tests; per-owner evidence records and no product writes."
+    },
+    {
+      "id": "real-model-smoke",
+      "status": "passed-synthetic-samples",
+      "detail": "Seven modules plus overall SDK answer/summary passed; quality remains pending human assessment."
+    }
   ],
-  "not_in_scope": [
-    "deployment",
-    "default-homepage-switch",
-    "production-data-migration",
-    "mobile-layout",
-    "registration",
-    "real-contact-link"
-  ],
-  "handoff_response_required": [
-    "baseline-sha",
-    "changed-files",
-    "protocol-version",
-    "implemented-blocked-deferred",
-    "compatibility-and-migration",
-    "tests-and-results",
-    "real-model-acceptance-status",
-    "remaining-decisions",
-    "rollback"
-  ],
-  "initial_delivery_baseline_commit": "633ccba4f4f9245e467be5c03426f00f18f313fb"
+  "frontend_update": {
+    "date": "2026-10-16",
+    "base_commit": "b291ded0d1b020d9d544c359f124a3fb54071086",
+    "scope": "presentation-only; preserve integrated backend/session/memory/prompt-workbench",
+    "read_first": "docs/handoff/horizon/FRONTEND_UPDATE_2026-10-16.md",
+    "product_root": "frontend/",
+    "scene_count": 15,
+    "brand": "LEVO",
+    "markdown": "DOM-only subset; no raw HTML",
+    "ledger_body": "automatic staggered word reveal",
+    "seal": "full-visible only; repeated ring words; overlay, no layout column",
+    "homepage_followups": false,
+    "backend_changed": false,
+    "tests": {
+      "python_passed": 289,
+      "python_skipped": 1,
+      "node_passed": 97
+    }
+  }
 }

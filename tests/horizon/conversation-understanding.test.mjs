@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildConversationUnderstanding as build} from '../../frontend/horizon/conversation-understanding.mjs';
-import {createProjectExamples} from '../../frontend/horizon/project-demo.mjs';
+import {buildConversationUnderstanding as build} from '../../frontend/conversation-understanding.mjs';
+import {createProjectExamples} from '../../frontend/project-demo.mjs';
 const chat=queries=>({id:'current',turns:queries.map((query,i)=>({id:'t'+i,query,status:'completed'}))});
 
 test('a new conversation has no invented understanding or goals',()=>{

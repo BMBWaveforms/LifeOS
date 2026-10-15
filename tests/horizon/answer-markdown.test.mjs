@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseMarkdown,parseInline,safeMarkdownUrl} from '../../frontend/horizon/answer-markdown.mjs';
+import {parseMarkdown,parseInline,safeMarkdownUrl} from '../../frontend/answer-markdown.mjs';
 const textOf=nodes=>nodes.map(n=>n.text??textOf(n.children||n.items?.flat()||[])).join('');
 
 test('assistant answers support headings, emphasis, both lists and quotes',()=>{

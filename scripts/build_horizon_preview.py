@@ -1,4 +1,4 @@
-"""Build only the public Horizon candidate, with all real API access disabled."""
+"""Build the public Horizon product with all real API access disabled."""
 import json
 import shutil
 from pathlib import Path
@@ -8,7 +8,7 @@ MODULES = (
     'app', 'answer-markdown', 'answer-reveals', 'service', 'runtime-config', 'chat-presentation', 'conversation-library',
     'conversation-ordering', 'conversation-understanding', 'decision-ledger', 'guide-detail', 'guide-share',
     'guide-share-card', 'scene-landing', 'landing-scenes', 'memory-navigation',
-    'project-demo', 'workspace-shell',
+    'project-demo', 'workspace-shell', 'memory-topics', 'session-guard',
 )
 STYLES = ('styles', 'chat-enhancements', 'conversation-library',
           'conversation-understanding', 'decision-ledger', 'guide-detail',
@@ -20,7 +20,7 @@ def build_horizon(destination):
     if destination.exists():
         shutil.rmtree(destination)
     destination.mkdir(parents=True)
-    source = ROOT / 'frontend/horizon'
+    source = ROOT / 'frontend'
     for name in ('index.html', *(f'{m}.mjs' for m in MODULES), *(f'{s}.css' for s in STYLES)):
         shutil.copyfile(source / name, destination / name)
     assets = destination / 'assets'
@@ -47,4 +47,4 @@ def build_horizon(destination):
 
 
 if __name__ == '__main__':
-    build_horizon(ROOT / '.preview-site/horizon')
+    build_horizon(ROOT / '.preview-site')

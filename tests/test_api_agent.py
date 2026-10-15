@@ -196,8 +196,8 @@ def test_login_isolation_and_cookie(tmp_path):
     assert response.status_code==200 and 'HttpOnly' in response.headers['set-cookie']
     assert 'token' not in response.text
     b.post('/api/login',json={'username':'bob','password':creds['bob']['password']})
-    a.post('/api/memory-action',json={'action':'settings','enabled':True})
-    assert not b.get('/api/memories').json()['enabled']
+    assert a.post('/api/memory-action',json={'action':'settings','enabled':False}).status_code==400
+    assert b.get('/api/memories').json()['enabled']
     a.post('/api/logout',json={});assert a.get('/api/memories').status_code==401
 
 def test_csrf_origin_and_body_limit(tmp_path):

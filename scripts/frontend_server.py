@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 class Handler(SimpleHTTPRequestHandler):
     backend_port = 8781
+    extensions_map = {**SimpleHTTPRequestHandler.extensions_map, '.mjs': 'application/javascript'}
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT / 'frontend'), **kwargs)
     def log_message(self, *args):
@@ -14,7 +15,10 @@ class Handler(SimpleHTTPRequestHandler):
     def proxy(self):
         if self.path.startswith('/api/') or self.path == '/health':
             size = int(self.headers.get('Content-Length', '0'))
-            if size > 20000:
+            path = self.path.split('?', 1)[0]
+            limit = 200000 if path == '/api/prompt-tests' else 2000000 if path in (
+                '/api/eval/datasets', '/api/prompts/versions', '/api/prompts/import') else 20000
+            if size > limit:
                 self.send_error(413)
                 return True
             connection = http.client.HTTPConnection('127.0.0.1', self.backend_port, timeout=300)

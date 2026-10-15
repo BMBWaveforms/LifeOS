@@ -5,15 +5,15 @@
     "reduced": false,
     "cpu": 1,
     "completed": {
-      "elapsed": 6016.199999988079,
+      "elapsed": 6030.5,
       "scrollBefore": 0,
       "scrollNow": 0,
       "mixedFrame": {
-        "t": 211.39999997615814,
+        "t": 228.2999999821186,
         "scroll": 0,
         "words": [
           1,
-          0.506,
+          0.505,
           0,
           0,
           0,
@@ -68,15 +68,15 @@
     "reduced": false,
     "cpu": 4,
     "completed": {
-      "elapsed": 6024.699999988079,
+      "elapsed": 6023.4000000059605,
       "scrollBefore": 115,
       "scrollNow": 115,
       "mixedFrame": {
-        "t": 221.09999999403954,
+        "t": 222.30000001192093,
         "scroll": 115,
         "words": [
           1,
-          0.506,
+          0.505,
           0,
           0,
           0,
@@ -131,7 +131,7 @@
     "reduced": true,
     "cpu": 4,
     "completed": {
-      "elapsed": 45.900000005960464,
+      "elapsed": 45.39999997615814,
       "scrollBefore": 115,
       "scrollNow": 115,
       "units": 24,
@@ -182,7 +182,7 @@
     "reduced": true,
     "cpu": 1,
     "completed": {
-      "elapsed": 13.900000005960464,
+      "elapsed": 13.799999982118607,
       "scrollBefore": 35,
       "scrollNow": 35,
       "units": 24,

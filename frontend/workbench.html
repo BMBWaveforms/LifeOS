@@ -1,23 +1,45 @@
 <!doctype html>
-<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>苟活 · 评测工作台</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f5f6f0;color:#243a30;font:16px/1.7 system-ui,sans-serif}main{max-width:1200px;margin:24px auto;padding:24px}header,.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}header{justify-content:space-between}h1{margin:0;font-size:30px}h2{margin-top:0;font-size:22px}section,article{background:white;border:1px solid #dbe3d8;border-radius:16px;padding:24px;margin-top:20px}button,a{color:#234d39}button{padding:10px 16px;border:1px solid #c7d7c9;border-radius:9px;background:#eef5ea;font:inherit;cursor:pointer}button[aria-pressed=true],button.primary{background:#234d39;color:white}button:disabled{opacity:.5;cursor:wait}input,textarea{width:100%;padding:12px;font:inherit;border:1px solid #c7d7c9;border-radius:9px}textarea{min-height:100px}.row{margin:12px 0}.row input{width:auto}small,.muted{color:#66766c}label{display:block}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f8f3;border-radius:8px;padding:14px;max-height:450px;overflow:auto;font:14px/1.65 ui-monospace,monospace}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}.results article{min-width:0}details{border-top:1px solid #e5ebe1;padding:10px 0}summary{cursor:pointer}#status{min-height:24px;overflow-wrap:anywhere}.error{color:#a2382c}.history-item{border-top:1px solid #e5ebe1;padding:12px 0}.badge{font-size:13px;background:#edf3e7;border-radius:20px;padding:4px 10px}[hidden]{display:none!important}@media(max-width:760px){main{padding:16px;margin:0}.results{grid-template-columns:1fr}h1{font-size:26px}}
-</style><link rel="stylesheet" href="/evaluation.css">
-<main><header><div><h1>评测工作台</h1><small>管理评测集、比较提示词方案，查看系统判定和人工复核。</small></div><div class="row"><a href="/">返回产品</a><span id="account"></span><button id="logout" hidden>退出登录</button></div></header>
-<p id="status" role="status" aria-live="polite"></p>
-<section id="login" hidden><h2>使用产品账号登录</h2><form id="loginform"><label for="username">账号</label><input id="username" autocomplete="username" placeholder="test1 ～ test10"><label for="password">密码</label><input id="password" type="password" autocomplete="current-password"><div class="row"><button class="primary">登录</button></div></form></section>
-<div id="workspace" hidden>
-<nav id="bench-tabs" class="bench-tabs" role="tablist" aria-label="评测工作台功能"></nav>
-<p id="ev-status" role="status" aria-live="polite"></p>
-<div id="ev-dataset" class="bench-panel" data-bench-panel="dataset"></div>
-<div id="ev-jobs" class="bench-panel" data-bench-panel="jobs" hidden></div>
-<div id="ev-prompt" class="bench-panel" data-bench-panel="prompt" hidden></div>
-<div id="free-test" data-bench-panel="free" hidden>
-<section id="free-prompt"></section>
-<section><h2>Claude Agent SDK</h2><p id="runtime-info" class="muted"></p><small>产品和测试统一使用 SDK。每个测试会话有独立记忆，产品里的聊天和记忆不会被测试修改。对比提示词方案请使用批量评测。</small></section>
-<section><h2>输入与连续测试</h2><label for="query">本次用户输入</label><textarea id="query" maxlength="2000" placeholder="例如：我工作时经常被手机通知打断，指南里有什么建议？"></textarea><label class="row"><input id="memory-enabled" type="checkbox" checked>在测试会话中保存摘要</label><small id="session-info">尚未开始测试会话。</small><div class="row"><button id="run" class="primary">运行本次测试</button><button id="new-session">新测试会话</button></div><small>连续运行会接着同一测试会话交流。执行完成表示运行和后端校验完成，回答质量需复核。</small></section>
-<div id="results" class="results" aria-live="polite"></div>
-<section><div class="row"><h2 style="margin:0">最近运行记录</h2><button id="refresh">刷新记录</button></div><small>记录 SDK 配置、提示词版本、输入输出、工具调用和摘要变化；仅当前账号可见。</small><div id="history"></div></section>
-</div>
-</div></main><script src="/workbench.js"></script><script src="/evaluation.js"></script></html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>苟活 · 评测工作台</title>
+  <link rel="stylesheet" href="/evaluation.css">
+</head>
+<body>
+<main>
+  <header class="workbench-header">
+    <div><a class="brand-link" href="/">苟活 / LifeOS</a><h1>评测工作台</h1><p class="muted">先把每段提示词测清楚，再检查整体表现。</p></div>
+    <div class="row account-actions"><a href="/">返回产品</a><span id="account"></span><button id="logout" hidden>退出登录</button></div>
+  </header>
+  <p id="status" role="status" aria-live="polite"></p>
+  <section id="login" class="login-card" hidden>
+    <span class="eyebrow">团队工作空间</span><h2>登录评测工作台</h2><p class="muted">使用产品账号登录。实验记录仅自己可见。</p>
+    <form id="loginform"><label for="username">账号</label><input id="username" autocomplete="username" placeholder="test1 ～ test10"><label for="password">密码</label><input id="password" type="password" autocomplete="current-password"><div class="row"><button class="primary">登录</button></div></form>
+  </section>
+  <div id="workspace" hidden>
+    <nav id="bench-tabs" class="bench-tabs" role="tablist" aria-label="评测工作台功能"></nav>
+    <p id="bench-context" class="bench-context"></p>
+    <p id="ev-status" role="status" aria-live="polite"></p>
+    <div id="prompt-test" class="bench-panel" data-bench-panel="single" role="tabpanel" aria-label="单环节提示词测试"></div>
+    <div id="overall-test" class="bench-panel" data-bench-panel="overall" role="tabpanel" aria-label="整体测试" hidden>
+      <section class="overall-intro"><span class="eyebrow">完整流程</span><h2>检查组合后的真实表现</h2><p>整体测试使用已保存的提示词组合，保留真实的工具调用、来源校验与测试记忆。可先交互试一轮，再用评测集做批量对比。</p><p class="muted">理解、检索、回复在同一次问答中协作；记忆与摘要共用一次整理。整体结果不能由七次独立实验拼成。</p></section>
+      <nav id="overall-tabs" class="overall-tabs" role="tablist" aria-label="整体测试方式"></nav>
+      <div id="free-test" data-overall-panel="free" role="tabpanel">
+        <section id="free-prompt"></section>
+        <section class="compact-section"><h2>交互测试</h2><p id="runtime-info" class="muted"></p><small>每个测试会话有独立记忆，产品聊天和记忆不会被测试修改。执行成功不代表回答质量已经通过。</small></section>
+        <section><h2>输入与连续测试</h2><label for="query">本次用户输入</label><textarea id="query" maxlength="2000" placeholder="例如：我工作时经常被手机通知打断，指南里有什么建议？"></textarea><label class="row"><input id="memory-enabled" type="checkbox" checked>在测试会话中保存摘要</label><small id="session-info">尚未开始测试会话。</small><div class="row"><button id="run" class="primary">运行整体测试</button><button id="new-session">新测试会话</button></div><small>连续运行会接着同一测试会话交流。修改组合或记忆设置后，下一轮创建新会话。</small></section>
+        <div id="results" class="results" aria-live="polite"></div>
+        <section><div class="row"><h2>我的交互记录</h2><button id="refresh">刷新记录</button></div><small>记录提示词版本、输入输出、工具调用和记忆变化。</small><div id="history"></div></section>
+      </div>
+      <div id="ev-jobs" data-overall-panel="jobs" role="tabpanel" hidden></div>
+      <div id="ev-dataset" data-overall-panel="dataset" role="tabpanel" hidden></div>
+    </div>
+    <div id="ev-prompt" class="bench-panel" data-bench-panel="prompt" role="tabpanel" aria-label="提示词版本管理" hidden></div>
+  </div>
+</main>
+<script src="/workbench.js"></script>
+<script src="/prompt-tests.js"></script>
+<script src="/evaluation.js"></script>
+</body>
+</html>

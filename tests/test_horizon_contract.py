@@ -26,19 +26,19 @@ class SyntheticModel:
         return self.responses.pop(0)
 
 
-def test_horizon_real_json_matches_current_api_without_changing_account_defaults(tmp_path):
+def test_horizon_real_json_uses_sdk_and_automatic_deletion_only_memory(tmp_path):
     model = SyntheticModel()
     app = create_app(tmp_path, model, {'claude-sdk': ScriptedSDKExecutor(model)})
     client = TestClient(app)
     # Only freshly generated temporary test credentials; never read deployment data.
     credentials = json.loads((tmp_path / 'login.json').read_text())
     assert client.post('/api/login', json={'username': 'alice', 'password': credentials['alice']['password']}).status_code == 200
-    assert client.get('/api/memories').json()['enabled'] is False
+    assert client.get('/api/memories').json()['enabled'] is True
+    assert client.get('/api/memories').json()['policy'] == 'automatic_delete_only'
+    for action in ('settings', 'correct_summary', 'save'):
+        assert client.post('/api/memory-action', json={'action': action, 'enabled': False}).status_code == 400
     assert client.get('/health').json()['model']['configured'] is True
-    # Fixture setup explicitly enables only the temporary store; Horizon never does this.
-    app.state.store.change('alice', 'settings', {'enabled': True})
-    # The current SDK backend accepts the stable ID allocated by the frontend.
-    conversation_id = 'horizon-browser-conversation-001'
+    conversation_id = 'horizon-browser-conversation-0001'
     answer = client.post('/api/run', json={'mode': 'chat', 'query': '手机打断工作', 'conversation_id': conversation_id, 'followup_memory_id': ''})
     assert answer.status_code == 200, answer.text
     data = answer.json()
@@ -52,6 +52,9 @@ def test_horizon_real_json_matches_current_api_without_changing_account_defaults
     memory = client.get('/api/memories').json()['effective'][0]
     assert memory['id'] == data['summary']['memory_id']
     assert memory['origin'] == 'model_summary'
+    topic = client.get('/api/memories').json()['topics'][0]
+    assert topic['current_memory_id'] == memory['id']
+    assert topic['sources'][0]['query'] == '手机打断工作'
     assert 'source_conversation_id' not in memory  # Documented gap, not a fabricated API.
     assert client.post('/api/memory-action', json={'action': 'delete', 'id': memory['id']}).status_code == 200
     assert client.get('/api/memories').json()['memories'] == []
@@ -74,4 +77,9 @@ def test_horizon_preview_is_allowlisted_and_cannot_select_real_api(tmp_path):
     assert {p.stem for p in (target / 'assets/scenes').glob('*.mp4')} == names
     assert {p.stem for p in (target / 'assets/scenes').glob('*.jpg')} == names
     assert not (target / 'AGENTS.md').exists()
+    assert (target / 'app.mjs').exists()
+    assert (target / 'memory-topics.mjs').exists()
+    assert 'app.mjs' in (target / 'index.html').read_text()
+    for obsolete in ('horizon', 'app.js', 'api.js', 'services.js', 'mock-service.js', 'workbench.html', 'evaluation.js'):
+        assert not (target / obsolete).exists()
     assert not any(p.name in {'backend', '.runtime', 'login.json', 'auth.json', 'api.json', '.env'} for p in target.rglob('*'))

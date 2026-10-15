@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {clarificationModel,createTextStream,recoverWaitingTurns,runReplySequence,usedMemories} from '../../frontend/horizon/chat-presentation.mjs';
-import {conversationMeta,conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from '../../frontend/horizon/conversation-library.mjs';
-import {DemoService,delay} from '../../frontend/horizon/service.mjs';
-const entries=JSON.parse(readFileSync(new URL('../../frontend/horizon/assets/guide.json',import.meta.url))).entries;
+import {clarificationModel,createTextStream,recoverWaitingTurns,runReplySequence,usedMemories} from '../../frontend/chat-presentation.mjs';
+import {conversationMeta,conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from '../../frontend/conversation-library.mjs';
+import {DemoService,delay} from '../../frontend/service.mjs';
+const entries=JSON.parse(readFileSync(new URL('../../frontend/assets/guide.json',import.meta.url))).entries;
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
 
 test('sidebar limits never discard stored conversations and most recently used wins',()=>{

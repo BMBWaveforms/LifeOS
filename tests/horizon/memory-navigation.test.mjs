@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findMemoryConversation,memoryResumeContext} from '../../frontend/horizon/memory-navigation.mjs';
+import {findMemoryConversation,memoryResumeContext} from '../../frontend/memory-navigation.mjs';
 
 test('exact saved turn wins over a later continuation and supports legacy memories',()=>{
  const origin={id:'old',turns:[{response:{summary:{memory_id:'m1'}}}]};

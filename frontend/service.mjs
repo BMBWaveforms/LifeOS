@@ -1,4 +1,5 @@
 /* Providers are deliberately separate. Demo never falls through to a live API. */
+import {demoTopics,topicMemoryIds} from './memory-topics.mjs';
 export const DEMO_KEY='lifeos.horizon.demo.v1';
 export const uid=()=>globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2);
 const clone=value=>JSON.parse(JSON.stringify(value));
@@ -24,7 +25,7 @@ export function searchGuides(entries,query){
 export class DemoService{
   constructor(entries,storage,latency=1050){this.mode='demo';this.user={id:'local-demo',name:'访客体验'};this.entries=entries;this.storage=storage;this.latency=latency;this.state=initial();try{const parsed=JSON.parse(storage?.getItem(DEMO_KEY)||'null');if(parsed&&typeof parsed.enabled==='boolean'&&Array.isArray(parsed.memories)&&parsed.operations&&typeof parsed.operations==='object')this.state={...parsed,enabled:true};}catch{ /* A new demo remains usable if stored data is damaged. */ }}
   commit(update){const next=clone(this.state);const result=update(next);next.revision++;const keys=Object.keys(next.operations);for(const id of keys.slice(0,-50))delete next.operations[id];try{if(!this.storage)throw Error();this.storage.setItem(DEMO_KEY,JSON.stringify(next));}catch{throw new Error('浏览器未能保存记录。请允许本机存储后重试；本次没有写入记忆。');}this.state=next;return result;}
-  async getMemories(){return {...clone(this.state),enabled:true,effective:clone(this.state.memories.filter(m=>m.state==='active'))};}
+  async getMemories(){return {...clone(this.state),enabled:true,effective:clone(this.state.memories.filter(m=>m.state==='active')),topics:demoTopics(clone(this.state.memories))};}
   async getHome(){return {followups:clone(this.state.memories.filter(m=>m.state==='active'&&m.problem_status!=='resolved').slice().reverse().slice(0,3).map(m=>({memory_id:m.id,topic:m.problem,progress_question:'上次聊到的这件事，有新进展了吗？',guide_question:'要不要接着聊？'})))};}
   async submit({query,conversationId,followupId,requestId=uid(),signal,onProgress,clarification}){
     await delay(this.latency,signal);
@@ -48,7 +49,7 @@ export class DemoService{
         const previous=followupId?s.memories.find(m=>m.id===followupId&&m.state==='active'):null;
         if(followupId&&!previous)throw new Error('关联记忆已失效，请开始新话题。');
         const now=Date.now();
-        const memory={id:uid(),text:query,problem:previous?.problem||query.slice(0,60),problem_status:'unresolved',state:'active',created:now,updated:now,guide_ids:[...new Set([...(previous?.guide_ids||[]),...cards.map(c=>c.guide_id)])],followup_of:previous?.id||'',origin:'demo_topic',source_conversation_id:response.conversation_id};
+        const memoryId=uid(),memory={id:memoryId,topic_id:previous?.topic_id||previous?.id||memoryId,query,text:query,problem:previous?.problem||query.slice(0,60),problem_status:'unresolved',state:'active',created:now,updated:now,guide_ids:[...new Set([...(previous?.guide_ids||[]),...cards.map(c=>c.guide_id)])],followup_of:previous?.id||'',origin:'demo_topic',source_conversation_id:response.conversation_id};
         // Continuing a conversation appends a new record, preserving saved content.
         if(previous)previous.state='superseded';
         s.memories.push(memory);
@@ -60,6 +61,7 @@ export class DemoService{
     return response;
   }
   async deleteMemory(id){this.commit(s=>{if(!s.memories.some(m=>m.id===id))throw Error('这条记忆已不存在。');s.memories=s.memories.filter(m=>m.id!==id);s.operations={};});return this.getMemories();}
+  async deleteTopic(id){const topic=demoTopics(this.state.memories).find(item=>item.id===id);if(!topic)throw Error('这个主题已不存在。');const ids=new Set(topicMemoryIds(topic));this.commit(s=>{s.memories=s.memories.filter(item=>!ids.has(item.id));s.operations={};});return this.getMemories();}
   async clearMemories(){this.commit(s=>{s.memories=[];s.operations={};});return this.getMemories();}
 }
 
@@ -74,5 +76,7 @@ export class RealService{
   async getHome(){const data=await this.request('/api/run',{mode:'home',query:'',conversation_id:'',followup_memory_id:''});const result=typeof data.result==='string'?JSON.parse(data.result):data.result;return {followups:result?.followups||[]};}
   async submit({query,conversationId,followupId,signal}){const memory=await this.request('/api/memories',undefined,signal);if(memory.enabled!==true)throw new ApiError('当前账号的自动记忆尚未由后端启用，请联系部署者完成接入。你的输入已保留。',409);return this.request('/api/run',{mode:'chat',query,conversation_id:conversationId||'',followup_memory_id:followupId||''},signal);}
   async deleteMemory(id){return this.request('/api/memory-action',{action:'delete',id});}
+  async deleteTopic(id){return this.request('/api/memory-action',{action:'delete_topic',id});}
+  async deleteConversation(id){return this.request('/api/conversation-action',{action:'delete',conversation_id:id});}
   async clearMemories(){return this.request('/api/memory-action',{action:'clear',confirmed:true});}
 }

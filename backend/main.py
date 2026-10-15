@@ -15,6 +15,7 @@ from backend.workbench import Workbench
 from backend.accounts import initialize_accounts
 from backend.prompts import PromptRegistry
 from backend.evaluation import Evaluation, STAGES, RULES
+from backend.prompt_tests import PromptTests
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,10 +24,12 @@ def create_app(directory=None, client=None, executors=None):
     directory.mkdir(parents=True, exist_ok=True)
     store = Store(directory)
     auth = initialize_accounts(store, os.getenv('TEST_ACCOUNT_PASSWORD'))
+    store.enable_product_memory()
     registry = PromptRegistry(directory)
     service = AgentService(store, client, executors, registry.snapshot)
     workbench = Workbench(directory, service.client, executors, registry)
     evaluation = Evaluation(directory, service.client, registry, executors)
+    prompt_tests = PromptTests(directory, store, service.client, registry, (executors or {}).get('claude-sdk'))
     sessions = {}
     attempts = {}
     login_lock = threading.Lock()
@@ -39,6 +42,7 @@ def create_app(directory=None, client=None, executors=None):
     app.state.evaluation = evaluation
     app.state.registry = registry
     app.state.workbench = workbench
+    app.state.prompt_tests = prompt_tests
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True,
                        allow_methods=['GET', 'POST'], allow_headers=['Content-Type'])
 
@@ -53,6 +57,8 @@ def create_app(directory=None, client=None, executors=None):
             except Exception:
                 return JSONResponse({'message': '请求格式异常。'}, status_code=400)
             limit = 2000000 if request.url.path in ('/api/eval/datasets', '/api/prompts/versions', '/api/prompts/import') else 20000
+            if request.url.path == '/api/prompt-tests':
+                limit = 200000
             if len(body) > limit:
                 return JSONResponse({'message': '请求过大。'}, status_code=413)
         response = await call_next(request)
@@ -130,7 +136,7 @@ def create_app(directory=None, client=None, executors=None):
 
     @app.get('/api/memories')
     def memories(request: Request):
-        return store.state(owner(request))
+        return {**store.state(owner(request)), 'policy': 'automatic_delete_only'}
 
     @app.get('/api/runtimes')
     def runtimes(request: Request):
@@ -163,6 +169,28 @@ def create_app(directory=None, client=None, executors=None):
     def prompt_catalog(request: Request):
         owner(request)
         return registry.catalog()
+
+    @app.get('/api/prompt-tests/catalog')
+    def prompt_test_catalog(request: Request):
+        return prompt_tests.catalog(owner(request))
+
+    @app.get('/api/prompt-tests')
+    def prompt_test_history(request: Request):
+        return prompt_tests.history(owner(request))
+
+    @app.get('/api/prompt-tests/{run_id}')
+    def prompt_test_result(run_id: str, request: Request):
+        return prompt_tests.result(owner(request), run_id)
+
+    @app.post('/api/prompt-tests')
+    def run_prompt_test(data: dict, request: Request):
+        user = owner(request)
+        if not test_locks[user].acquire(blocking=False):
+            return JSONResponse({'message': '上一轮测试仍在运行，请稍后重试。'}, status_code=409)
+        try:
+            return prompt_tests.run(user, data)
+        finally:
+            test_locks[user].release()
 
     @app.get('/api/prompts/versions/{version_id}')
     def prompt_version(version_id: str, request: Request):
@@ -252,9 +280,11 @@ def create_app(directory=None, client=None, executors=None):
     @app.post('/api/memory-action')
     def change(data: dict, request: Request):
         user = owner(request)
-        if data.get('action') not in ('settings', 'correct_summary', 'delete', 'clear', 'feedback'):
+        if data.get('action') in ('settings', 'correct_summary', 'save'):
+            raise ValueError('记忆会自动整理，可删除来源记录或整个主题。')
+        if data.get('action') not in ('delete', 'delete_topic', 'clear', 'feedback'):
             raise ValueError('未知的记忆管理操作。')
-        return store.change(user, data['action'], data)
+        return {**store.change(user, data['action'], data), 'policy': 'automatic_delete_only'}
 
     @app.post('/api/conversation-action')
     def conversation_action(data: dict, request: Request):

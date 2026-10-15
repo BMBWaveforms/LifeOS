@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {orderedConversations,movedConversationIds} from '../../frontend/horizon/conversation-ordering.mjs';
+import {orderedConversations,movedConversationIds} from '../../frontend/conversation-ordering.mjs';
 
 const items=()=>Array.from({length:12},(_,i)=>({id:'c'+i,created:100-i,turns:[{query:'相同标题的不同对话'}]}));
 const ids=list=>list.map(c=>c.id);

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {RealService} from '../../frontend/horizon/service.mjs';
-import {loadRuntimeConfig} from '../../frontend/horizon/runtime-config.mjs';
-import {resultOf,clarificationModel,usedMemories} from '../../frontend/horizon/chat-presentation.mjs';
+import {RealService} from '../../frontend/service.mjs';
+import {loadRuntimeConfig} from '../../frontend/runtime-config.mjs';
+import {resultOf,clarificationModel,usedMemories} from '../../frontend/chat-presentation.mjs';
 const guide=JSON.parse(readFileSync(new URL('../../data/guide.json',import.meta.url))).entries.find(e=>e.guide_id==='03-01');
 
 // These are public baseline payloads. Unknown execution metadata is deliberately not consumed.
@@ -48,5 +48,5 @@ test('real transport is same-origin, forwards abort and surfaces authentication 
 });
 
 test('published candidate guide and attribution stay identical to authoritative data',()=>{
- for(const name of ['guide.json','ATTRIBUTION.txt','GUIDE-LICENSE.txt'])assert.deepEqual(readFileSync(new URL('../../frontend/horizon/assets/'+name,import.meta.url)),readFileSync(new URL('../../data/'+name,import.meta.url)));
+ for(const name of ['guide.json','ATTRIBUTION.txt','GUIDE-LICENSE.txt'])assert.deepEqual(readFileSync(new URL('../../frontend/assets/'+name,import.meta.url)),readFileSync(new URL('../../data/'+name,import.meta.url)));
 });

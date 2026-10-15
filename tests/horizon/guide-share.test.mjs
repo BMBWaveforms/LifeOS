@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {buildGuideShareModel,wrapCardText} from '../../frontend/horizon/guide-share-card.mjs';
+import {buildGuideShareModel,wrapCardText} from '../../frontend/guide-share-card.mjs';
 const entries=JSON.parse(readFileSync(new URL('../../data/guide.json',import.meta.url))).entries;
 
 test('sharing takes guide text, limits and provenance without conversation or memory',()=>{

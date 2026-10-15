@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {DemoService,searchGuides,DEMO_KEY,RealService} from '../../frontend/horizon/service.mjs';
+import {DemoService,searchGuides,DEMO_KEY,RealService} from '../../frontend/service.mjs';
 const entries=JSON.parse(readFileSync(new URL('../../data/guide.json',import.meta.url))).entries;
 const storage=()=>{const map=new Map();return {getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v)};};
 const make=(s=storage())=>new DemoService(entries,s,0);

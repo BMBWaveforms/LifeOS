@@ -1,2 +1,2 @@
-# Preserve the upstream license verbatim, including its terminal blank line.
-frontend/horizon/assets/GUIDE-LICENSE.txt whitespace=-blank-at-eof
+# Keep the authoritative upstream license byte-for-byte, including its final blank line.
+frontend/assets/GUIDE-LICENSE.txt whitespace=-blank-at-eof

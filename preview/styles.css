@@ -1,6 +1,0 @@
-/* The preview-only badge stays outside product layout and expands on demand. */
-#preview-notice {position:fixed;z-index:1000;left:12px;bottom:10px;max-width:min(360px,calc(100vw - 24px));padding:5px 10px;font:11px/1.6 sans-serif;color:#594d3a;background:#f3eee4;border:1px solid #d9ceb9;border-radius:8px;box-shadow:0 2px 10px #332d2212;}
-#preview-notice summary {padding:0;cursor:pointer;white-space:nowrap;font-weight:600;}
-#preview-notice p {margin:8px 0;}
-#preview-notice nav {display:flex;flex-wrap:wrap;gap:4px 12px;}
-#preview-notice a {text-decoration:underline;white-space:nowrap;}
