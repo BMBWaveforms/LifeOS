@@ -17,8 +17,8 @@ export function initSceneLanding({onStart}){
  function select(index,{virtual,center=true}={}){
   const next=wrap(index),changed=selected!==next;selected=next;const scene=sceneAt(selected);
   if(center){const phase=wrap(position);const destination=virtual===undefined?next+Math.round((phase-next)/count)*count:virtual;target=position+destination-phase;if(reduced.matches)position=target;autoAfter=performance.now()+3500;}
-  if(changed){const context=$('scene-name').parentElement;context.classList.remove('is-changing');void context.offsetWidth;context.classList.add('is-changing');}
-  root.dataset.scene=scene.id;$('scene-name').textContent=scene.name;$('scene-counter').textContent=`${String(selected+1).padStart(2,'0')} / ${String(count).padStart(2,'0')}`;
+  root.dataset.scene=scene.id;$('scene-name').textContent=scene.name;$('scene-description').textContent=scene.line;$('scene-status').textContent=scene.name;$('scene-counter').textContent=`${String(selected+1).padStart(2,'0')} / ${String(count).padStart(2,'0')}`;
+  if(changed&&visible&&!reduced.matches){for(const [index,node]of [...$('scene-caption').children].entries()){node.getAnimations().forEach(animation=>animation.cancel());const animation=node.animate([{opacity:.35,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:420,delay:index*70,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'});animation.finished.then(()=>animation.cancel()).catch(()=>{});}}
   $('scene-open').setAttribute('aria-label',`聊聊「${scene.name}」`);$('landing-query').placeholder=`聊聊${scene.label}，或者说说你自己的事…`;
   for(const b of buttons)if(!b.hasAttribute('aria-hidden'))b.setAttribute('aria-pressed',String(Number(b.dataset.sceneIndex)===selected));
   if(changed||!video.getAttribute('src')){
@@ -70,7 +70,7 @@ export function initSceneLanding({onStart}){
  reel.addEventListener('keydown',e=>{const delta={ArrowRight:1,ArrowLeft:-1,ArrowDown:1,ArrowUp:-1}[e.key];if(delta===undefined&&e.key!=='Home'&&e.key!=='End')return;e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?count-1:wrap(selected+delta);select(next);const canonical=buttons.find(b=>Number(b.dataset.virtual)===next);canonical?.focus({preventScroll:true});});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){video.pause();cancelAnimationFrame(frame);frame=0;}else if(visible){playVideo();startLoop();}});
  window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(buildReel,100);});
- reduced.addEventListener('change',()=>{paused=reduced.matches;position=target;updatePause();paint();});
+ reduced.addEventListener('change',()=>{if(reduced.matches)for(const node of $('scene-caption').children)node.getAnimations().forEach(animation=>animation.cancel());paused=reduced.matches;position=target;updatePause();paint();});
  function setBusy(value){busy=Boolean(value);$('scene-open').disabled=busy;$('landing-send').disabled=busy;$('landing-query').disabled=busy;}
  buildReel();select(0,{center:false});updatePause();setBusy(true);setVisible(visible);
  return {setVisible,setBusy,getScene:()=>sceneAt(selected)};

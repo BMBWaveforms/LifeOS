@@ -49,13 +49,16 @@
   </header>
   <main id="main" class="scene-stage" tabindex="-1">
     <button id="scene-open" class="scene-open" aria-label="聊聊「通勤与生活」" disabled></button>
-    <div class="scene-caption"><h1 id="landing-slogan"><span>看清投入，</span><span>做更值得的选择。</span></h1></div>
+    <div id="scene-caption" class="scene-caption"><h1 id="scene-name">通勤与生活</h1><p id="scene-description" class="scene-description">把路上的时间，留一点给自己。</p></div>
     <div class="scene-conversation" role="group" aria-label="开始或继续对话">
+    <p id="landing-slogan" class="scene-product-slogan">看清投入，做更值得的选择。</p>
+    <div class="scene-input-surface">
     <button id="followup-card" class="followup-card" hidden></button>
     <form id="landing-composer" class="scene-form"><label class="sr-only" for="landing-query">说说你想聊的事</label><textarea id="landing-query" rows="1" maxlength="2000" placeholder="聊聊通勤，或者说说你自己的事…" disabled></textarea><button id="landing-send" type="submit" aria-label="开始对话" disabled><svg class="icon"><use href="#up"/></svg></button></form>
     </div>
+    </div>
   </main>
-  <div class="scene-toolbar"><div class="scene-context" aria-live="polite" aria-atomic="true"><span id="scene-counter" class="scene-counter">01 / 04</span><span aria-hidden="true">·</span><span id="scene-name">通勤与生活</span></div><div class="scene-playback"><button id="scene-media-status" class="scene-media-status" hidden></button><button id="scene-pause" class="scene-pause" aria-label="暂停视频与缩略图轨道" aria-pressed="false"><svg class="icon"><use href="#pause"/></svg><span id="scene-pause-label">暂停画面</span></button></div></div>
+  <div class="scene-toolbar"><div class="scene-context" aria-live="polite" aria-atomic="true"><span id="scene-counter" class="scene-counter">01 / 04</span><span id="scene-status" class="sr-only">通勤与生活</span></div><div class="scene-playback"><button id="scene-media-status" class="scene-media-status" hidden></button><button id="scene-pause" class="scene-pause" aria-label="暂停视频与缩略图轨道" aria-pressed="false"><svg class="icon"><use href="#pause"/></svg><span id="scene-pause-label">暂停画面</span></button></div></div>
   <div id="scene-reel" class="scene-reel" role="group" aria-label="场景浏览，可滚动或拖动"><div id="scene-reel-track" class="scene-reel-track"></div></div>
   <div class="scene-credit"><button data-action="guide-info">687 条指南，有据可查</button><span>滚动或拖动，看看生活的其他切面</span></div>
 </div>

@@ -1,0 +1,464 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "followup": false,
+    "initial": {
+      "heading": "通勤与生活",
+      "headingCount": 1,
+      "titleSize": 90,
+      "sloganSize": 21.6,
+      "slogan": "看清投入，做更值得的选择。",
+      "caption": {
+        "x": 496,
+        "y": 317.39764404296875,
+        "width": 920,
+        "height": 164.015625,
+        "top": 317.39764404296875,
+        "right": 1416,
+        "bottom": 481.41326904296875,
+        "left": 496
+      },
+      "composer": {
+        "x": 24,
+        "y": 610.375,
+        "width": 440,
+        "height": 113.625,
+        "top": 610.375,
+        "right": 464,
+        "bottom": 724,
+        "left": 24
+      },
+      "overflow": 0
+    },
+    "switched": {
+      "states": [
+        {
+          "name": "搬家这件事",
+          "description": "下一处住处，也是一种生活选择。",
+          "scene": "home",
+          "aria": "聊聊「搬家这件事」",
+          "titleFits": true,
+          "caption": {
+            "x": 496,
+            "y": 317.39764404296875,
+            "width": 920,
+            "height": 164.015625,
+            "top": 317.39764404296875,
+            "right": 1416,
+            "bottom": 481.41326904296875,
+            "left": 496
+          }
+        },
+        {
+          "name": "把专注找回来",
+          "description": "给眼前的事，留一段不被打断的时间。",
+          "scene": "focus",
+          "aria": "聊聊「把专注找回来」",
+          "titleFits": true,
+          "caption": {
+            "x": 496,
+            "y": 317.39764404296875,
+            "width": 920,
+            "height": 164.015625,
+            "top": 317.39764404296875,
+            "right": 1416,
+            "bottom": 481.41326904296875,
+            "left": 496
+          }
+        },
+        {
+          "name": "今晚，早点休息",
+          "description": "生活里的很多事，可以从睡个好觉开始。",
+          "scene": "night",
+          "aria": "聊聊「今晚，早点休息」",
+          "titleFits": true,
+          "caption": {
+            "x": 496,
+            "y": 317.39764404296875,
+            "width": 920,
+            "height": 164.015625,
+            "top": 317.39764404296875,
+            "right": 1416,
+            "bottom": 481.41326904296875,
+            "left": 496
+          }
+        }
+      ],
+      "draft": "保留我正在写的问题",
+      "slogan": "看清投入，做更值得的选择。"
+    }
+  },
+  {
+    "width": 1280,
+    "height": 800,
+    "followup": true,
+    "initial": {
+      "heading": "通勤与生活",
+      "headingCount": 1,
+      "titleSize": 80,
+      "sloganSize": 19.2,
+      "slogan": "看清投入，做更值得的选择。",
+      "caption": {
+        "x": 360,
+        "y": 233.7296905517578,
+        "width": 896,
+        "height": 148.46873474121094,
+        "top": 233.7296905517578,
+        "right": 1256,
+        "bottom": 382.19842529296875,
+        "left": 360
+      },
+      "composer": {
+        "x": 24,
+        "y": 439.75,
+        "width": 440,
+        "height": 184.25,
+        "top": 439.75,
+        "right": 464,
+        "bottom": 624,
+        "left": 24
+      },
+      "overflow": 0
+    },
+    "switched": {
+      "states": [
+        {
+          "name": "搬家这件事",
+          "description": "下一处住处，也是一种生活选择。",
+          "scene": "home",
+          "aria": "聊聊「搬家这件事」",
+          "titleFits": true,
+          "caption": {
+            "x": 360,
+            "y": 233.7296905517578,
+            "width": 896,
+            "height": 148.46873474121094,
+            "top": 233.7296905517578,
+            "right": 1256,
+            "bottom": 382.19842529296875,
+            "left": 360
+          }
+        },
+        {
+          "name": "把专注找回来",
+          "description": "给眼前的事，留一段不被打断的时间。",
+          "scene": "focus",
+          "aria": "聊聊「把专注找回来」",
+          "titleFits": true,
+          "caption": {
+            "x": 360,
+            "y": 233.7296905517578,
+            "width": 896,
+            "height": 148.46873474121094,
+            "top": 233.7296905517578,
+            "right": 1256,
+            "bottom": 382.19842529296875,
+            "left": 360
+          }
+        },
+        {
+          "name": "今晚，早点休息",
+          "description": "生活里的很多事，可以从睡个好觉开始。",
+          "scene": "night",
+          "aria": "聊聊「今晚，早点休息」",
+          "titleFits": true,
+          "caption": {
+            "x": 360,
+            "y": 233.7296905517578,
+            "width": 896,
+            "height": 148.46873474121094,
+            "top": 233.7296905517578,
+            "right": 1256,
+            "bottom": 382.19842529296875,
+            "left": 360
+          }
+        }
+      ],
+      "draft": "保留我正在写的问题",
+      "slogan": "看清投入，做更值得的选择。"
+    }
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "followup": true,
+    "initial": {
+      "heading": "通勤与生活",
+      "headingCount": 1,
+      "titleSize": 80,
+      "sloganSize": 19.2,
+      "slogan": "看清投入，做更值得的选择。",
+      "caption": {
+        "x": 360,
+        "y": 150.5265655517578,
+        "width": 896,
+        "height": 148.46873474121094,
+        "top": 150.5265655517578,
+        "right": 1256,
+        "bottom": 298.99530029296875,
+        "left": 360
+      },
+      "composer": {
+        "x": 24,
+        "y": 359.75,
+        "width": 440,
+        "height": 184.25,
+        "top": 359.75,
+        "right": 464,
+        "bottom": 544,
+        "left": 24
+      },
+      "overflow": 0
+    },
+    "switched": {
+      "states": [
+        {
+          "name": "搬家这件事",
+          "description": "下一处住处，也是一种生活选择。",
+          "scene": "home",
+          "aria": "聊聊「搬家这件事」",
+          "titleFits": true,
+          "caption": {
+            "x": 360,
+            "y": 150.5265655517578,
+            "width": 896,
+            "height": 148.46873474121094,
+            "top": 150.5265655517578,
+            "right": 1256,
+            "bottom": 298.99530029296875,
+            "left": 360
+          }
+        },
+        {
+          "name": "把专注找回来",
+          "description": "给眼前的事，留一段不被打断的时间。",
+          "scene": "focus",
+          "aria": "聊聊「把专注找回来」",
+          "titleFits": true,
+          "caption": {
+            "x": 360,
+            "y": 150.5265655517578,
+            "width": 896,
+            "height": 148.46873474121094,
+            "top": 150.5265655517578,
+            "right": 1256,
+            "bottom": 298.99530029296875,
+            "left": 360
+          }
+        },
+        {
+          "name": "今晚，早点休息",
+          "description": "生活里的很多事，可以从睡个好觉开始。",
+          "scene": "night",
+          "aria": "聊聊「今晚，早点休息」",
+          "titleFits": true,
+          "caption": {
+            "x": 360,
+            "y": 150.5265655517578,
+            "width": 896,
+            "height": 148.46873474121094,
+            "top": 150.5265655517578,
+            "right": 1256,
+            "bottom": 298.99530029296875,
+            "left": 360
+          }
+        }
+      ],
+      "draft": "保留我正在写的问题",
+      "slogan": "看清投入，做更值得的选择。"
+    }
+  },
+  {
+    "width": 757,
+    "height": 800,
+    "followup": true,
+    "initial": {
+      "heading": "通勤与生活",
+      "headingCount": 1,
+      "titleSize": 52,
+      "sloganSize": 18,
+      "slogan": "看清投入，做更值得的选择。",
+      "caption": {
+        "x": 24,
+        "y": 238.89999389648438,
+        "width": 709,
+        "height": 114,
+        "top": 238.89999389648438,
+        "right": 733,
+        "bottom": 352.8999938964844,
+        "left": 24
+      },
+      "composer": {
+        "x": 24,
+        "y": 441.734375,
+        "width": 380,
+        "height": 182.265625,
+        "top": 441.734375,
+        "right": 404,
+        "bottom": 624,
+        "left": 24
+      },
+      "overflow": 0
+    },
+    "switched": {
+      "states": [
+        {
+          "name": "搬家这件事",
+          "description": "下一处住处，也是一种生活选择。",
+          "scene": "home",
+          "aria": "聊聊「搬家这件事」",
+          "titleFits": true,
+          "caption": {
+            "x": 24,
+            "y": 238.89999389648438,
+            "width": 709,
+            "height": 114,
+            "top": 238.89999389648438,
+            "right": 733,
+            "bottom": 352.8999938964844,
+            "left": 24
+          }
+        },
+        {
+          "name": "把专注找回来",
+          "description": "给眼前的事，留一段不被打断的时间。",
+          "scene": "focus",
+          "aria": "聊聊「把专注找回来」",
+          "titleFits": true,
+          "caption": {
+            "x": 24,
+            "y": 238.89999389648438,
+            "width": 709,
+            "height": 114,
+            "top": 238.89999389648438,
+            "right": 733,
+            "bottom": 352.8999938964844,
+            "left": 24
+          }
+        },
+        {
+          "name": "今晚，早点休息",
+          "description": "生活里的很多事，可以从睡个好觉开始。",
+          "scene": "night",
+          "aria": "聊聊「今晚，早点休息」",
+          "titleFits": true,
+          "caption": {
+            "x": 24,
+            "y": 238.89999389648438,
+            "width": 709,
+            "height": 114,
+            "top": 238.89999389648438,
+            "right": 733,
+            "bottom": 352.8999938964844,
+            "left": 24
+          }
+        }
+      ],
+      "draft": "保留我正在写的问题",
+      "slogan": "看清投入，做更值得的选择。"
+    }
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "followup": false,
+    "initial": {
+      "heading": "通勤与生活",
+      "headingCount": 1,
+      "titleSize": 96,
+      "sloganSize": 22,
+      "slogan": "看清投入，做更值得的选择。",
+      "caption": {
+        "x": 968,
+        "y": 384.6421813964844,
+        "width": 920,
+        "height": 171.65628051757812,
+        "top": 384.6421813964844,
+        "right": 1888,
+        "bottom": 556.2984619140625,
+        "left": 968
+      },
+      "composer": {
+        "x": 32,
+        "y": 789.703125,
+        "width": 480,
+        "height": 114.296875,
+        "top": 789.703125,
+        "right": 512,
+        "bottom": 904,
+        "left": 32
+      },
+      "overflow": 0
+    },
+    "switched": {
+      "states": [
+        {
+          "name": "搬家这件事",
+          "description": "下一处住处，也是一种生活选择。",
+          "scene": "home",
+          "aria": "聊聊「搬家这件事」",
+          "titleFits": true,
+          "caption": {
+            "x": 968,
+            "y": 384.6421813964844,
+            "width": 920,
+            "height": 171.65628051757812,
+            "top": 384.6421813964844,
+            "right": 1888,
+            "bottom": 556.2984619140625,
+            "left": 968
+          }
+        },
+        {
+          "name": "把专注找回来",
+          "description": "给眼前的事，留一段不被打断的时间。",
+          "scene": "focus",
+          "aria": "聊聊「把专注找回来」",
+          "titleFits": true,
+          "caption": {
+            "x": 968,
+            "y": 384.6421813964844,
+            "width": 920,
+            "height": 171.65628051757812,
+            "top": 384.6421813964844,
+            "right": 1888,
+            "bottom": 556.2984619140625,
+            "left": 968
+          }
+        },
+        {
+          "name": "今晚，早点休息",
+          "description": "生活里的很多事，可以从睡个好觉开始。",
+          "scene": "night",
+          "aria": "聊聊「今晚，早点休息」",
+          "titleFits": true,
+          "caption": {
+            "x": 968,
+            "y": 384.6421813964844,
+            "width": 920,
+            "height": 171.65628051757812,
+            "top": 384.6421813964844,
+            "right": 1888,
+            "bottom": 556.2984619140625,
+            "left": 968
+          }
+        }
+      ],
+      "draft": "保留我正在写的问题",
+      "slogan": "看清投入，做更值得的选择。"
+    }
+  },
+  {
+    "interaction": {
+      "animations": 2,
+      "heading": "今晚，早点休息",
+      "errors": []
+    },
+    "entered": {
+      "query": "准备租房搬家，选房和签约前有哪些事需要先确认？",
+      "count": 1,
+      "route": "#/chat"
+    }
+  }
+]
