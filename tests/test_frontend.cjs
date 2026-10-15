@@ -46,21 +46,21 @@ function dom() {
 }
 const guide={guide_id:'03-01',title:'关掉非必要通知',fields:{'说人话':'工作时把手机放到视线之外。','成本':'少量设置时间','备注':'按工作需要保留必要通知','证据等级':'B'},source_url:'https://github.com/eternity4719/HowToLiveBetter/blob/main/README.md',source_locator:'第3节第1条'};
 const settle=async()=>{for(let i=0;i<25;i++)await Promise.resolve();};
-function fixture() {
-  const document=dom(),calls=[],state={loggedIn:false,enabled:false,records:[],number:0,nextStatus:'answer',summaryFailure:false};
+function fixture(initial={}) {
+  const document=dom(),calls=[],state={loggedIn:false,enabled:false,records:[],number:0,nextStatus:'answer',summaryFailure:false,homeFailures:0,memoryFailures:0,...initial};
   const memory=()=>({enabled:state.enabled,memories:state.records,effective:state.enabled?state.records.filter(m=>m.state==='active'):[]});
   const request=async(url,data)=>{
     calls.push({url,data});
-    if(url==='/api/me'){if(!state.loggedIn)throw Object.assign(Error('请登录'),{status:401});return {user:{id:'test10',name:'测试用户'}};}
-    if(url==='/api/login'){state.loggedIn=true;return {user:{id:'test10',name:'测试用户'}};}
-    if(url==='/api/memories')return memory();
+    if(url==='/api/me'){if(state.initialMe)return state.initialMe;if(!state.loggedIn)throw Object.assign(Error('请登录'),{status:401});return {user:{id:'test10',name:'测试用户'}};}
+    if(url==='/api/login'){state.loggedIn=true;return {user:{id:data.username||'test10',name:'测试用户'}};}
+    if(url==='/api/memories'){if(state.memoryFailures>0){state.memoryFailures--;throw Object.assign(Error('档案读取失败'),{status:502});}return memory();}
     if(url.startsWith('/api/guide-entry'))return guide;
     if(url==='/api/memory-action'){
       if(data.action==='settings')state.enabled=data.enabled;
       if(data.action==='delete')state.records=state.records.filter(m=>m.id!==data.id);
       return memory();
     }
-    if(url==='/api/run'&&data.mode==='home')return {result:{followups:memory().effective.filter(m=>m.problem_status!=='resolved').map(m=>({memory_id:m.id,topic:m.problem,progress_question:'上次的事情解决了吗？',guide_question:'还想继续咨询吗？'}))}};
+    if(url==='/api/run'&&data.mode==='home'){if(state.homeFailures>0){state.homeFailures--;throw Object.assign(Error('回访服务暂时不可用'),{status:502});}return {result:{followups:memory().effective.filter(m=>m.problem_status!=='resolved').map(m=>({memory_id:m.id,topic:m.problem,progress_question:'上次的事情解决了吗？',guide_question:'还想继续咨询吗？'}))}};}
     if(url==='/api/run'){
       let summary={saved:false,message:'记忆已关闭，本轮不保存摘要。'};
       if(state.enabled&&!state.summaryFailure){state.records=state.records.map(m=>({...m,state:'superseded'}));const id='memory-'+(++state.number);state.records.push({id,state:'active',problem:'手机通知打断工作',text:'用户咨询减少手机通知的指南。',problem_status:data.query.includes('已经解决')?'resolved':'unresolved'});summary={saved:true,message:'本轮摘要已保存。',memory_id:id};}
@@ -127,4 +127,31 @@ test('the eight fixed starters point to current canonical guides and bundled ima
   const entries=new Map(JSON.parse(fs.readFileSync(path.join(root,'data/guide.json'),'utf8')).entries.map(entry=>[entry.guide_id,entry]));
   assert.equal(window.LifeScenes.length,8);assert.equal(new Set(window.LifeScenes.map(scene=>scene.id)).size,8);
   for(const scene of window.LifeScenes){assert.equal(scene.guide_title,entries.get(scene.guide_id)?.title);assert.ok(fs.existsSync(path.join(root,'frontend',scene.image)));assert.ok(scene.draft.length>0&&scene.draft.length<=2000);}
+});
+
+
+test('restored login keeps a first home failure visible and labels retained results on later failures',async()=>{
+  const f=fixture({loggedIn:true,enabled:true,homeFailures:1,records:[{id:'existing-memory',state:'active',problem:'手机通知',problem_status:'unresolved'}]});await settle();
+  assert.equal(f.$('login').hidden,true);assert.equal(f.$('home').querySelectorAll('.radar-card[data-recommendation]').length,8);
+  assert.match(f.$('followups').textContent,/回访暂时未能读取/);assert.doesNotMatch(f.$('followups').textContent,/暂时没有需要回访的问题/);assert.equal(f.$('followups').querySelectorAll('.home-read-error').length,1);
+  await f.clickText(f.$('followups'),'重试');assert.equal(f.$('followups').querySelectorAll('.home-read-error').length,0);assert.equal(f.$('followups').querySelectorAll('.followup-card').length,1);
+  f.state.homeFailures=1;await f.clickText(f.$('followups'),'刷新回访');assert.match(f.$('followups').textContent,/保留上次读取的结果/);assert.equal(f.$('followups').querySelectorAll('.followup-card').length,1);
+  await f.clickText(f.$('followups'),'重试');assert.equal(f.$('followups').querySelectorAll('.home-read-error').length,0);
+});
+
+
+test('initial identity lookup locks login and send until it settles, so an old account cannot replace a new login',async()=>{
+  let resolveMe;const initialMe=new Promise(resolve=>{resolveMe=resolve;});const f=fixture({initialMe});await settle();
+  assert.equal(f.$('login-submit').disabled,true);assert.equal(f.$('today-send').disabled,true);
+  f.$('username').value='new-account';f.$('password').value='test';f.$('loginform').onsubmit({preventDefault(){}});await settle();assert.equal(f.calls.filter(call=>call.url==='/api/login').length,0);
+  resolveMe({user:{id:'old-account',name:'旧账号'}});await settle();assert.equal(f.$('login-submit').disabled,false);
+  await f.submit('loginform');await f.$('profile-entry').click();await settle();assert.match(f.$('modal-body').textContent,/测试用户/);assert.doesNotMatch(f.$('modal-body').textContent,/旧账号/);
+});
+
+test('successful deletion exits confirmation before a failed refresh and retry reads without deleting again',async()=>{
+  const f=fixture({loggedIn:true,enabled:true,records:[{id:'delete-me',state:'active',problem:'手机通知',text:'摘要',problem_status:'unresolved'}]});await settle();
+  await f.$('profile-entry').click();await settle();await f.clickText(f.$('modal-body'),'删除');f.state.memoryFailures=1;await f.clickText(f.$('modal-actions'),'确认删除');
+  assert.equal(f.$('modal-title').textContent,'个人档案与设置');assert.equal(f.$('modal-actions').querySelectorAll('button').some(button=>button.textContent==='确认删除'),false);assert.match(f.$('modal-body').textContent,/记忆已删除，个人档案暂时未能刷新/);
+  const deletes=()=>f.calls.filter(call=>call.url==='/api/memory-action'&&call.data.action==='delete').length;assert.equal(deletes(),1);
+  await f.clickText(f.$('modal-actions'),'重试读取');assert.equal(deletes(),1);assert.match(f.$('modal-body').textContent,/暂时没有个人记忆/);assert.equal(f.$('login').hidden,true);
 });

@@ -15,7 +15,7 @@
   function icon(name){const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),use=document.createElementNS(ns,'use');svg.setAttribute('class','icon');svg.setAttribute('aria-hidden','true');use.setAttribute('href','#i-'+name);svg.append(use);return svg;}
   const uid=prefix=>prefix+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
   let service=window.PreviewProduct||window.RealProduct(API), user=null, epoch=0, busy=null;
-  let conversations=[],activeId='',memories=null,home=null,historyLoaded=false;
+  let conversations=[],activeId='',memories=null,home=null,homeReadState='idle',historyLoaded=false;
   const pendingFeedback=new Map();
   const mock=()=>service.mode==='mock',active=()=>conversations.find(c=>c.id===activeId);
   const stamp=()=>({epoch,owner:user?.id,service}),current=c=>c.epoch===epoch&&c.owner===user?.id&&c.service===service;
@@ -245,8 +245,9 @@
     $('home').replaceChildren(track);
   }
   async function readHome(c) {
-    $('home').setAttribute('aria-busy','true');
-    try {const value=await (mock()?service.getMvpHome():service.getHome());if(!current(c))return;home=value;renderHome();}
+    $('home').setAttribute('aria-busy','true');homeReadState='loading';renderFollowups();
+    try {const value=await (mock()?service.getMvpHome():service.getHome());if(!current(c))return;home=value;homeReadState='ready';renderHome();}
+    catch(error){if(current(c)){homeReadState='error';renderFollowups();}throw error;}
     finally {if(current(c))$('home').setAttribute('aria-busy','false');}
   }
   function renderHome() {
@@ -277,9 +278,13 @@
     button(heading,'刷新回访',refreshHome,'text-button');box.append(heading);
     if(!memories){P(box,'个人记忆暂时未能读取，可以在个人档案中重试。','hint');return;}
     if(!memories.enabled){P(box,'开启个人记忆后，这里会问问上次的进展。','hint');button(box,'管理个人记忆',openProfile,'text-button');return;}
-    for(const f of home?.followups||[]){const card=E('article',undefined,'notice followup-card');card.append(E('h3',f.progress_question||f.topic));P(card,f.guide_question||'还需要继续咨询吗？','hint');
+    if(homeReadState==='error'){const notice=E('div',undefined,'notice home-read-error');
+      P(notice,home?'回访暂时未能更新，下面保留上次读取的结果。':'回访暂时未能读取，情境入口和你的输入仍然保留。');button(notice,'重试',refreshHome);box.append(notice);
+    }else if(homeReadState==='loading')P(box,'正在更新问题回访…','hint');
+    if(!home)return;
+    for(const f of home.followups||[]){const card=E('article',undefined,'notice followup-card');card.append(E('h3',f.progress_question||f.topic));P(card,f.guide_question||'还需要继续咨询吗？','hint');
       const actions=row(card);button(actions,'继续咨询',()=>startFollowup(f));button(actions,'已经解决',()=>startFollowup(f,'resolved'),'text-button');button(actions,'还没解决',()=>startFollowup(f,'unresolved'),'text-button');box.append(card);}
-    if(!(home?.followups||[]).length)P(box,'暂时没有需要回访的问题。','hint');
+    if(!(home.followups||[]).length&&homeReadState!=='loading')P(box,homeReadState==='error'?'上次读取时没有需要回访的问题，当前状态尚未确认。':'暂时没有需要回访的问题。','hint');
   }
   function startFollowup(f,progress='') {
     if(!memories?.enabled){say('先在个人档案中开启记忆，才能接着记录进展。');return;}
@@ -310,8 +315,7 @@
     });
   }
   function renderHomeError() {
-    $('home').querySelector('.home-read-error')?.remove();const n=E('div',undefined,'notice home-read-error');
-    P(n,'回访暂时未能更新，情境入口和你的输入仍然保留。');button(n,'重试',refreshHome);$('followups').append(n);sync();
+    homeReadState='error';renderFollowups();sync();
   }
   function renderPending() {
     $('pending-feedback').replaceChildren();
@@ -548,8 +552,10 @@
         invalidateMemoryContext(m.id);
         home={...(home||{}),followups:(home?.followups||[]).filter(f=>f.memory_id!==m.id)};
         if(memories){if(mock())memories.events=(memories.events||[]).filter(record=>record.id!==m.id);else {memories.memories=(memories.memories||[]).filter(record=>record.id!==m.id);memories.effective=(memories.effective||[]).filter(record=>record.id!==m.id);}}
-        renderHome();renderChat();await readMemories(ctx);if(!current(ctx))return;
-        renderProfile($('modal-body'),$('modal-actions'));$('modal-title').textContent='个人档案与设置';$('modal').classList.add('profile-dialog');say('记忆已删除。');
+        renderHome();renderChat();renderProfile($('modal-body'),$('modal-actions'));$('modal-title').textContent='个人档案与设置';$('modal').classList.add('profile-dialog');say('记忆已删除。');
+        try{await readMemories(ctx);if(!current(ctx))return;renderProfile($('modal-body'),$('modal-actions'));}
+        catch(e){if(!current(ctx))return;if(e.status===401)throw e;
+          P($('modal-body'),'记忆已删除，个人档案暂时未能刷新。','hint');button($('modal-actions'),'重试读取',openProfile);say('记忆已删除，个人档案暂时未能刷新。','error');return;}
         try{await readHome(ctx);}catch(e){if(current(ctx))renderHomeError();}
       }),'primary');
     });
@@ -574,7 +580,7 @@
   }
   function resetPrivate() {
     galleryMotion?.dispose();galleryMotion=null;
-    service.abortAll();epoch++;busy=null;loading=false;user=null;memories=null;home=null;conversations=[];activeId='';historyLoaded=false;focusedRecommendationId='';pendingFeedback.clear();pendingDraft=null;
+    service.abortAll();epoch++;busy=null;loading=false;user=null;memories=null;home=null;homeReadState='idle';conversations=[];activeId='';historyLoaded=false;focusedRecommendationId='';pendingFeedback.clear();pendingDraft=null;
     toggleHistory(false);closeModal();$('query').value='';$('today-query').value='';$('password').value='';$('history-search').value='';$('topics').replaceChildren();$('home').replaceChildren();$('chat').replaceChildren();renderPending();$('login').hidden=false;renderHome();sync();
   }
   async function logout() {const outgoing=service;resetPrivate();route('today');try{await outgoing.logout();say('已退出，个人内容已清除。');}catch{say('本页已清除，服务端退出未确认，可重试退出。','error');modal('退出结果待确认',(box,actions)=>{P(box,'可再次发送退出请求。');button(actions,'重试退出',async()=>{try{await outgoing.logout();closeModal();say('已退出。');}catch(e){$('modal-error').textContent=e.message;}},'',false);});}}
@@ -638,5 +644,9 @@
   $('modal').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const controls=[...$('modal').querySelectorAll('button,input,textarea,select,a[href],summary')].filter(n=>!n.disabled&&n.getClientRects().length);const first=controls[0],last=controls.at(-1);if(!first)return;if(e.shiftKey&&document.activeElement===first||!e.shiftKey&&document.activeElement===last){e.preventDefault();(e.shiftKey?last:first).focus();}});
   window.addEventListener('hashchange',renderRoute);window.addEventListener('resize',updateCardControls);
   const today=new Date();$('local-date').dateTime=today.toISOString();$('local-date').textContent=new Intl.DateTimeFormat('zh-CN',{weekday:'short',month:'long',day:'numeric',timeZone:'Asia/Shanghai'}).format(today);
-  (async()=>{renderRoute();renderTools();renderHome();try{await enter(await service.me());}catch(e){if(e.status!==401)say(e.message,'error');$('login').hidden=true;}renderTools();sync();})();
+  (async()=>{const ctx=stamp();loading=true;renderRoute();renderTools();renderHome();sync();
+    try{const nextUser=await service.me();if(!current(ctx))return;await enter(nextUser);}
+    catch(e){if(!current(ctx))return;if(e.status!==401)say(e.message,'error');$('login').hidden=true;}
+    finally{if(ctx.epoch===epoch&&ctx.service===service){loading=false;renderTools();sync();}}
+  })();
 })();
