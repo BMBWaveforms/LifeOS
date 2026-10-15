@@ -367,7 +367,7 @@
     for(const name of groups){const group=E('details',undefined,'history-group');group.open=true;const count=items.filter(c=>(c.group||'其他')===name);group.append(E('summary',name+' · '+count.length));
       for(const c of count){const item=E('article',undefined,'topic-row'+(c.id===activeId?' active':''));button(item,c.title,()=>restoreConversation(c.id));group.append(item);}box.append(group);}
     if(!items.length)P(box,search?'没有找到相关对话。':'本页还没有对话。','hint');
-    $('history-note').textContent=mock()?'固定场景模拟 · 会话和记忆仅保留在当前页面，刷新后重置。':'仅保留本页对话，刷新或退出后清除；开启记忆后保存的摘要可在个人档案查看。';
+    $('history-note').textContent=mock()?'固定场景模拟 · 会话和记忆仅保留在当前页面，刷新后重置。':'刷新后清除本页展示；为便于续聊，服务端会临时保存本次对话。摘要可在个人档案管理。';
     sync();
   }
   async function restoreConversation(id) {
@@ -395,16 +395,17 @@
       button(actions,'保存',()=>run('history',async ctx=>{if(!title.value.trim()){$('modal-error').textContent='请输入对话名称。';return;}
         if(mock())await service.renameConversation(c.id,title.value.trim(),group.value);if(!current(ctx))return;
         c.title=title.value.trim();c.group=group.value;c.manualGroup=true;persist(c);renderHistory();renderChat();closeModal();say('对话信息已更新。');}), 'primary');
-      button(actions,mock()?'删除对话':'从本页移除',()=>confirmDeleteConversation(c),'danger');
+      button(actions,'删除对话',()=>confirmDeleteConversation(c),'danger');
     });
   }
   function confirmDeleteConversation(c) {
-    modal(mock()?'删除这段对话？':'从当前页面移除这段对话？',(box,actions)=>{
+    modal('删除这段对话？',(box,actions)=>{
       P(box,c.title);P(box,'相关个人记忆仍会保留，可以在个人档案中单独删除。');
-      if(!mock())P(box,'此操作只移除本页显示的对话。','hint');
+      if(!mock())P(box,'同时删除这段对话用于续聊的服务端记录。','hint');
       button(actions,'取消',closeModal,'',false);
       button(actions,'确认删除',()=>run('delete',async ctx=>{
-        if(mock())await service.deleteConversation(c.id);if(!current(ctx))return;
+        if(mock())await service.deleteConversation(c.id);
+        else if(c.serverId)await service.deleteConversation(c.serverId);if(!current(ctx))return;
         conversations=conversations.filter(x=>x.id!==c.id);if(activeId===c.id){activeId='';makeConversation();renderChat();}
         closeModal();renderHistory();say('对话已移除，相关个人记忆仍保留。');
       }),'primary');
@@ -414,7 +415,7 @@
     const box=$('chat'),wasBottom=box.scrollHeight-box.clientHeight-box.scrollTop<75,oldTop=box.scrollTop;
     const focus=box.contains(document.activeElement)?document.activeElement?.dataset.focus:null;
     box.replaceChildren();const c=active();$('agent-title').textContent=c?.title||'新对话';
-    $('chat-policy').textContent=mock()?'交互演示 · 固定场景模拟':'建议依据固定指南 · 对话仅在本页保留';
+    $('chat-policy').textContent=mock()?'交互演示 · 固定场景模拟':'建议依据固定指南 · 本次对话可删除';
     if(c?.resumeNotice)P(box,c.resumeNotice,'notice');
     if(c?.resumeSummary){const summary=E('div',undefined,'resume-card');summary.append(E('h3','上次聊到'));P(summary,c.resumeSummary);
       button(summary,c.historyExpanded?'收起旧消息 ↑':'展开旧消息 ↓',()=>{c.historyExpanded=!c.historyExpanded;renderChat();},'text-button',false);box.append(summary);}
@@ -460,6 +461,7 @@
     if(busy){say('上一轮仍在处理，请稍等或停止。');return;}
     const query=String(override??$('query').value).trim();if(!query||query.length>2000){say('请输入1–2000字的问题。','error');return;}
     if(!active())makeConversation();const c=active(),original=$('query').value;
+    if(!mock()&&!c.serverId)c.serverId=window.crypto?.randomUUID?.()||uid('conversation')+'-'+Math.random().toString(36).slice(2,12);
     const turn=retryTurn||{id:uid('turn'),query,versions:[],versionIndex:0,status:'waiting',anchor:new Date().toISOString()};
     const previous=turn.versions[turn.versionIndex||0];turn.memoryEnabled=!!memories?.enabled;turn.status='waiting';turn.partial='';turn.error='';turn.createdAfterResume=true;
     if(!retryTurn)c.messages.push(turn);if(c.title==='新对话')c.title=query.slice(0,32);
@@ -469,7 +471,9 @@
       const slow=setTimeout(()=>{if(current(ctx))updateChunk(turn,'仍在处理，请勿重复提交；你可以继续编辑下一条草稿。');},15000);
       try {
         const response=await (mock()?service.submitMvpMessage:service.submitMessage)({query,conversationId:mock()?c.id:c.serverId,turnId:turn.id,followupId:c.followupId||'',guideId:c.guideId||'',context:c.context,memoryId:c.memoryId,group:c.group,recommendationId:c.recommendationId,anchor:turn.anchor,skipClarification:extra.skipClarification||c.context?.limited,scenario:extra.skipClarification?'normal':undefined,onChunk:mock()?text=>{if(current(ctx))updateChunk(turn,text);}:undefined});
-        if(!current(ctx))return;c.serverId=response.conversation_id||c.serverId;c.group=c.manualGroup?c.group:response.group||c.group||'其他';c.context=response.context||c.context;
+        if(!current(ctx))return;
+        if(!mock()&&response.execution?.context_reset&&c.messages.length>1)c.resumeNotice='本次已从新的对话上下文继续；之前聊天仅供查看，有效个人摘要仍可使用。';
+        c.serverId=response.conversation_id||c.serverId;c.group=c.manualGroup?c.group:response.group||c.group||'其他';c.context=response.context||c.context;
         if(regenerate||!turn.versions.length)turn.versions.push(response);else turn.versions[turn.versionIndex||0]=response;
         turn.versionIndex=turn.versions.length-1;turn.status='completed';
         if(response.summary?.saved&&response.summary.memory_id)c.followupId=response.summary.memory_id;
@@ -531,7 +535,7 @@
       if(memories?.enabled)button(card,'继续聊 ↗',()=>continueMemory(m),'text-button');box.append(card);}
     if(!records.length)P(box,'暂时没有个人记忆。','empty');
     const info=E('div',undefined,'profile-info');P(info,user?user.name||user.id:'尚未登录');
-    P(info,mock()?'演示数据仅保留在当前页面，刷新后重置。':'对话仅在本页保留；已保存的摘要会保留在个人档案中。','hint');box.append(info);
+    P(info,mock()?'演示数据仅保留在当前页面，刷新后重置。':'聊天展示仅在本页，服务端临时保留本次对话供续聊。关闭个人记忆会清理之前的会话记录；关闭后的新聊天仍会临时保存本次对话。','hint');box.append(info);
     if(user)button(actions,'退出登录',logout,'',false);else button(actions,'登录',()=>{closeModal();$('login').hidden=false;$('username').focus();},'',false);
     button(actions,'关闭',closeModal,'',false);sync();
   }

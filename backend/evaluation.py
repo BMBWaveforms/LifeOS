@@ -108,16 +108,14 @@ def validate_case(case):
 
 class FrozenClient(ModelClient):
     """Keep a real batch on one model configuration, credentials stay in process memory."""
-    def __init__(self, client, with_sdk=True):
+    def __init__(self, client):
         self.values = client.config()
-        self.sdk_values = ModelClient.sdk_config(self) if with_sdk else None
+        self.sdk_values = ModelClient.sdk_config(self)
 
     def config(self):
         return self.values
 
     def sdk_config(self):
-        if not self.sdk_values:
-            raise ModelError('此批次没有配置 SDK 执行层。')
         return self.sdk_values
 
 
@@ -250,13 +248,13 @@ class Evaluation:
         for index, v in enumerate(variants):
             if not isinstance(v, dict):
                 raise ValueError('执行方案格式无效。')
-            snapshots.append({'label': 'AB'[index], 'runtime': validate_runtime(v.get('runtime')),
+            snapshots.append({'label': 'AB'[index], 'runtime': validate_runtime(v.get('runtime', 'claude-sdk')),
                               'bundle': self.registry.snapshot(v.get('bundle_id'))})
         judge_id = data.get('judge_version_id') or snapshots[0]['bundle']['versions']['judge']
         judge = self.registry.version(judge_id)
         if judge['module'] != 'judge':
             raise ValueError('判定版本须属于评测判定模块。')
-        model = FrozenClient(self.client, any(v['runtime'] == 'claude-sdk' for v in snapshots)) if isinstance(self.client, ModelClient) else self.client
+        model = FrozenClient(self.client) if isinstance(self.client, ModelClient) else self.client
         spec = {'dataset_id': dataset['id'], 'dataset_name': dataset['name'], 'dataset_version': dataset['version'],
                 'cases': cases, 'variants': snapshots, 'judge': judge,
                 'model': model.ready(), 'tool_hash': hashlib.sha256(encoded(tool_definitions()).encode()).hexdigest(),
@@ -314,6 +312,8 @@ class Evaluation:
         if old['status'] in ('queued', 'running'):
             raise ValueError('请等待任务结束再重跑。')
         spec = old['snapshot']
+        if any(v['runtime'] != 'claude-sdk' for v in spec['variants']):
+            raise ValueError('原快照含已停用的执行层；历史记录保留，请新建 SDK 任务。')
         if failed_only:
             ids = {r['case_id'] for r in old['results'] if r['status'] != 'pass'}
             for record in old['results']:
@@ -325,7 +325,7 @@ class Evaluation:
             spec['cases'] = [c for c in spec['cases'] if c['id'] in ids]
             if not spec['cases']:
                 raise ValueError('没有失败、待确认或未完成的用例。')
-        model = FrozenClient(self.client, any(v['runtime'] == 'claude-sdk' for v in spec['variants'])) if isinstance(self.client, ModelClient) else self.client
+        model = FrozenClient(self.client) if isinstance(self.client, ModelClient) else self.client
         if model.ready() != spec['model']:
             raise ValueError('模型配置已变更，请新建任务；原记录保留。')
         spec['rerun_of'] = jid
@@ -339,6 +339,9 @@ class Evaluation:
             with self.db() as db:
                 return bool(db.execute('SELECT cancel FROM jobs WHERE id=?', (jid,)).fetchone()[0])
         spec = self.job(owner, jid)['snapshot']
+        if any(v['runtime'] != 'claude-sdk' for v in spec['variants']):
+            update('interrupted', '原快照含已停用的执行层；历史记录保留，请新建 SDK 任务。')
+            return
         update('running')
         model = model or self.client
         bench = Workbench(self.path.parent / 'evaluation-runs' / jid, model, self.executors, self.registry)
@@ -388,7 +391,6 @@ class Evaluation:
                     fresh = False
                 elif step['kind'] == 'new_conversation':
                     fresh = True
-                    service.conversations.clear()
                     record.update(status='success', output='新会话，保留本用例的有效长期记忆。')
                 elif step['kind'] == 'home':
                     output = service.home(owner, include_trace=True)

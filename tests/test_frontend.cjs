@@ -55,6 +55,7 @@ function fixture(initial={}) {
     if(url==='/api/login'){state.loggedIn=true;return {user:{id:data.username||'test10',name:'测试用户'}};}
     if(url==='/api/memories'){if(state.memoryFailures>0){state.memoryFailures--;throw Object.assign(Error('档案读取失败'),{status:502});}return memory();}
     if(url.startsWith('/api/guide-entry'))return guide;
+    if(url==='/api/conversation-action'){if(state.conversationDeleteFailures>0){state.conversationDeleteFailures--;throw Object.assign(Error('临时会话删除失败'),{status:502});}return {deleted:true};}
     if(url==='/api/memory-action'){
       if(data.action==='settings')state.enabled=data.enabled;
       if(data.action==='delete')state.records=state.records.filter(m=>m.id!==data.id);
@@ -62,6 +63,7 @@ function fixture(initial={}) {
     }
     if(url==='/api/run'&&data.mode==='home'){if(state.homeFailures>0){state.homeFailures--;throw Object.assign(Error('回访服务暂时不可用'),{status:502});}return {result:{followups:memory().effective.filter(m=>m.problem_status!=='resolved').map(m=>({memory_id:m.id,topic:m.problem,progress_question:'上次的事情解决了吗？',guide_question:'还想继续咨询吗？'}))}};}
     if(url==='/api/run'){
+      if(state.pendingChat)return state.pendingChat;
       let summary={saved:false,message:'记忆已关闭，本轮不保存摘要。'};
       if(state.enabled&&!state.summaryFailure){state.records=state.records.map(m=>({...m,state:'superseded'}));const id='memory-'+(++state.number);state.records.push({id,state:'active',problem:'手机通知打断工作',text:'用户咨询减少手机通知的指南。',problem_status:data.query.includes('已经解决')?'resolved':'unresolved'});summary={saved:true,message:'本轮摘要已保存。',memory_id:id};}
       if(state.summaryFailure)summary={saved:false,message:'摘要生成失败，未写入记忆；答复仍可查看。'};
@@ -104,7 +106,7 @@ test('enabled summaries replace followup IDs, resolved progress leaves followups
   f.fill('query','还有什么限制？');await f.submit('askform');assert.equal(f.chats()[1].data.followup_memory_id,'memory-1');
   await f.clickText(f.$('followups'),'已经解决');assert.equal(f.chats()[2].data.followup_memory_id,'memory-2');assert.equal(f.$('followups').querySelectorAll('.followup-card').length,0);
   await f.$('profile-entry').click();await settle();const off=f.$('memory-enabled');off.checked=false;await off.onchange();await settle();assert.match(f.$('modal-body').textContent,/用户咨询减少手机通知/);f.$('modal-close').click();
-  f.fill('query','我想再了解一下');await f.submit('askform');assert.equal(f.chats().at(-1).data.followup_memory_id,'');assert.equal(f.chats().at(-1).data.conversation_id,'');
+  f.fill('query','我想再了解一下');await f.submit('askform');assert.equal(f.chats().at(-1).data.followup_memory_id,'');assert.notEqual(f.chats().at(-1).data.conversation_id,'server-conversation');assert.match(f.chats().at(-1).data.conversation_id,/^[A-Za-z0-9_-]{24,64}$/);
 });
 
 test('arbitrary clarification has no unrelated choices and summary failure keeps the valid answer',async()=>{
@@ -119,7 +121,7 @@ test('deleting a saved summary clears its linked conversation and refreshes the 
   f.fill('query','工作时被手机打断');await f.submit('askform');assert.equal(f.$('followups').querySelectorAll('.followup-card').length,1);
   await f.$('profile-entry').click();await settle();await f.clickText(f.$('modal-body'),'删除');await f.clickText(f.$('modal-actions'),'确认删除');
   assert.equal(f.$('followups').querySelectorAll('.followup-card').length,0);assert.equal(f.state.records.length,0);f.$('modal-close').click();
-  f.fill('query','我想继续了解');await f.submit('askform');assert.equal(f.chats().at(-1).data.followup_memory_id,'');assert.equal(f.chats().at(-1).data.conversation_id,'');
+  f.fill('query','我想继续了解');await f.submit('askform');assert.equal(f.chats().at(-1).data.followup_memory_id,'');assert.notEqual(f.chats().at(-1).data.conversation_id,'server-conversation');assert.match(f.chats().at(-1).data.conversation_id,/^[A-Za-z0-9_-]{24,64}$/);
 });
 
 test('the eight fixed starters point to current canonical guides and bundled images',()=>{
@@ -154,4 +156,38 @@ test('successful deletion exits confirmation before a failed refresh and retry r
   assert.equal(f.$('modal-title').textContent,'个人档案与设置');assert.equal(f.$('modal-actions').querySelectorAll('button').some(button=>button.textContent==='确认删除'),false);assert.match(f.$('modal-body').textContent,/记忆已删除，个人档案暂时未能刷新/);
   const deletes=()=>f.calls.filter(call=>call.url==='/api/memory-action'&&call.data.action==='delete').length;assert.equal(deletes(),1);
   await f.clickText(f.$('modal-actions'),'重试读取');assert.equal(deletes(),1);assert.match(f.$('modal-body').textContent,/暂时没有个人记忆/);assert.equal(f.$('login').hidden,true);
+});
+
+
+test('deleting a chat waits for server deletion and keeps saved summaries',async()=>{
+  const f=fixture({loggedIn:true,enabled:true,conversationDeleteFailures:1});await settle();
+  f.fill('query','测试服务端删除');await f.submit('askform');
+  const saved=JSON.stringify(f.state.records);
+  f.$('conversation-menu').click();await f.clickText(f.$('modal-actions'),'删除对话');
+  await f.clickText(f.$('modal-actions'),'确认删除');
+  assert.match(f.$('chat').textContent,/测试服务端删除/);
+  assert.equal(f.$('modal').open,true);
+  await f.clickText(f.$('modal-actions'),'确认删除');
+  assert.doesNotMatch(f.$('chat').textContent,/测试服务端删除/);
+  assert.equal(JSON.stringify(f.state.records),saved);
+  const deletes=f.calls.filter(call=>call.url==='/api/conversation-action');
+  assert.equal(deletes.length,2);
+  assert.equal(deletes[0].data.conversation_id,'server-conversation');
+});
+
+
+test('stopping the first pending response still lets deletion revoke the known server conversation',async()=>{
+  let finish;const pendingChat=new Promise(resolve=>{finish=resolve;});
+  const f=fixture({loggedIn:true,pendingChat});await settle();
+  f.fill('query','首轮还没返回就删除');await f.submit('askform');
+  const cid=f.chats()[0].data.conversation_id;
+  assert.match(cid,/^[A-Za-z0-9_-]{24,64}$/);
+  f.$('stop').click();await settle();
+  f.$('conversation-menu').click();await f.clickText(f.$('modal-actions'),'删除对话');
+  await f.clickText(f.$('modal-actions'),'确认删除');
+  const deletion=f.calls.find(call=>call.url==='/api/conversation-action');
+  assert.equal(deletion.data.conversation_id,cid);
+  finish({conversation_id:cid,result:{status:'acknowledged',cards:[]},summary:{saved:false,message:'late result'}});
+  await settle();
+  assert.doesNotMatch(f.$('chat').textContent,/首轮还没返回就删除|late result/);
 });

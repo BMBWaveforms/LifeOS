@@ -27,9 +27,9 @@
 
 - 前端：原生 HTML/CSS/JavaScript，唯一产品入口是合伙人页面 `frontend/index.html`，固定情境在 `scenes.js`，真实接口在 `services.js`。旧测试页不再作为产品首页；`/workbench.html` 仅作内部测试工具；无需 Node 构建应用。
 - 后端：Python + FastAPI + Uvicorn；Docker 使用 Python 3.12。
-- 模型：问答默认由 SDK 使用 Anthropic 兼容入口调用 DeepSeek；`backend/model.py` 的摘要、首页任务及显式 native 问答通过 `httpx` 调用 Chat Completions 接口。
-- Harness：`AgentService` 在 Python 中组织上下文和摘要/回访任务；`backend/executors.py` 提供 native / claude-sdk 两种可替换问答执行层。所有启动方式缺省 claude-sdk，仍使用 DeepSeek；显式配置 native 才走 Python 自实现。
-- SDK：锁定 claude-agent-sdk 0.2.166，包含 Claude Code CLI；不需要宿主机另装 Claude Code。SDK 使用 Anthropic 兼容入口，摘要/首页继续使用原模型接口。
+- 模型：问答统一由 SDK 使用 Anthropic 兼容入口调用 DeepSeek；`backend/model.py` 的摘要、首页任务和评测语义判定同样使用无工具、无历史恢复的SDK临时任务，不再直接调用 Chat Completions。
+- Harness：`AgentService` 每轮提供权威业务状态和两个指南工具；`backend/executors.py` 仅提供 claude-sdk，SDK 负责连续对话及普通历史压缩；`backend/sdk_sessions.py` 管隔离持久化、恢复授权与过期。旧 AGENT_RUNTIME 不再选择执行层，显式 native 请求拒绝。
+- SDK：锁定 claude-agent-sdk 0.2.166，包含 Claude Code CLI；不需要宿主机另装 Claude Code。所有模型任务使用 Anthropic 兼容入口；摘要/首页/判定不续接聊天历史。
 - 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，共同分发及权限检查在 `backend/tools.py`，检索实现及结果校验在 `backend/store.py`。
 - 团队账号：`backend/accounts.py` 按私有 `TEST_ACCOUNT_PASSWORD` 补齐 test1 到 test10，并同步这些测试账号的密码；保留已有身份、其他账号凭据和数据。新密码经独立盐的 PBKDF2 保存，账号文件原子更新；密码不写入公开文档或源码配置。
 - 评测工作台：`frontend/workbench.html`、`evaluation.js` / `evaluation.css`；`workbench.js` 保留自由测试。`backend/workbench.py` 管隔离会话，`evaluation.py` 管版本化评测集、队列、五环节及整体判定、复核与导出。共享定义，个人运行与结果；用例/方案分别隔离。批量会话放在 evaluation-runs/{job_id}/workbench，自由测试 API 不能续接；旧批量会话保留并标 scope=evaluation。
@@ -50,12 +50,12 @@
 6. 记录的 `active/superseded` 与问题的 `resolved/unresolved/unknown` 是独立状态。
 7. 用户归属、实际回读记录和记忆 revision 由后端校验；删除、纠正和设置变更会使陈旧结果失效。
 8. 调整指南快照、模型输出契约或工具参数时，同步提示词、校验、测试与说明；保留指南署名及许可。
-9. SDK 不读取用户/项目配置，不开放 Bash、文件和 Web 工具。每轮启动新 SDK 会话，仅重放后端已校验的短期历史；不使用 resume / continue 恢复旧记忆。工具失败后 Python 拒绝整轮结果，不允许 SDK 将失败伪装成正常无答案。
-10. 测试执行层选择只作用于该测试会话，不改变产品默认。原生与 SDK 测试不共用会话或记忆；不保存模型私有思维链、API Key 或请求头。执行成功与质量判定独立；系统语义判定可能出错，保留人工复核和待确认，整体结果不能取五项平均。
+9. SDK 不读取用户/项目配置，不开放 Bash、文件和 Web 工具。每轮创建新工具绑定和 run_id，通过私有提交标记恢复该用户该对话的 SDK 历史，不使用 continue 查最近会话。首轮发送前分配稳定应用ID，删除先写跨重启的私有撤销标记；begin、摘要保存前及commit都须校验。仅在来源校验、摘要处理及最终 revision 检查通过后提交恢复标记；失败/中断记录不得恢复。工具失败后 Python 拒绝整轮结果。
+10. 产品、自由测试和批量任务统一 SDK；A/B 比较提示词方案。历史 native 结果可查看/导出，不能续接或用旧快照重跑；不保存模型私有思维链、API Key 或请求头。执行成功与质量判定独立；系统语义判定可能出错，保留人工复核和待确认，整体结果不能取五项平均。
 
 11. 批量任务固定用例版本、提示词全文、判定版本、模型配置和指南/工具哈希。最多 200 用例、每例 20 步、两方案；单队列执行，重启将未结束任务标为 interrupted，用原快照手动重跑。不要增加后端 worker。
 12. 新提示词组合至少完成一个成功执行的评测用例才能启用；这不是质量门槛证明。产品启用需要独立调用与原因，并校验 expected_active 防止覆盖队友操作。既有启用组合可回滚。
-13. 评测不保存 reasoning_content / thinking / 原始 SDK 会话。理解字段是显式任务标签；缺失时必须待确认，不从最终答案猜隐藏过程。规则和语义判定分别保留证据，复核不覆盖系统结论。
+13. 评测结果不保存 reasoning_content / thinking 或原始 SDK 会话；SDK 恢复所需 transcript 仅在隔离私有运行目录（目录0700、文件0600）保存，不进入 API、结果导出或静态预览。理解字段是显式任务标签；缺失时必须待确认，不从最终答案猜隐藏过程。规则和语义判定分别保留证据，复核不覆盖系统结论。
 
 ## 部署配置与数据
 
@@ -65,13 +65,16 @@
 - `API_CONFIG_FILE`：后端读取配置的路径；本地 Python 在 `.env` 中设置，容器内由 `compose.yml` 设置。它与宿主机的 `API_CONFIG_PATH` 不同。
 - `WEB_PORT`：宿主机前端端口，默认 8780。改变它时同步浏览器地址对应的 `ALLOWED_ORIGINS`。
 - `COOKIE_SECURE`：浏览器通过 HTTPS 访问时设为 `true`；本地或 SSH 隧道的 HTTP 访问保持 `false`。
-- `AGENT_RUNTIME`：产品默认执行层 native / claude-sdk；SDK 失败会明确报错，不自动回退。无变量的程序、Compose、示例配置和启动脚本均默认 claude-sdk。
+- 问答执行层固定 `claude-sdk`；SDK 失败明确报错，不自动回退。旧 `AGENT_RUNTIME` 环境变量不影响执行层。
+- `AGENT_SDK_AUTO_COMPACT` / `AGENT_SDK_COMPACT_PCT`：默认 true / 60，通过已锁定 CLI 的环境变量提前自动压缩；不是保证无损或精确 token 输入预算。关闭自动压缩须自行控制窗口。
+- `AGENT_SDK_SESSION_TTL_SECONDS` / `AGENT_SDK_MAX_SESSIONS`：默认闲置7天 / 每用户30个SDK会话；后续访问时清理，不是定时删除服务。管理记忆立即撤销并清理该用户SDK会话。
+- `AGENT_SDK_CONTEXT_USAGE`：默认 false，开启后限时尝试SDK上下文统计；第三方接口不支持时显示unknown，不填0。
 - `AGENT_SDK_BASE_URL`：SDK 入口，DeepSeek 官方为 https://api.deepseek.com/anthropic。第三方模型代理需要操作者提供真实兼容地址，不猜测路径。
 - `TEST_ACCOUNT_PASSWORD`：私有统一测试密码，仅作用于 test1 到 test10；为空时不创建或重设测试账号，不删除已有账号。登录字段必须传字符串，保留前导零。
 - `COMPOSE_PROJECT_NAME`：固定一个部署项目名，并在启动、日志、更新及备份时使用同一配置。更换名字会指向另一套卷和账号。
 - `memory_data`：包含数据库、账号哈希、profiles 和首次密码；重建应用容器保留卷。
 
-保持后端单 worker、单实例：登录会话和运行状态在进程内，SQLite 保存长期记忆。当前不能直接增加 Uvicorn worker 或横向扩容后端。
+保持后端单 worker、单实例：登录和本轮运行状态在进程内，SQLite 保存长期记忆，SDK transcript及提交标记保存在原运行卷。删除/纠正/设置变更、过期、提示词/工具/指南/模型或压缩配置变更使旧SDK恢复失效；自动摘要增加revision后提交新值，不得每轮无条件清会话。当前不能直接增加 Uvicorn worker 或横向扩容后端。
 
 前端默认绑定宿主机 `127.0.0.1`，后端不发布宿主机端口。服务器可经 SSH 隧道预览；公网域名通过同机 HTTPS 网关转发到前端。不要为了外网访问直接暴露后端或停掉无关服务。
 
@@ -100,4 +103,4 @@ docker compose --env-file .env.compose config --quiet
 
 ## Horizon 候选前端交接
 
-`frontend/horizon/` 是独立候选入口 `/horizon/`，不替换上述默认产品或工作台。接手融合先读 `docs/handoff/horizon/README.md` 及机器清单 `handoff.json`。新版“自动记忆且仅删除”要求与本文描述的当前后端记忆策略存在明确差异；不得通过静默开启账号、覆写生产数据或恢复新版开关来掩盖冲突。原后端 SDK/native、校验、提示词与评测保持完整。CI 经原有测试入口额外检查 `frontend/horizon/*.mjs` 与 `tests/horizon/*.test.mjs`（见 `tests/horizon.test.cjs`）；静态预览另含 `/horizon/` 且禁用真实 API 模式。
+`frontend/horizon/` 是独立候选入口 `/horizon/`，不替换上述默认产品或工作台。接手融合先读 `docs/handoff/horizon/README.md` 及机器清单 `handoff.json`。新版“自动记忆且仅删除”要求与本文描述的当前后端记忆策略存在明确差异；不得通过静默开启账号、覆写生产数据或恢复新版开关来掩盖冲突。原后端SDK会话恢复/压缩、校验、提示词与评测保持完整。CI 经原有测试入口额外检查 `frontend/horizon/*.mjs` 与 `tests/horizon/*.test.mjs`（见 `tests/horizon.test.cjs`）；静态预览另含 `/horizon/` 且禁用真实 API 模式。

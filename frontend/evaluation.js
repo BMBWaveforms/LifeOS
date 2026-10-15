@@ -658,18 +658,7 @@ const Evals = (() => {
     for (const v of ["A", "B"]) {
       const f = append(variants, "fieldset");
       append(f, "legend", "方案 " + v);
-      const rt = select(
-        f,
-        "Agent 执行层",
-        "ev-runtime-" + v,
-        [
-          ["native", "Python 自实现"],
-          ["claude-sdk", "Claude Agent SDK"],
-        ],
-        v === "A" ? runtimes?.default || "native" : "native",
-      );
-      for (const option of rt.options)
-        if (!available(option.value)) option.disabled = true;
+      append(f, "p", "统一使用 Claude Agent SDK", "muted");
       select(
         f,
         "提示词组合",
@@ -696,7 +685,7 @@ const Evals = (() => {
     append(
       setup,
       "small",
-      "每个方案、每个用例各用独立测试记忆；同用例各步骤可以连续交流。任务排队执行，系统判定后由测试者复核。A/B 可比较执行层或单个提示词模块，请尽量一次只改一个变量。",
+      "每个方案、每个用例各用独立测试记忆；同用例各步骤可以连续交流。任务排队执行，系统判定后由测试者复核。A/B 比较两份提示词方案，两者均使用 SDK，请尽量一次只改一个模块。",
     );
     button(
       append(setup, "div", undefined, "row"),
@@ -706,7 +695,7 @@ const Evals = (() => {
           throw Error("请先选择评测集及用例。");
         const variants = ["A", ...(q("ev-compare").checked ? ["B"] : [])].map(
           (v) => ({
-            runtime: q("ev-runtime-" + v).value,
+            runtime: "claude-sdk",
             bundle_id: q("ev-bundle-" + v).value,
           }),
         );
@@ -853,7 +842,7 @@ const Evals = (() => {
         note("已请求取消，当前用例结束后停止；已有结果保留。");
         await openJob(job.id);
       });
-    else {
+    else if (job.variants.every((v) => v.runtime === "claude-sdk")) {
       button(actions, "按原快照全部重跑", async () => {
         const next = await scopedApi("/api/eval/jobs/" + job.id + "/rerun", {});
         await openJob(next.id);
@@ -865,6 +854,8 @@ const Evals = (() => {
         await openJob(next.id);
       });
     }
+    if (job.variants.some((v) => v.runtime !== "claude-sdk"))
+      append(box, "p", "此任务含已停用执行层，保留历史与导出；需要运行时请新建 SDK 任务。", "muted");
     button(actions, "导出完整 JSON", async () =>
       download(
         "lifeos-evaluation-" + job.id + ".json",

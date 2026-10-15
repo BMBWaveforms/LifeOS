@@ -2,7 +2,7 @@
   "schema_version": 1,
   "kind": "frontend-to-backend-agent-handoff",
   "upstream_repository": "shuaishuaisylas/LifeOS",
-  "baseline_commit": "633ccba4f4f9245e467be5c03426f00f18f313fb",
+  "baseline_commit": "12eb522f04dd61b2a5cae371cf516bdb0d96484a",
   "candidate_entry": "/horizon/",
   "default_entry_changed": false,
   "backend_changed": false,
@@ -44,7 +44,12 @@
     "homepage_followups": false,
     "entry_without_message": true,
     "answer_format": "DOM-only Markdown subset; plain text supported; raw HTML stays text",
-    "decision_ledger": "client evidence presentation; automatic text reveal; viewport-gated overlay seal; no new scoring"
+    "decision_ledger": "client evidence presentation; automatic text reveal; viewport-gated overlay seal; no new scoring",
+    "backend_runtime": "claude-sdk-only",
+    "sdk_private_session_persistence": true,
+    "product_history_api": false,
+    "backend_conversation_delete_api": "/api/conversation-action",
+    "candidate_conversation_delete_calls_backend": false
   },
   "tasks": [
     {
@@ -92,6 +97,13 @@
       "priority": "P2",
       "owner": "backend-and-frontend-agents",
       "status": "semantics-mapping-required"
+    },
+    {
+      "id": "conversation-revocation",
+      "priority": "P1",
+      "owner": "frontend-integration-agent",
+      "status": "upstream-api-present-candidate-not-connected",
+      "detail": "Reconcile browser history deletion with owner-scoped SDK session revocation; SDK private transcripts are not product history APIs."
     }
   ],
   "preserve": [
@@ -123,5 +135,6 @@
     "real-model-acceptance-status",
     "remaining-decisions",
     "rollback"
-  ]
+  ],
+  "initial_delivery_baseline_commit": "633ccba4f4f9245e467be5c03426f00f18f313fb"
 }

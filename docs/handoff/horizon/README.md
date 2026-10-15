@@ -8,7 +8,7 @@ LEVO品牌、15个生活视频场景、输入框下方“直接进入 →”、�
 
 ## 本次交付与基线
 
-目标仓库：`shuaishuaisylas/LifeOS`；核对基线：`633ccba4f4f9245e467be5c03426f00f18f313fb`。该基线已经合入 partner product frontend，具有真实 SDK/native 执行层、团队账号、提示词版本与评测工作台。Horizon 是另一套候选产品前端，不能拿旧独立项目的后端覆盖这些实现。
+目标仓库：`shuaishuaisylas/LifeOS`；首次交接基线为`633ccba`，本轮已同步当前主分支`12eb522f04dd61b2a5cae371cf516bdb0d96484a`。当前后端统一为SDK执行，支持隔离会话恢复与受控压缩，保留团队账号、提示词版本与评测工作台。Horizon 是另一套候选产品前端，不能拿旧独立项目的后端覆盖这些实现。
 
 - 新版代码：`frontend/horizon/`，入口 `/horizon/`，子路由 `#/`、`#/chat`。
 - 原产品：`frontend/index.html`，入口 `/`。本次不切换默认首页。
@@ -37,6 +37,7 @@ python3 scripts/frontend_server.py --port 8892 --backend-port 8781
 
 ## 文件所有权与改动范围
 
+- 上游新增`POST /api/conversation-action`用于撤销SDK会话；候选前端的删除目前仍只作用于浏览器历史，尚未调用此接口，接手时须统一删除语义。
 - 优先在 `frontend/horizon/service.mjs` 做协议映射；`runtime-config.mjs` 仅使用现有 `/health` 做配置发现。原独立服务的 `/app-config` 未迁入。
 - 本次新增前端运行模块、8 类前端测试、独立预览复制脚本，以及候选路由的 Nginx MIME/CSP 支持。原服务入口/模型执行层不变。
 - 复制了 687 条相同指南正文，使用本仓库 `data/guide.json` 的完整元数据；正文条目与独立前端逐条相同。测试会防止副本漂移。指南来源/许可、样片来源均随代码附带。

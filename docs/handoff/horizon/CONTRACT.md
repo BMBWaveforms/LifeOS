@@ -1,6 +1,6 @@
 # API 对照与待实现协议
 
-## 已有接口：按基线源码核对
+## 已有接口：按主分支12eb522源码核对
 
 来源：`frontend/services.js`、`backend/main.py`、`backend/model.py`、`backend/store.py`。下列路径已经存在，Horizon 的 `RealService` 用同源 cookie，不接受浏览器传来的模型密钥。
 
@@ -11,12 +11,13 @@
 | POST /api/login | `{username,password}` | `{user}` + HttpOnly cookie；密码不写前端存储 |
 | POST /api/logout | `{}` | 清除服务端会话；前端重置当前模式视图 |
 | GET /api/memories | cookie | `{enabled,revision,memories,effective,feedback}`；enabled=false 时 Horizon 阻止真实提问，无隐式 settings 写入 |
-| POST /api/run | `{mode:'chat',query,conversation_id,followup_memory_id}` | 最终 JSON：`conversation_id`、`result`、`summary`；即便前端发送了本机 ID，必须保存服务端实际返回的 ID |
-| POST /api/run | `{mode:'home',query:'',conversation_id:'',followup_memory_id:''}` | result.followups：`memory_id,topic,progress_question,guide_question,guides,last_discussed`；页面显示一条 |
+| POST /api/run | `{mode:'chat',query,conversation_id,followup_memory_id}` | 最终 JSON：`conversation_id`、`result`、`summary`；conversation_id为空或24–64位字母/数字/下划线/短横线；首轮前端UUID可稳定续接，仍保存服务端实际返回的ID |
+| POST /api/run | `{mode:'home',query:'',conversation_id:'',followup_memory_id:''}` | result.followups：`memory_id,topic,progress_question,guide_question,guides,last_discussed`；Horizon首页已不调用，适配器仅保留 |
 | POST /api/memory-action | `{action:'delete',id}` 或 `{action:'clear',confirmed:true}` | 新的记忆状态；后端当前 clear 不以 confirmed 字段做安全授权，仍须账号鉴权；前端已先确认 |
+| POST /api/conversation-action | `{action:"delete",conversation_id}` + cookie | 撤销并删除归属于当前账号的SDK会话；Horizon目前只删除本机展示，尚未调用此接口 |
 | GET /api/guide-entry?guide_id=03-01 | cookie | 完整固定指南条目；已有答复 card 含正文，Horizon 当前直接读该 card |
 
-后端还接受 `guide_id`、`runtime` 等字段，但本版视频场景发送自然语言，不把视频映射成强制指南 ID，也不在产品端切执行层。`requestId`、`clarification`、`onProgress` 是当前前端 service 接口参数，RealService **没有向现有后端发送它们**。
+后端还接受 `guide_id`；执行层已统一`claude-sdk`，显式`runtime:native`会被拒绝。本版视频场景发送自然语言，不把视频映射成强制指南 ID，也不在产品端切执行层。`requestId`、`clarification`、`onProgress` 是当前前端 service 接口参数，RealService **没有向现有后端发送它们**。
 
 现有 `result` 可是对象，旧兼容代码也容忍 JSON 字符串。状态：`answer / partial / unsupported / clarification / acknowledged`。`cards` 是服务端全文读取并校验后合并的指南条目，含 `guide_id,title,fields,full_text,source_locator,match_reason,memory_ids` 等；不要用模型自由文本替代。追问字段 `clarification` 是字符串；现有 finalize 不保留前端演示的快捷选项。
 
@@ -29,7 +30,7 @@
 ## 必须尊重的当前限制
 
 - 401 登录失效保留输入；400/409 使用服务端 message，不能自动无限重试。账号并行锁可能返回409；删除记忆、变更 runtime/提示词会使短期上下文失效并产生新的 conversation_id。
-- 当前聊天上下文在后端进程内，按账号隔离，仅保留最近12条消息并清理一小时未活跃会话。重启/其他worker不会恢复产品完整历史。浏览器历史继续使用返回的新ID。
+- 当前SDK会话按账号在私有运行卷隔离持久化，仅恢复已经来源/记忆版本校验并提交的轮次；默认闲置7天、每用户最多30会话，后续访问触发清理。记忆/提示词/模型/工具/压缩配置等改变会使旧恢复失效。SDK恢复不是产品完整历史列表、跨设备记录或任意worker能力；仍保持单worker。浏览器保存服务端返回的ID，不能读取私有SDK transcript。
 - 当前后端能关闭/编辑摘要，Horizon 不展示相关按钮。前端预检无法代替服务端权限策略，跨标签修改可能发生竞态，属于P0待处理事项。
 - 摘要没有持久化 source_conversation_id；不要把 memory.source_run 的内部令牌发给前端当来源链接。关联须另建受账号授权的数据字段。
 - 浏览器取消 fetch 不能证明后端停止。生产请求没有幂等/操作查询契约。重试可能产生新结果/摘要；前端已保留不确定状态。

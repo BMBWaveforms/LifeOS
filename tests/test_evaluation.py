@@ -58,7 +58,7 @@ class Organizer:
 @pytest.fixture
 def env(tmp_path):
     model, executor = Organizer(), ObservableExecutor()
-    app = create_app(tmp_path, model, {'native': executor, 'claude-sdk': executor})
+    app = create_app(tmp_path, model, {'claude-sdk': executor})
     app.state.evaluation.pool = None
     client = TestClient(app)
     login(client, tmp_path)
@@ -82,7 +82,7 @@ def job(env, dataset, variants=None, run=True):
     client, app, *_ = env
     bid = app.state.registry.active_id()
     r = client.post('/api/eval/jobs', json={'dataset_id': dataset['id'], 'dataset_version': dataset['version'],
-                                           'variants': variants or [{'runtime': 'native', 'bundle_id': bid}]})
+                                           'variants': variants or [{'runtime': 'claude-sdk', 'bundle_id': bid}]})
     assert r.status_code == 200, r.text
     jid = r.json()['id']
     if run:
@@ -129,16 +129,16 @@ def test_prompt_edit_bundle_test_activation_and_rollback_are_separate(env):
     bundle = client.post('/api/prompts/bundles', json={'name': 'candidate', 'versions': versions}).json()
     activate = {'bundle_id': bundle['id'], 'expected_active': old['id'], 'note': 'test deployment'}
     assert client.post('/api/prompts/activate', json=activate).status_code == 400
-    result = job(env, save_set(client), [{'runtime': 'native', 'bundle_id': bundle['id']}])
+    result = job(env, save_set(client), [{'runtime': 'claude-sdk', 'bundle_id': bundle['id']}])
     assert result['status'] == 'completed'
     assert client.post('/api/prompts/activate', json=activate).status_code == 200
     assert registry.active_id() == bundle['id']
-    next_request = client.post('/api/run', json={'runtime':'native','query':'你好'}).json()
+    next_request = client.post('/api/run', json={'runtime':'claude-sdk','query':'你好'}).json()
     assert next_request['prompt_bundle_id'] == bundle['id']
     assert client.post('/api/prompts/activate', json=activate).status_code == 400
     assert client.post('/api/prompts/activate', json={'bundle_id': old['id'], 'expected_active': bundle['id'], 'note': 'rollback'}).status_code == 200
     assert registry.active_id() == old['id']
-    restored = client.post('/api/run', json={'runtime':'native','query':'你好'}).json()
+    restored = client.post('/api/run', json={'runtime':'claude-sdk','query':'你好'}).json()
     assert restored['prompt_bundle_id'] == old['id']
     assert 'Synthetic revision.' in client.post('/api/prompts/diff', json={'left': parent, 'right': new['id']}).json()['diff']
 
@@ -177,7 +177,7 @@ def test_batch_cases_and_ab_do_not_share_memory_or_product_state(env):
     original = client.get('/api/memories').json()
     dataset = save_set(client, [simple_case(title='first',memory_enabled=True,steps=[{'kind':'chat','query':'我被手机通知打断'}],rules=[]),simple_case(title='second')])
     bid = app.state.registry.active_id()
-    done = job(env, dataset, [{'runtime':'native','bundle_id':bid},{'runtime':'claude-sdk','bundle_id':bid}])
+    done = job(env, dataset, [{'runtime':'claude-sdk','bundle_id':bid},{'runtime':'claude-sdk','bundle_id':bid}])
     assert done['completed'] == 4 and done['status'] == 'completed'
     assert len({client.get('/api/eval/results/'+r['id']).json()['session_id'] for r in done['results']}) == 4
     for r in done['results']:
@@ -186,7 +186,7 @@ def test_batch_cases_and_ab_do_not_share_memory_or_product_state(env):
     assert client.get('/api/memories').json() == original
     assert client.get('/api/test-runs').json()['runs'] == []
     any_result = client.get('/api/eval/results/'+done['results'][0]['id']).json()
-    assert client.post('/api/test-run',json={'session_id':any_result['session_id'],'runtime':'native','query':'干扰评测'}).status_code == 401
+    assert client.post('/api/test-run',json={'session_id':any_result['session_id'],'runtime':'claude-sdk','query':'干扰评测'}).status_code == 401
 
 
 def test_legacy_batch_sessions_are_retained_but_cannot_resume_as_free_tests(env):
@@ -199,9 +199,9 @@ def test_legacy_batch_sessions_are_retained_but_cannot_resume_as_free_tests(env)
     assert client.get('/api/test-runs').json()['runs']
     with app.state.evaluation.db() as db:
         db.execute('INSERT INTO evaluations VALUES (?,?,?,?,?,?,?,?)',('legacy-id',done['id'],'alice','legacy-case','A','pass',json.dumps(record),0))
-    Evaluation(path,model,app.state.registry,{'native':executor},start_workers=False)
+    Evaluation(path,model,app.state.registry,{'claude-sdk':executor},start_workers=False)
     assert client.get('/api/test-runs').json()['runs']==[]
-    assert client.post('/api/test-run',json={'session_id':sid,'runtime':'native','query':'干扰评测'}).status_code==401
+    assert client.post('/api/test-run',json={'session_id':sid,'runtime':'claude-sdk','query':'干扰评测'}).status_code==401
     with app.state.workbench.db() as db:
         assert db.execute('SELECT COUNT(*) FROM results WHERE session_id=?',(sid,)).fetchone()[0]==1
 
@@ -286,7 +286,7 @@ def test_cancel_rerun_snapshot_and_service_restart(env):
     rerun=client.post('/api/eval/jobs/'+queued['id']+'/rerun',json={'failed_only':True}).json()
     assert rerun['snapshot']['rerun_of']==queued['id']
     assert rerun['snapshot']['cases']==queued['snapshot']['cases']
-    restarted=Evaluation(path,model,app.state.registry,{'native':executor},start_workers=False)
+    restarted=Evaluation(path,model,app.state.registry,{'claude-sdk':executor},start_workers=False)
     assert restarted.job('alice',rerun['id'])['status']=='interrupted'
 
 
@@ -368,3 +368,40 @@ def test_contract_documents_are_frozen_in_bundle(env,monkeypatch):
     new=registry.create_bundle('alice',{'name':'new contract','versions':original['versions']})
     assert registry.resolve(registry.snapshot(original['id']),'chat')==before
     assert registry.snapshot(new['id'])['contracts']['chat']=='synthetic new contract'
+
+
+def test_new_jobs_reject_native_and_legacy_snapshots_remain_readable(env):
+    client, app, _, executor, _ = env
+    dataset = save_set(client)
+    rejected = client.post('/api/eval/jobs', json={'dataset_id': dataset['id'],
+        'variants': [{'runtime': 'native', 'bundle_id': app.state.registry.active_id()}]})
+    assert rejected.status_code == 400
+    queued = job(env, dataset, run=False)
+    spec = queued['snapshot']
+    spec['variants'][0]['runtime'] = 'native'
+    with app.state.evaluation.db() as db:
+        db.execute('UPDATE jobs SET spec=?, status=? WHERE id=?', (json.dumps(spec), 'interrupted', queued['id']))
+    original = client.get('/api/eval/jobs/'+queued['id']).json()
+    assert original['snapshot'] == spec
+    assert client.get('/api/eval/jobs/'+queued['id']+'/export').status_code == 200
+    retry = client.post('/api/eval/jobs/'+queued['id']+'/rerun', json={})
+    assert retry.status_code == 400 and '停用' in retry.json()['message']
+    app.state.evaluation.execute_job('alice', queued['id'])
+    assert client.get('/api/eval/jobs/'+queued['id']).json()['status'] == 'interrupted'
+    assert client.get('/api/eval/jobs/'+queued['id']).json()['snapshot'] == spec
+    assert not executor.requests
+
+
+def test_ab_compares_prompt_bundles_with_sdk_only(env):
+    client, app, _, executor, _ = env
+    first = app.state.registry.snapshot()
+    revision = app.state.registry.save('alice', {'module': 'reply',
+        'content': first['documents']['reply']['content']+'\nSynthetic SDK variant B.'})
+    second = app.state.registry.create_bundle('alice', {'name': 'SDK variant B',
+        'versions': {**first['versions'], 'reply': revision['id']}})
+    done = job(env, save_set(client), [{'bundle_id': first['id']}, {'bundle_id': second['id']}])
+    assert done['status'] == 'completed' and done['completed'] == 2
+    assert {v['runtime'] for v in done['variants']} == {'claude-sdk'}
+    assert len(executor.requests) == 2
+    assert 'Synthetic SDK variant B.' not in executor.requests[0].instruction
+    assert 'Synthetic SDK variant B.' in executor.requests[1].instruction

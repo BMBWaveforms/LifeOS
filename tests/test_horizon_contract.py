@@ -4,12 +4,14 @@ import json
 from pathlib import Path
 from fastapi.testclient import TestClient
 from backend.main import create_app
+from test_api_agent import ScriptedSDKExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class SyntheticModel:
     def __init__(self):
+        self.sessions = {}
         self.responses = [
             {'role': 'assistant', 'content': '', 'tool_calls': [
                 {'id': 'test-read', 'type': 'function', 'function': {'name': 'get_entry', 'arguments': '{"guide_id":"03-01"}'}}]},
@@ -25,7 +27,8 @@ class SyntheticModel:
 
 
 def test_horizon_real_json_matches_current_api_without_changing_account_defaults(tmp_path):
-    app = create_app(tmp_path, SyntheticModel())
+    model = SyntheticModel()
+    app = create_app(tmp_path, model, {'claude-sdk': ScriptedSDKExecutor(model)})
     client = TestClient(app)
     # Only freshly generated temporary test credentials; never read deployment data.
     credentials = json.loads((tmp_path / 'login.json').read_text())
@@ -34,10 +37,12 @@ def test_horizon_real_json_matches_current_api_without_changing_account_defaults
     assert client.get('/health').json()['model']['configured'] is True
     # Fixture setup explicitly enables only the temporary store; Horizon never does this.
     app.state.store.change('alice', 'settings', {'enabled': True})
-    answer = client.post('/api/run', json={'mode': 'chat', 'query': '手机打断工作', 'conversation_id': 'browser-local', 'followup_memory_id': '', 'runtime': 'native'})
+    # The current SDK backend accepts the stable ID allocated by the frontend.
+    conversation_id = 'horizon-browser-conversation-001'
+    answer = client.post('/api/run', json={'mode': 'chat', 'query': '手机打断工作', 'conversation_id': conversation_id, 'followup_memory_id': ''})
     assert answer.status_code == 200, answer.text
     data = answer.json()
-    assert data['conversation_id'] and data['conversation_id'] != 'browser-local'
+    assert data['conversation_id'] == conversation_id
     assert data['result']['status'] == 'answer'
     card = data['result']['cards'][0]
     original = app.state.store.entries['03-01']

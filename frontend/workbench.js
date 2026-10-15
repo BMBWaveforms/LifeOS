@@ -1,7 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
-const labels = {native:'Python 自实现', 'claude-sdk':'Claude Agent SDK'};
-let active = null, selected = 'native', runtimes = null, busy = false, epoch = 0, sessions = {};
+const labels = {native:'Python 自实现（历史）', 'claude-sdk':'Claude Agent SDK'};
+let active = null, selected = 'claude-sdk', runtimes = null, busy = false, epoch = 0, sessions = {};
 const message = text => { $('status').textContent = text; };
 function resetLogin(){document.dispatchEvent(new Event('lifeos-logout'));epoch++;active=null;sessions={};$('workspace').hidden=true;$('login').hidden=false;$('logout').hidden=true;$('account').textContent='';$('results').replaceChildren();$('history').replaceChildren();}
 async function api(path, data){
@@ -16,11 +16,10 @@ function details(box, title, value){const element=document.createElement('detail
 function available(id){return !!runtimes?.options.find(option=>option.id===id)?.available;}
 function controls(){
  for(const id of ['run','new-session','memory-enabled','refresh'])$(id).disabled=busy;
- $('compare').disabled=busy||!available('claude-sdk');if($('free-bundle'))$('free-bundle').disabled=busy;
- for(const id of Object.keys(labels)){$(id).disabled=busy||!available(id);$(id).setAttribute('aria-pressed',String(id===selected));}
- for(const button of document.querySelectorAll('#history button,#results article>button'))button.disabled=busy;
+ $('run').disabled=busy||!available('claude-sdk');if($('free-bundle'))$('free-bundle').disabled=busy;
+ for(const button of document.querySelectorAll('#history button,#results article>button'))button.disabled=busy||button.dataset.legacy==='true';
  const version=runtimes?.options.find(option=>option.id==='claude-sdk')?.version;
- $('runtime-info').textContent='本次测试：'+labels[selected]+' · 产品默认：'+labels[runtimes?.default]+(version?' · SDK '+version:' · SDK 未安装');
+ $('runtime-info').textContent='统一执行层：'+labels[selected]+(version?' · SDK '+version:' · SDK 未安装');
  $('session-info').textContent=sessions[selected]?'正在续接 '+labels[selected]+' 的测试会话。':'下一次运行将创建 '+labels[selected]+' 的新测试会话。';
 }
 function render(record, clear=true){
@@ -40,7 +39,9 @@ function render(record, clear=true){
  const before=record.memories_before?.memories||[],after=record.memories_after?.memories||[];
  const oldIds=new Set(before.map(item=>item.id));
  details(article,'记忆变化：'+before.length+' → '+after.length+' 条',{新增:after.filter(item=>!oldIds.has(item.id)),之前:before,之后:after});
- const resume=add(article,'button','续接此测试会话');resume.disabled=busy;resume.onclick=()=>{selected=record.runtime;sessions={[selected]:{session_id:record.session_id,runtime:selected,memory_enabled:record.memories_after.enabled}};$('memory-enabled').checked=record.memories_after.enabled;controls();message('已续接 '+labels[selected]+' 测试会话，将使用这个会话的最新进展。');};
+ if(record.runtime==='claude-sdk'){
+  const resume=add(article,'button','续接此测试会话');resume.disabled=busy;resume.onclick=()=>{sessions={[selected]:{session_id:record.session_id,runtime:selected,memory_enabled:record.memories_after.enabled}};$('memory-enabled').checked=record.memories_after.enabled;controls();message('已续接 SDK 测试会话，将使用这个会话的最新进展。');};
+ }else add(article,'p','此记录来自已停用的执行层，可查看和下载；请新建 SDK 测试会话。').className='muted';
  const download=add(article,'button','下载本次记录');download.disabled=busy;download.onclick=()=>{const blob=new Blob([JSON.stringify(record,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='lifeos-test-'+record.id+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
  $('results').append(article);
 }
@@ -51,27 +52,21 @@ async function history(){
  for(const run of data.runs){const box=document.createElement('div');box.className='history-item';add(box,'small',new Date(run.created*1000).toLocaleString()+' · '+labels[run.runtime]+' · '+(run.status==='success'?'执行完成':'执行失败'));add(box,'p',run.query);const button=add(box,'button','查看结果');button.onclick=async()=>{const version=epoch;try{const record=await api('/api/test-runs/'+run.id);if(version===epoch)render(record);}catch(error){message(error.message);}};$('history').append(box);}
 }
 async function session(runtime, fresh=false){if(fresh||!sessions[runtime])sessions[runtime]=await api('/api/test-sessions',{runtime,memory_enabled:$('memory-enabled').checked,bundle_id:$('free-bundle')?.value});return sessions[runtime];}
-async function run(compare=false){
+async function run(){
  const query=$('query').value.trim();if(!query){message('请填写本次用户输入。');return;}
  if(busy)return;
  const version=epoch;busy=true;controls();$('results').replaceChildren();
  try{
-  const engines=compare?['native','claude-sdk']:[selected];let failures=0;
-  const fixedBundle=$('free-bundle')?.value;
-  if(compare){for(const runtime of engines)sessions[runtime]=await api('/api/test-sessions',{runtime,memory_enabled:$('memory-enabled').checked,bundle_id:fixedBundle});}
-  for(const runtime of engines){
-   message('正在运行 '+labels[runtime]+'，并整理测试摘要…');
-   const current=await session(runtime,false);if(version!==epoch)return;
-   const record=await api('/api/test-run',{session_id:current.session_id,runtime,query});if(version!==epoch)return;
-   render(record,false);if(record.status==='error')failures++;
-  }
-  message(failures?'本次有 '+failures+' 个执行失败，记录已保存，请查看原因。':compare?'两种执行层已完成本次对比，请查看输出与工具记录。':'本次测试完成，可以继续输入下一句话。');await history();
+  message('正在运行 Claude Agent SDK，并整理测试摘要…');
+  const current=await session(selected,false);if(version!==epoch)return;
+  const record=await api('/api/test-run',{session_id:current.session_id,query});if(version!==epoch)return;
+  render(record,false);
+  message(record.status==='error'?'本次执行失败，记录已保存，请查看原因。':'本次测试完成，可以继续输入下一句话。');await history();
  }catch(error){if(version===epoch)message(error.message);}
  finally{busy=false;if(active)controls();}
 }
-async function enter(user){active=user;epoch++;sessions={};$('account').textContent=user.name;$('logout').hidden=false;$('login').hidden=true;$('workspace').hidden=false;runtimes=await api('/api/runtimes');selected=available(runtimes.default)?runtimes.default:'native';controls();await history();message('已登录，测试数据与产品数据分开保存。');document.dispatchEvent(new CustomEvent('lifeos-login',{detail:user}));}
-for(const id of Object.keys(labels))$(id).onclick=()=>{selected=id;controls();message('已选择 '+labels[id]+'。');};
-$('run').onclick=()=>run();$('compare').onclick=()=>run(true);
+async function enter(user){active=user;epoch++;sessions={};$('account').textContent=user.name;$('logout').hidden=false;$('login').hidden=true;$('workspace').hidden=false;runtimes=await api('/api/runtimes');selected='claude-sdk';controls();await history();message('已登录，测试数据与产品数据分开保存。');document.dispatchEvent(new CustomEvent('lifeos-login',{detail:user}));}
+$('run').onclick=()=>run();
 $('new-session').onclick=()=>{delete sessions[selected];$('results').replaceChildren();controls();message('已开始新测试会话，以往运行记录仍可查看。');};
 $('memory-enabled').onchange=()=>{sessions={};controls();message('记忆设置已变更，下一次运行将使用新测试会话。');};
 $('refresh').onclick=()=>history().catch(error=>message(error.message));
