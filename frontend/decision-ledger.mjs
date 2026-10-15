@@ -14,15 +14,15 @@ export function calculateCommute(minutes,days,weeks){
 }
 // The automatic text timeline completes passages; viewport visibility gates the seal.
 // Only the visible, completed seal keeps a deliberate anticipation and landing.
-export function createLedgerSequence({items,seen=new Set(),stamped=false,reduced=false,schedule=setTimeout,cancel=clearTimeout,onReveal=()=>{},onStamp=()=>{},onStampCancel=()=>{},onComplete=()=>{}}){
+export function createLedgerSequence({items,seen=new Set(),stamped=false,reduced=false,schedule=setTimeout,cancel=clearTimeout,canStamp=()=>true,onReveal=()=>{},onStamp=()=>{},onStampCancel=()=>{},onComplete=()=>{}}){
  let stampVisible=false,pageVisible=true,disposed=false,stampTimer=null,stampStage='',stampVersion=0;
  const clearStamp=()=>{stampVersion++;if(stampTimer!==null)cancel(stampTimer);stampTimer=null;if(stampStage){stampStage='';onStampCancel();}};
  function stamp(){
-  if(disposed||stamped||stampTimer!==null||!stampVisible||!pageVisible||items.some(item=>!seen.has(item.id)))return;
+  if(disposed||stamped||stampTimer!==null||!stampVisible||!pageVisible||!canStamp()||items.some(item=>!seen.has(item.id)))return;
   const version=stampVersion;
   if(reduced){stamped=true;onStamp('done');onComplete();return;}
   stampStage='arming';
-  stampTimer=schedule(()=>{stampTimer=null;if(disposed||version!==stampVersion||!stampVisible||!pageVisible)return;stampStage='stamping';onStamp('start');stampTimer=schedule(()=>{stampTimer=null;if(disposed||version!==stampVersion||!stampVisible||!pageVisible)return;stamped=true;stampStage='';onStamp('done');onComplete();},1100);},550);
+  stampTimer=schedule(()=>{if(disposed||version!==stampVersion)return;stampTimer=null;if(!stampVisible||!pageVisible||!canStamp()){clearStamp();return;}stampStage='stamping';onStamp('start');stampTimer=schedule(()=>{if(disposed||version!==stampVersion)return;stampTimer=null;if(!stampVisible||!pageVisible||!canStamp()){clearStamp();return;}stamped=true;stampStage='';onStamp('done');onComplete();},1100);},550);
  }
  function revealAll(){for(const item of items)if(!seen.has(item.id)){seen.add(item.id);onReveal(item,false);}stamp();}
  return {
@@ -42,7 +42,7 @@ export function ledgerPassages(value,limit=108){
  const chunks=[];let buffer='';
  for(const sentence of sentences){
   if(buffer&&buffer.length+sentence.length>limit){chunks.push(buffer);buffer='';}
-  if(sentence.length>limit*1.6){if(buffer){chunks.push(buffer);buffer='';}for(let i=0;i<sentence.length;i+=limit)chunks.push(sentence.slice(i,i+limit));}
+  if(sentence.length>limit*1.6){if(buffer){chunks.push(buffer);buffer='';}const chars=Array.from(sentence);for(let i=0;i<chars.length;i+=limit)chunks.push(chars.slice(i,i+limit).join(''));}
   else buffer+=sentence;
  }
  if(buffer)chunks.push(buffer);return chunks;
@@ -105,7 +105,7 @@ function paintTextReveal(item,progress){
 }
 function arrow(){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.setAttribute('class','ledger-arrow');const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d','M5 12h14m-6-6 6 6-6 6');svg.append(path);return svg;}
 export function createLedgerView(model,{key,onReadGuide}){
- let state=states.get(key);if(!state){state={open:false,selected:Math.max(0,model.cards.findIndex(c=>c.guide_id==='04-18')),minutes:'30',days:'5',weeks:'52',seen:new Set(),stamped:false};states.set(key,state);if(states.size>150)states.delete(states.keys().next().value);}
+ let state=states.get(key);if(!state){state={open:false,selected:Math.max(0,model.cards.findIndex(c=>c.guide_id==='04-18')),minutes:'30',days:'5',weeks:'52',seen:new Set(),stamped:false,elapsed:0};states.set(key,state);if(states.size>150)states.delete(states.keys().next().value);}
  const motion=matchMedia('(prefers-reduced-motion: reduce)'),scroller=document.getElementById('conversation-scroll'),dialog=document.getElementById('dialog');
  let disposed=false,sequence=null,observer=null,frame=0,lastSample=0,elapsed=0,units=[],numbers=[],seal,sealSlot,status;
  const root=node('section',undefined,'ledger-entry');root.setAttribute('aria-label','决策账本');
@@ -123,28 +123,32 @@ export function createLedgerView(model,{key,onReadGuide}){
  }
  function field(parent,key,label,value){const passages=key==='source'?(String(value||'').match(/[^；\n]+[；\n]?|[；\n]/g)||[]):ledgerPassages(value);passages.forEach((text,i)=>{addUnit(parent,key+'-'+i,i===0?label:'',node('p',text));units.at(-1).phase=label;});}
  function settleNumbers(){for(const item of numbers)item.host.textContent=item.value===null?'—':format(item.value);}
+ function sealInView(){
+  const bounds=scroller?.getBoundingClientRect()||{top:0,bottom:innerHeight,left:0,right:innerWidth},r=sealSlot.getBoundingClientRect();
+  return r.top>=Math.max(0,bounds.top)+12&&r.bottom<=Math.min(innerHeight,bounds.bottom)-24&&r.left>=Math.max(0,bounds.left)&&r.right<=Math.min(innerWidth,bounds.right);
+ }
  function sample(time=performance.now()){
-  frame=0;if(disposed||!state.open||!sequence||!root.isConnected)return;
-  const bounds=scroller?.getBoundingClientRect()||{top:0,bottom:innerHeight,left:0,right:innerWidth},top=Math.max(0,bounds.top)+12,bottom=Math.min(innerHeight,bounds.bottom)-24,visible=new Set(),passed=new Set();
+  if(frame)cancelAnimationFrame(frame);frame=0;if(disposed||!state.open||!sequence||!root.isConnected)return;
+  const visible=new Set(),passed=new Set();
   const pageVisible=!document.hidden&&!dialog?.open;
-  const dt=lastSample?Math.min(100,Math.max(0,time-lastSample)):0;lastSample=pageVisible?time:0;if(pageVisible)elapsed+=dt;
+  const dt=lastSample?Math.min(100,Math.max(0,time-lastSample)):0;lastSample=pageVisible?time:0;if(pageVisible){elapsed+=dt;state.elapsed=elapsed;}
   let moving=false;
-  const sealBounds=sealSlot.getBoundingClientRect();
   for(const [index,item] of units.entries()){
-   const progress=motion.matches||item.focused?1:ledgerAutoProgress(elapsed,index,item.length);
+   const progress=motion.matches||item.focused||state.seen.has(item.id)?1:ledgerAutoProgress(elapsed,index,item.length);
    if(progress<1)moving=true;else visible.add(item.id);
    if(progress!==item.progress){item.progress=progress;item.host.style.setProperty('--ledger-progress',String(progress));paintTextReveal(item,progress);}
   }
-  const r=sealBounds,stampVisible=!moving&&r.top>=top&&r.bottom<=bottom&&r.left>=Math.max(0,bounds.left)&&r.right<=Math.min(innerWidth,bounds.right);
+  const stampVisible=!moving&&sealInView();
   sequence.update({visible,passed,stampVisible,pageVisible});
   if(moving&&pageVisible)requestSample();
  }
  function requestSample(){if(!frame)frame=requestAnimationFrame(sample);}
  function prepare(){
   sequence?.dispose();sequence=null;root.dataset.playing=String(!state.stamped);root.dataset.stamped=String(state.stamped);
-  lastSample=0;elapsed=0;for(const item of units){item.progress=motion.matches?1:0;item.focused=false;item.host.style.setProperty('--ledger-progress',String(item.progress));paintTextReveal(item,item.progress);}
+  lastSample=0;elapsed=state.elapsed||0;for(const [index,item] of units.entries()){item.progress=motion.matches||state.seen.has(item.id)?1:ledgerAutoProgress(elapsed,index,item.length);item.focused=false;item.host.style.setProperty('--ledger-progress',String(item.progress));paintTextReveal(item,item.progress);}
   seal.dataset.state=state.stamped?'done':'waiting';status.textContent=state.stamped?'已展开':'逐项展开';
   sequence=createLedgerSequence({items:units,seen:state.seen,stamped:state.stamped,reduced:motion.matches,
+   canStamp:()=>!disposed&&state.open&&root.isConnected&&root.getClientRects().length>0&&!document.hidden&&!dialog?.open&&sealInView(),
    onReveal(item){status.textContent=item.phase;root.dataset.stage=item.phase;if(item.id==='calculator')settleNumbers();},
    onStamp(phase){seal.dataset.state=phase==='start'?'stamping':'done';if(phase==='done'){state.stamped=true;root.dataset.stamped='true';}},
    onStampCancel(){if(!state.stamped)seal.dataset.state='waiting';},onComplete(){root.dataset.playing='false';status.textContent='已展开';}});
@@ -155,7 +159,7 @@ export function createLedgerView(model,{key,onReadGuide}){
   const toolbar=node('div',undefined,'ledger-toolbar');status=node('span','逐项展开');toolbar.append(status);paper.append(toolbar);
   const question=node('section',undefined,'ledger-question');question.dataset.phase='这次的问题';field(question,'question','这次要想清楚的事',model.query);paper.append(question);
   const guideSection=node('section',undefined,'ledger-guides');const choices=node('div',undefined,'ledger-choices');
-  model.cards.forEach((card,i)=>{const choose=button('',()=>{if(state.selected===i)return;state.selected=i;state.seen=new Set([...state.seen].filter(id=>id.startsWith('question')||id.startsWith('guides-')));state.stamped=false;buildPaper();prepare();paper.querySelectorAll('.ledger-guide-choice')[i]?.focus({preventScroll:true});},'ledger-guide-choice');choose.setAttribute('aria-pressed',String(i===state.selected));choose.setAttribute('aria-label',card.title+'，证据等级 '+ledgerEvidence(card).grade+'，查看明细');choose.append(node('span',card.source_locator||card.guide_id,'ledger-guide-id'),node('span',card.title,'ledger-guide-title'),evidenceGrade(ledgerEvidence(card).grade,'ledger-guide-grade'));addUnit(choices,'guides-'+i,i===0?(model.cards.length>1?'本轮建议 · 选择一条查看':'本轮建议'):'',choose);units.at(-1).phase='本轮建议 '+(i+1)+' / '+model.cards.length;});
+  model.cards.forEach((card,i)=>{const choose=button('',()=>{if(state.selected===i)return;state.selected=i;state.seen=new Set([...state.seen].filter(id=>id.startsWith('question')||id.startsWith('guides-')));state.stamped=false;state.elapsed=0;buildPaper();prepare();paper.querySelectorAll('.ledger-guide-choice')[i]?.focus({preventScroll:true});},'ledger-guide-choice');choose.setAttribute('aria-pressed',String(i===state.selected));choose.setAttribute('aria-label',card.title+'，证据等级 '+ledgerEvidence(card).grade+'，查看明细');choose.append(node('span',card.source_locator||card.guide_id,'ledger-guide-id'),node('span',card.title,'ledger-guide-title'),evidenceGrade(ledgerEvidence(card).grade,'ledger-guide-grade'));addUnit(choices,'guides-'+i,i===0?(model.cards.length>1?'本轮建议 · 选择一条查看':'本轮建议'):'',choose);units.at(-1).phase='本轮建议 '+(i+1)+' / '+model.cards.length;});
   guideSection.append(choices);paper.append(guideSection);
   const card=model.cards[state.selected]||model.cards[0],facts=ledgerEvidence(card),detail=node('section',undefined,'ledger-detail');
   if(facts.tags.length){addUnit(detail,'tags-title','',node('h4','投入与收益概览','ledger-label'));const tags=node('dl',undefined,'ledger-facts');facts.tags.forEach((tag,i)=>{const pair=node('div',undefined,'ledger-fact-pair');pair.append(node('dt',tag.label),node('dd',tag.value==='0'?'无':tag.value));addUnit(tags,'tags-'+i,'',pair);});detail.append(tags);}
