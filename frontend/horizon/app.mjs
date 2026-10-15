@@ -1,6 +1,6 @@
-import {DemoService,RealService,uid} from './service.mjs';
+import {DemoService,RealService,delay,uid} from './service.mjs';
 import {loadRuntimeConfig} from './runtime-config.mjs';
-import {clarificationModel,createTextStream,initChatViewport,recoverWaitingTurns,resultOf,usedMemories} from './chat-presentation.mjs';
+import {clarificationModel,createTextStream,initChatViewport,recoverWaitingTurns,resultOf,runReplySequence,usedMemories} from './chat-presentation.mjs';
 import {conversationActivity,conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from './conversation-library.mjs';
 import {demoProject,createProjectExamples} from './project-demo.mjs';
 import {findMemoryConversation,memoryResumeContext} from './memory-navigation.mjs';
@@ -173,18 +173,18 @@ function renderChat(){
  }
  syncBusy();understandingView.render(c);chatViewport.after(c,position);autosizeQuery();
 }
-function syncBusy(){const running=Boolean(busy);landingView.setBusy(running||mutation||!service);$('thinking').hidden=!running||Boolean(busy?.turn.partial);$('send').hidden=running;$('stop').hidden=!running;$('send').disabled=running||!service;document.querySelectorAll('[data-action="new-chat"]').forEach(e=>e.disabled=running);$('thinking-text').textContent=isDemo()?'正在查找与你相关的指南':'正在等待答复与记忆处理';}
+function syncBusy(){const running=Boolean(busy);landingView.setBusy(running||mutation||!service);$('thinking').hidden=!running||busy.phase==='user'||Boolean(busy?.turn.partial);$('send').hidden=running;$('stop').hidden=!running;$('send').disabled=running||!service;document.querySelectorAll('[data-action="new-chat"]').forEach(e=>e.disabled=running);$('thinking-text').textContent=isDemo()?'正在查找与你相关的指南':'正在等待答复与记忆处理';}
 function scrollEnd(){chatViewport.end();}
 function autosizeQuery(){const input=$('query');if(!$('workspace').hidden){input.style.height='auto';const height=Math.min(180,Math.max(52,input.scrollHeight));input.style.height=height+'px';input.style.overflowY=input.scrollHeight>180?'auto':'hidden';}}
-async function send(retryTurn,{optionId}={}){
+async function send(retryTurn,{optionId,fromLanding=!$('landing').hidden}={}){
  if(busy||mutation||!service)return;if(!isDemo()&&!user){showLogin();return;}let c=ensureConversation();const query=(retryTurn?.query||$('query').value).trim();if(!query)return;if(query.length>2000){notify('请将问题控制在 2000 字以内。');return;}
  if(c.fixture){c=JSON.parse(JSON.stringify(c));delete c.fixture;conversations.unshift(c);}
  const previous=c.turns.at(-1),clarification=resultOf(previous)?.status==='clarification'?{query:previous.query,optionId:optionId||'free_text'}:null;
  const turn=retryTurn||{id:uid(),query,status:'waiting',requestId:uid()};if(!retryTurn){if(clarification)turn.clarificationContext=clarification;c.turns.push(turn);}turn.status='waiting';turn.error='';turn.partial='';
  if(c.turns.length===1&&!c.customTitle&&!c.recoveredMemory&&!c.sceneId)c.title=query.slice(0,22);c.updated=Date.now();$('query').value='';c.draft='';autosizeQuery();$('request-error').hidden=true;saveHistory();
- const job={controller:new AbortController(),turn,c,stream:createTextStream()};busy=job;renderChat();renderHistory();scrollEnd();$('announcer').textContent='已收到，正在查找相关指南。';
+ const job={controller:new AbortController(),turn,c,phase:'user',stream:createTextStream()};busy=job;renderChat();renderHistory();scrollEnd();$('announcer').textContent='消息已发送。';
  try{
-  const response=await service.submit({query,conversationId:c.serverId||c.id,followupId:c.followupId,requestId:turn.requestId,signal:job.controller.signal,clarification:turn.clarificationContext,onProgress:event=>{
+  const response=await runReplySequence({fromLanding,wait:ms=>delay(ms,job.controller.signal),onStage:phase=>{if(busy!==job)return;job.phase=phase;syncBusy();if(phase==='thinking')$('announcer').textContent='正在查找相关指南。';},submit:onProgress=>service.submit({query,conversationId:c.serverId||c.id,followupId:c.followupId,requestId:turn.requestId,signal:job.controller.signal,clarification:turn.clarificationContext,onProgress}),onProgress:event=>{
    if(busy!==job||job.controller.signal.aborted||event.type!=='text_delta')return;
    const position=chatViewport.beforeDelta();turn.partial=job.stream.append(event.text);
    let view=[...$('messages').querySelectorAll('.stream-response')].find(e=>e.dataset.turnId===turn.id);

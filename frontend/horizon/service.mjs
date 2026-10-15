@@ -41,7 +41,7 @@ export class DemoService{
     const selectedMemory=followupId?this.state.memories.find(m=>m.id===followupId&&m.state==='active'):null;
     if(selectedMemory)response.result.cards=response.result.cards.map(card=>({...card,memory_ids:[selectedMemory.id],match_reason:'接续你明确选择的咨询主题。'}));
     if(cards.length&&typeof onProgress==='function'){
-      for(const chunk of response.result.message.match(/.{1,5}/gu)||[]){if(signal?.aborted)throw new DOMException('已停止','AbortError');onProgress({type:'text_delta',text:chunk});await delay(90,signal);}
+      for(const chunk of response.result.message.match(/[^，。！？；：、\n]{1,3}[，。！？；：、\n]?|[，。！？；：、\n]/gu)||[]){if(signal?.aborted)throw new DOMException('已停止','AbortError');await onProgress({type:'text_delta',text:chunk});await delay(/[。！？]$/u.test(chunk)?340:/[，；：、]$/u.test(chunk)?220:135,signal);}
     }
     if(cards.length){
       try{this.commit(s=>{

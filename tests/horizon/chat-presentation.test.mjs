@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {clarificationModel,createTextStream,recoverWaitingTurns,usedMemories} from '../../frontend/horizon/chat-presentation.mjs';
+import {clarificationModel,createTextStream,recoverWaitingTurns,runReplySequence,usedMemories} from '../../frontend/horizon/chat-presentation.mjs';
 import {conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from '../../frontend/horizon/conversation-library.mjs';
-import {DemoService} from '../../frontend/horizon/service.mjs';
+import {DemoService,delay} from '../../frontend/horizon/service.mjs';
 const entries=JSON.parse(readFileSync(new URL('../../frontend/horizon/assets/guide.json',import.meta.url))).entries;
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
 
@@ -42,4 +42,33 @@ test('stopping during demo streaming preserves the partial display but cannot sa
  const service=new DemoService(entries,storage(),0),controller=new AbortController(),chunks=[];
  await assert.rejects(service.submit({query:'手机通知总打断工作',signal:controller.signal,onProgress:event=>{chunks.push(event.text);controller.abort();}}),e=>e.name==='AbortError');
  assert.equal(chunks.length,1);assert.equal((await service.getMemories()).memories.length,0);
+});
+
+
+test('landing sequence starts work immediately but presents the sent message before thinking and reply',async()=>{
+ const gates=[],stages=[],visible=[];let started=false;
+ const done=runReplySequence({fromLanding:true,wait:ms=>new Promise(resolve=>gates.push({ms,resolve})),onStage:stage=>stages.push(stage),onProgress:event=>visible.push(event.text),submit:async emit=>{started=true;await emit({type:'text_delta',text:'回复'});return {result:{message:'回复'}};}});
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(started,true);assert.deepEqual(stages,['user']);assert.deepEqual(visible,[]);assert.ok(gates[0].ms>1140);
+ gates[0].resolve();await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(stages,['user','thinking']);assert.deepEqual(visible,[]);assert.ok(gates[1].ms>=600);
+ gates[1].resolve();assert.equal((await done).result.message,'回复');assert.deepEqual(visible,['回复']);
+});
+
+test('instant JSON replies respect the same reading beats and completed jobs discard late progress',async()=>{
+ const gates=[],visible=[];let emit,completed=false;
+ const done=runReplySequence({wait:ms=>new Promise(resolve=>gates.push(resolve)),onProgress:event=>visible.push(event.text),submit:callback=>{emit=callback;return {result:{message:'完整 JSON'}};}}).then(result=>{completed=true;return result;});
+ await new Promise(resolve=>setImmediate(resolve));assert.equal(completed,false);
+ gates.shift()();await new Promise(resolve=>setImmediate(resolve));assert.equal(completed,false);
+ gates.shift()();assert.equal((await done).result.message,'完整 JSON');
+ await emit({type:'text_delta',text:'迟到分片'});assert.deepEqual(visible,[]);
+});
+
+test('stopping during the opening reading pause cannot publish text or commit demo memory',async()=>{
+ const service=new DemoService(entries,storage(),0),controller=new AbortController();let reached;
+ const attempted=new Promise(resolve=>reached=resolve),visible=[];
+ const pending=runReplySequence({fromLanding:true,wait:()=>delay(10000,controller.signal),onProgress:event=>visible.push(event),submit:emit=>service.submit({query:'手机通知总打断工作',signal:controller.signal,onProgress:event=>{reached();return emit(event);}})});
+ await attempted;assert.equal((await service.getMemories()).memories.length,0);
+ controller.abort();await assert.rejects(pending,{name:'AbortError'});
+ assert.deepEqual(visible,[]);assert.equal((await service.getMemories()).memories.length,0);
 });

@@ -40,7 +40,7 @@
 
 ### 真实流式
 
-前端已提供 `submit({...,signal,onProgress})`；UI 当前消费 `{type:'text_delta',text:string}`，最终 Promise 返回上述完整答复对象。适配器负责解析传输，只有已校验且允许公开的文本才可进入 UI。最终 card/summary 以最终校验结果为准，不根据分片先保存记忆。
+前端已提供 `submit({...,signal,onProgress})`；UI 当前消费 `{type:'text_delta',text:string}`，最终 Promise 返回上述完整答复对象。 展示层 `runReplySequence` 立即启动请求，但将首屏转场、用户消息阅读停顿和回复显示分开；真实JSON答复也遵守这个顺序。`onProgress` 可以返回Promise，提供方需 await 后再继续分片/完成，以保留停止语义；不要另写一份后端延时或把最终JSON伪装为模型流。适配器负责解析传输，只有已校验且允许公开的文本才可进入 UI。最终 card/summary 以最终校验结果为准，不根据分片先保存记忆。
 
 建议传输事件 envelope：
 

@@ -5,7 +5,7 @@
 | 检查 | 结果 |
 |---|---|
 | 后端完整测试 | 96 passed，1 skipped（原有94 + 新增2个Horizon契约/发布边界测试；容器检查留给GitHub环境） |
-| Node完整测试 | 60 passed（原有13 + Horizon47） |
+| Node完整测试 | 63 passed（原有13 + Horizon50） |
 | JS/ES module语法 | 原产品、预览、新版全部通过 |
 | 模块相对导入 | 完整解析，无缺失模块 |
 | 指南副本 | 687条，与仓库权威数据及来源/许可文件一致；前端测试约束不漂移 |
@@ -21,4 +21,10 @@
 
 仍需按 ACCEPTANCE 完成真实模型/账号、多端来源历史、服务端自动记忆策略、公共流式及取消/幂等的联调，才可考虑默认首页切换。
 
-GitHub当前授权没有workflow写入范围，因此保留原 `.github/workflows/ci.yml`。`tests/horizon.test.cjs` 经原Node入口加载47个新版测试并检查模块语法；`tests/test_horizon_container.py` 经原pytest入口在GitHub环境构建镜像并验证Nginx，本机明确跳过。
+GitHub当前授权没有workflow写入范围，因此保留原 `.github/workflows/ci.yml`。`tests/horizon.test.cjs` 经原Node入口加载50个新版测试并检查模块语法；`tests/test_horizon_container.py` 经原pytest入口在GitHub环境构建镜像并验证Nginx，本机明确跳过。
+
+## 首屏进入对话的节奏调整
+
+点击视频/首屏发送后，请求立即启动；页面先只展示用户消息1550ms（涵盖原入场过渡），再展示等待状态至少720ms，之后才显示回复。普通对话的用户消息停顿为360ms。演示文字每段约3字、135ms，逗号220ms、句末340ms；这些是前端阅读节奏，不是后端延时或真实模型流。
+
+新增3个测试覆盖：用户/等待/回复顺序、快速JSON不能抢先出现、停止开场等待不会输出迟到分片或写入演示记忆。浏览器正常模式与减少动效+4倍CPU减速均验证通过：约1.16s入场结束、1.57s显示等待、2.29s开始回复、4.60s完整展示；仅一条用户消息、无右侧空白、无脚本异常。提前停止后演示记忆为0。原始合成验收数据见 [reply-cadence.json](qa/reply-cadence.json)。

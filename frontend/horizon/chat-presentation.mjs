@@ -10,6 +10,18 @@ export function usedMemories(result,memories=[]){
 }
 export function recoverWaitingTurns(items){return items.map(c=>({...c,turns:c.turns.map(t=>t.status==='waiting'&&!t.response?{...t,status:'interrupted',error:'等待已中断，本轮结果尚未确认。'}:t)}));}
 
+// Start the request immediately, but give the sent message its own reading beat.
+// Providers await emit() so stopping during the opening pause cannot commit a
+// demo memory before the reply has actually been presented.
+export async function runReplySequence({fromLanding=false,wait,submit,onStage=()=>{},onProgress=()=>{}}){
+ let active=true;onStage('user');
+ const ready=(async()=>{await wait(fromLanding?1550:360);if(!active)return;onStage('thinking');await wait(720);})();
+ try{
+  const response=Promise.resolve().then(()=>submit(async event=>{await ready;if(active)await onProgress(event);}));
+  return (await Promise.all([ready,response]))[1];
+ }finally{active=false;}
+}
+
 // The UI consumes text deltas, not a transport. Real HTTP/SSE/WebSocket adapters
 // can call append() without changing the message component.
 export function createTextStream({initial='',onText=()=>{}}={}){
