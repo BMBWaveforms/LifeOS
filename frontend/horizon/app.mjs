@@ -1,7 +1,8 @@
 import {DemoService,RealService,delay,uid} from './service.mjs';
 import {loadRuntimeConfig} from './runtime-config.mjs';
 import {clarificationModel,createTextStream,initChatViewport,recoverWaitingTurns,resultOf,runReplySequence,usedMemories} from './chat-presentation.mjs';
-import {conversationActivity,conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from './conversation-library.mjs';
+import {RECENT_CONVERSATION_LIMIT,conversationActivity,conversationMeta,conversationPreview,initHistoryLineNavigation,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from './conversation-library.mjs';
+import {initHistoryReordering,movedConversationIds,orderedConversations} from './conversation-ordering.mjs';
 import {demoProject,createProjectExamples} from './project-demo.mjs';
 import {findMemoryConversation,memoryResumeContext} from './memory-navigation.mjs';
 import {buildLedgerModel,createLedgerView,disposeLedgerViews} from './decision-ledger.mjs';
@@ -11,7 +12,7 @@ import {renderGuideShare,shareableGuides} from './guide-share.mjs';
 import {initWorkspaceShell} from './workspace-shell.mjs';
 import {initConversationUnderstanding,buildConversationUnderstanding} from './conversation-understanding.mjs';
 const projectExamples=createProjectExamples();
-let projectExpanded=true,memoryDialogQuery='',memoryDialogFilter='all',memoryDialogScroll=0;
+let historyOrders={},sortingHistory=false,lastHistoryActive='',projectExpanded=true,memoryDialogQuery='',memoryDialogFilter='all',memoryDialogScroll=0;
 
 const $=id=>document.getElementById(id);
 const icon=(name,small=false)=>{const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class',name==='mark'?'brand-mark':`icon${small?' small':''}`);s.setAttribute('aria-hidden','true');const use=document.createElementNS(s.namespaceURI,'use');use.setAttribute('href','#'+name);s.append(use);return s;};
@@ -59,12 +60,12 @@ $('dialog').addEventListener('click',e=>{if(e.target===$('dialog')){const r=$('d
 
 function historyStorage(){try{return isDemo()?local:sessionStorage;}catch{return null;}}
 function historyKey(){return `lifeos.horizon.history.${mode}.${user?.id||'visitor'}`;}
-function loadHistory(){try{const data=JSON.parse(historyStorage()?.getItem(historyKey())||'[]');conversations=Array.isArray(data)?recoverWaitingTurns(data.filter(c=>typeof c.id==='string'&&Array.isArray(c.turns))):[];}catch{conversations=[];}try{const selected=historyStorage()?.getItem(historyKey()+'.active');activeId=conversations.some(c=>c.id===selected)?selected:'';}catch{activeId='';}}
+function loadHistory(){try{const data=JSON.parse(historyStorage()?.getItem(historyKey())||'[]');conversations=Array.isArray(data)?recoverWaitingTurns(data.filter(c=>typeof c.id==='string'&&Array.isArray(c.turns))):[];}catch{conversations=[];}try{const selected=historyStorage()?.getItem(historyKey()+'.active');activeId=conversations.some(c=>c.id===selected)?selected:'';}catch{activeId='';}try{const saved=JSON.parse(historyStorage()?.getItem(historyKey()+'.order')||'{}');historyOrders=saved.version===1&&saved.groups&&typeof saved.groups==='object'&&!Array.isArray(saved.groups)?saved.groups:{};}catch{historyOrders={};}sortingHistory=false;}
 function saveHistory(){try{historyStorage()?.setItem(historyKey(),JSON.stringify(conversations));historyStorage()?.setItem(historyKey()+'.active',activeId);}catch{notify('本机历史存储空间不足，当前对话仍可继续。');}}
 function rememberDraft(){const c=active();if(c){c.draft=$('query').value;if(!$('workspace').hidden)c.scrollTop=$('conversation-scroll').scrollTop;saveHistory();}}
 function createConversation(){rememberDraft();const c={id:uid(),title:'新对话',created:Date.now(),updated:Date.now(),turns:[],draft:'',followupId:'',serverId:''};conversations.unshift(c);activeId=c.id;$('query').value='';saveHistory();return c;}
 function ensureConversation(){return active()||createConversation();}
-function resetForProvider(){understandingView.close();conversations=[];activeId='';memories=null;followups=[];memoryError='';homeError='';$('query').value='';$('request-error').hidden=true;$('messages').replaceChildren();renderHistory();renderMemoriesState();}
+function resetForProvider(){understandingView.close();conversations=[];activeId='';historyOrders={};sortingHistory=false;memories=null;followups=[];memoryError='';homeError='';$('query').value='';$('request-error').hidden=true;$('messages').replaceChildren();renderHistory();renderMemoriesState();}
 function currentRoute(){return location.hash.startsWith('#/chat')?'chat':'home';}
 function navigate(route){if(blocking())return;rememberDraft();if(route==='chat'&&!active())ensureConversation();if(location.hash===`#/${route==='home'?'':route}`)renderRoute();else location.hash=route==='home'?'#/':'#/chat';}
 function renderRoute(){closeProfileMenu();if(currentRoute()!=='chat')understandingView.close();disposeLedgerViews();const chat=currentRoute()==='chat';$('landing').hidden=chat;$('workspace').hidden=!chat;landingView.setVisible(!chat);landingView.setBusy(Boolean(busy)||mutation||!service);if(chat){if(!active())ensureConversation();$('query').value=active()?.draft||'';renderChat();renderHistory();workspaceView.setVisible(true);requestAnimationFrame(()=>$('query').focus({preventScroll:true}));}else{workspaceView.setVisible(false);renderFollowup();if(service&&(!isDemo()?Boolean(user):true))refreshHome();}}
@@ -77,22 +78,42 @@ function selectConversation(c){if(blocking())return;rememberDraft();activeId=c.i
 function historyItems(){return [...conversations,...(isDemo()?projectExamples.filter(c=>!conversations.some(saved=>saved.id===c.id)):[])].filter(c=>c.turns.length);}
 function deleteConversation(c,afterDelete){if(blocking())return;confirmAction('删除这段对话？','会移除此浏览器里的对话记录，已经保存的记忆仍会保留。',()=>{conversations=conversations.filter(x=>x.id!==c.id);if(activeId===c.id){activeId='';createConversation();}saveHistory();renderChat();renderHistory();afterDelete?.();});}
 function historyRow(c){
- const row=el('div',undefined,'history-row'+(c.id===activeId?' active':''));row.dataset.conversationId=c.id;
- const b=action('',()=>selectConversation(c),'history-select');b.title=c.title;b.append(el('strong',c.title));
- if(!c.projectId)b.append(el('small',conversationPreview(c)));if(c.id===activeId)b.setAttribute('aria-current','true');row.append(b);
- if(!c.fixture){const del=action('',()=>deleteConversation(c),'icon-button delete-history');del.setAttribute('aria-label','删除对话：'+c.title);del.append(icon('trash'));row.append(del);}return row;
+ const row=el('div',undefined,'history-row'+(c.id===activeId?' active':''));row.dataset.conversationId=c.id;row.dataset.orderGroup=c.projectId?'project:'+c.projectId:'recent';
+ const b=action('',()=>{selectConversation(c);[...$('history').querySelectorAll('.history-row')].find(row=>row.dataset.conversationId===c.id)?.querySelector('.history-select').focus({preventScroll:true});},'history-select');b.title=[c.title,conversationPreview(c)].filter(Boolean).join('\n');b.append(el('strong',c.title));
+ if(!c.projectId)b.append(el('small',conversationMeta(c),'history-meta'));if(c.id===activeId)b.setAttribute('aria-current','true');row.append(b);
+ if(sortingHistory){const grip=action('',event=>event.preventDefault(),'icon-button history-order-handle');grip.dataset.reorderHandle='';grip.setAttribute('aria-label','调整顺序：'+c.title);grip.setAttribute('aria-describedby','history-order-help');grip.setAttribute('aria-keyshortcuts','ArrowUp ArrowDown');grip.append(icon('grip'));row.append(grip);}else if(!c.fixture){const del=action('',()=>deleteConversation(c),'icon-button delete-history');del.setAttribute('aria-label','删除对话：'+c.title);del.append(icon('trash'));row.append(del);}return row;
 }
 function renderHistory(){
- const box=$('history');box.replaceChildren();const items=historyItems(),projectItems=sortConversations(items.filter(c=>c.projectId===demoProject.id));
+ historyReorder.cancel();const box=$('history');box.replaceChildren();box.dataset.reordering=String(sortingHistory);$('history-heading-label').textContent=sortingHistory?'调整顺序':'对话';$('history-order-toggle').textContent=sortingHistory?'完成':'排序';$('history-order-toggle').setAttribute('aria-pressed',String(sortingHistory));$('history-order-reset').hidden=!sortingHistory||!Object.values(historyOrders).some(ids=>Array.isArray(ids)&&ids.length);$('history-search-toggle').hidden=sortingHistory;const trace=lastHistoryActive!==activeId;lastHistoryActive=activeId;const items=historyItems(),projectItems=orderedConversations(items.filter(c=>c.projectId===demoProject.id),historyOrders['project:'+demoProject.id]);
  if(projectItems.length){
-  const section=el('section',undefined,'project-group');section.setAttribute('aria-label','搬家计划项目对话');
-  const heading=action('',()=>{projectExpanded=!projectExpanded;renderHistory();},'project-heading');heading.setAttribute('aria-expanded',String(projectExpanded));heading.setAttribute('aria-controls','project-conversations');heading.append(el('span',demoProject.title),el('small','演示'),icon('chevron'));section.append(heading);
-  const list=el('div',undefined,'project-conversations');list.id='project-conversations';list.hidden=!projectExpanded;for(const c of projectItems)list.append(historyRow(c));section.append(list);box.append(section);
+  const section=el('section',undefined,'sidebar-section sidebar-projects');section.setAttribute('aria-label','项目对话');section.append(el('h2','项目','history-section-title'));const group=el('div',undefined,'project-group');section.append(group);
+  const heading=action('',()=>{projectExpanded=!projectExpanded;const list=$('project-conversations');heading.setAttribute('aria-expanded',String(projectExpanded));list.dataset.expanded=String(projectExpanded);list.inert=!projectExpanded;list.setAttribute('aria-hidden',String(!projectExpanded));historyLineNav.refresh();},'project-heading');heading.setAttribute('aria-expanded',String(projectExpanded));heading.setAttribute('aria-controls','project-conversations');heading.append(el('span',demoProject.title),el('small','演示'),icon('chevron'));group.append(heading);
+  const list=el('div',undefined,'project-conversations');list.id='project-conversations';list.dataset.expanded=String(projectExpanded);list.inert=!projectExpanded;list.setAttribute('aria-hidden',String(!projectExpanded));const body=el('div',undefined,'project-branch-body');body.append(projectBranches(projectItems,trace));for(const c of projectItems)body.append(historyRow(c));list.append(body);group.append(list);box.append(section);
  }
- const recent=recentConversations(items.filter(c=>!c.projectId));if(projectItems.length)box.append(el('p','最近使用','history-section-title'));
- if(!recent.length)box.append(el('p','聊过的事，会在这里留下线索。','history-empty'));else for(const c of recent)box.append(historyRow(c));
- $('history-total').textContent=String(items.length);
+ const recent=orderedConversations(items.filter(c=>!c.projectId),historyOrders.recent).slice(0,RECENT_CONVERSATION_LIMIT),section=el('section',undefined,'sidebar-section sidebar-recents');section.setAttribute('aria-label','最近对话');section.append(el('h2',Array.isArray(historyOrders.recent)&&historyOrders.recent.length?'自定顺序':'最近对话','history-section-title'));
+ if(!recent.length)section.append(el('p','聊过的事，会在这里留下线索。','history-empty'));else for(const c of recent)section.append(historyRow(c));box.append(section);
+ $('history-total').textContent=String(items.length);historyLineNav.refresh();
 }
+function saveHistoryOrder(next){
+ try{const storage=historyStorage();if(!storage)throw Error();storage.setItem(historyKey()+'.order',JSON.stringify({version:1,groups:next}));historyOrders=next;renderHistory();return true;}catch{notify('顺序未能保存，请检查浏览器存储后重试。');return false;}
+}
+function moveHistory({group,sourceId,targetId}){
+ if(busy||mutation)return false;
+ const items=historyItems().filter(c=>group==='recent'?!c.projectId:'project:'+c.projectId===group),ids=movedConversationIds(items,historyOrders[group],sourceId,targetId);
+ if(!ids||!saveHistoryOrder({...historyOrders,[group]:ids}))return false;
+ $('announcer').textContent='对话顺序已保存。';return true;
+}
+function projectBranches(items,trace){
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),height=items.length*40;
+ svg.setAttribute('class','project-branches');svg.setAttribute('viewBox',`0 0 18 ${height}`);svg.setAttribute('height',height);svg.setAttribute('aria-hidden','true');
+ const add=(d,cls)=>{const p=document.createElementNS(ns,'path');p.setAttribute('d',d);p.setAttribute('class',cls);svg.append(p);return p;};
+ add(`M1 0 V${height-28}`,'project-branch-base');
+ items.forEach((c,i)=>{const y=i*40+20;add(`M1 ${y-8} Q1 ${y} 9 ${y} H18`,'project-branch-base');if(c.id===activeId){const path=add(`M1 0 V${y-8} Q1 ${y} 9 ${y} H18`,'project-branch-selected');path.setAttribute('pathLength','1');if(trace&&!matchMedia('(prefers-reduced-motion: reduce)').matches)path.animate([{strokeDashoffset:1},{strokeDashoffset:0}],{duration:420,easing:'cubic-bezier(.22,1,.36,1)'});}});
+ return svg;
+}
+$('history-order-toggle').onclick=()=>{if(blocking())return;historyReorder.cancel();sortingHistory=!sortingHistory;renderHistory();$('history-order-toggle').focus({preventScroll:true});};
+$('history-order-reset').onclick=()=>{if(blocking())return;saveHistoryOrder({});};
+
 function showConversationLibrary(initialQuery=''){
  if(blocking())return;let query=initialQuery;
  const render=()=>openDialog('全部对话',body=>{
@@ -276,6 +297,8 @@ const understandingView=initConversationUnderstanding({
   },
 });
 const chatViewport=initChatViewport({getConversation:active});
+const historyLineNav=initHistoryLineNavigation($('history'));
+const historyReorder=initHistoryReordering($('history'),{onMove:moveHistory,enabled:()=>!busy&&!mutation});
 const workspaceView=initWorkspaceShell({onCollapse:()=>closeProfileMenu()});
 async function boot(){try{await guideReady;service=new DemoService(entries,local);user=service.user;loadHistory();await refreshMemories();await refreshHome();renderProvider();renderRoute();}catch{notify('指南没有加载成功，请保持本地服务运行并刷新页面。');$('send').disabled=true;}config=await loadRuntimeConfig(); }
 boot();

@@ -17,7 +17,7 @@
     "public_backend_streaming": false,
     "server_cancel": false,
     "server_idempotency": false,
-    "history": {"demo": "browser-localStorage", "real": "browser-sessionStorage-per-account", "server_persistence": false},
+    "history": {"demo": "browser-localStorage", "real": "browser-sessionStorage-per-account", "server_persistence": false, "manual_order": "same-group-ID-order; demo-localStorage; real-sessionStorage-per-account; new-conversations-first; no-server-sync"},
     "projects": "demo-group-only",
     "understanding": "frontend-explicit-text-rules-not-agent-reasoning",
     "guide_share": "local-png-no-private-fields",

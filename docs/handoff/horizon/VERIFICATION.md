@@ -1,11 +1,11 @@
 # 本次交付验证
 
-基线：`633ccba4f4f9245e467be5c03426f00f18f313fb`。以下均在独立集成副本进行，未改原工作目录和8890运行版本，未读取生产账号或运行时数据库。
+基线：`633ccba4f4f9245e467be5c03426f00f18f313fb`。集成检查在独立集成副本进行，后续视觉调整同时同步至8890独立新版；原产品工作目录保持不动，未读取生产账号或运行时数据库。
 
 | 检查 | 结果 |
 |---|---|
 | 后端完整测试 | 96 passed，1 skipped（原有94 + 新增2个Horizon契约/发布边界测试；容器检查留给GitHub环境） |
-| Node完整测试 | 63 passed（原有13 + Horizon50） |
+| Node完整测试 | 68 passed（原有13 + Horizon55） |
 | JS/ES module语法 | 原产品、预览、新版全部通过 |
 | 模块相对导入 | 完整解析，无缺失模块 |
 | 指南副本 | 687条，与仓库权威数据及来源/许可文件一致；前端测试约束不漂移 |
@@ -21,7 +21,7 @@
 
 仍需按 ACCEPTANCE 完成真实模型/账号、多端来源历史、服务端自动记忆策略、公共流式及取消/幂等的联调，才可考虑默认首页切换。
 
-GitHub当前授权没有workflow写入范围，因此保留原 `.github/workflows/ci.yml`。`tests/horizon.test.cjs` 经原Node入口加载50个新版测试并检查模块语法；`tests/test_horizon_container.py` 经原pytest入口在GitHub环境构建镜像并验证Nginx，本机明确跳过。
+GitHub当前授权没有workflow写入范围，因此保留原 `.github/workflows/ci.yml`。`tests/horizon.test.cjs` 经原Node入口加载55个新版测试并检查模块语法；`tests/test_horizon_container.py` 经原pytest入口在GitHub环境构建镜像并验证Nginx，本机明确跳过。
 
 ## 首屏进入对话的节奏调整
 
@@ -36,3 +36,13 @@ GitHub当前授权没有workflow写入范围，因此保留原 `.github/workflow
 1440×900、1280×800、1280×720、757×800、1920×1080已逐场景验收；带回访卡时标题与输入区域仍至少相隔57px，无标题溢出和水平滚动。手动快速切换、减少动效时取消文字过渡、草稿保留、按所选视频直接发送到聊天均通过；Node仍为63项通过。合成浏览器数据见 [scene-hierarchy.json](qa/scene-hierarchy.json)。
 
 设计扫描：更新后的场景CSS/脚本无发现。全页HTML扫描中的全屏视频贴边是既有满屏画布设计，导航/正文保留24px边距；隐藏工作区的10px个人资料文字不属本轮首页改动；请求期间的等待点是实际请求反馈。首页原10px页脚已统一为12px，未将这些检查扩展为对聊天界面的重设计。
+
+## 侧栏层级、分支与对话排序
+
+侧栏统一14px内容/操作、12px分组标签与活动信息；“开始新对话”使用黑色主操作。项目名称与子对话用原生SVG曲线分支表达关系，当前路径420ms描出，展开/收起360ms；普通对话保持平面结构，轻量横线与最多4px的邻近反馈辅助定位。参考 React Bits 的 [Line Sidebar](https://reactbits.dev/c/components/line-sidebar)、[Branched Menu](https://reactbits.dev/c/micro/branched-menu) 与 [Shredder](https://reactbits.dev/micro/shredder)，采用原生实现，无React依赖；没有引入碎纸删除。
+
+“排序”模式才展示手柄，拖动有悬起、空位、邻项让位和240ms落位；支持同组上下键、Escape/组外取消、保存后刷新、恢复默认。排序不会切换当前对话或丢掉不可见历史。减少动效时去掉分支/让位过渡与悬起缩放，保留直接操作反馈。仍是客户端偏好，不是后端新增能力。
+
+新增5个自动测试覆盖同名识别元信息、完整组顺序、打开旧会话后的稳定性、新会话置前、过期/重复ID、无效跨组目标与输入不变。正常1440×900和减少动效+4倍CPU的1280×720浏览器走查覆盖：21段合成对话、6条可见最近对话、3条项目对话；鼠标拖动、键盘排序、取消、组间隔离、刷新保留、恢复默认、搜索旧记录、重命名、删除取消/确认均通过。侧栏页脚可见、右侧无空白，无脚本异常。原始合成数据见 [sidebar-hierarchy.json](qa/sidebar-hierarchy.json)。
+
+集成后的静态 `/horizon/` 也已浏览器验收：新增排序模块正常加载，键盘可调整项目对话，偏好写入正确的项目组；静态模式没有真实API请求或脚本异常，见 [sidebar-preview.json](qa/sidebar-preview.json)。

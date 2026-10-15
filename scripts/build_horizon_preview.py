@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODULES = (
     'app', 'service', 'runtime-config', 'chat-presentation', 'conversation-library',
-    'conversation-understanding', 'decision-ledger', 'guide-detail', 'guide-share',
+    'conversation-ordering', 'conversation-understanding', 'decision-ledger', 'guide-detail', 'guide-share',
     'guide-share-card', 'scene-landing', 'landing-scenes', 'memory-navigation',
     'project-demo', 'workspace-shell',
 )

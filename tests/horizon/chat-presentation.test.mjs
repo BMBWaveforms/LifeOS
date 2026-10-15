@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {clarificationModel,createTextStream,recoverWaitingTurns,runReplySequence,usedMemories} from '../../frontend/horizon/chat-presentation.mjs';
-import {conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from '../../frontend/horizon/conversation-library.mjs';
+import {conversationMeta,conversationPreview,matchingConversationTurn,matchesConversation,recentConversations,sortConversations} from '../../frontend/horizon/conversation-library.mjs';
 import {DemoService,delay} from '../../frontend/horizon/service.mjs';
 const entries=JSON.parse(readFileSync(new URL('../../frontend/horizon/assets/guide.json',import.meta.url))).entries;
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
@@ -71,4 +71,11 @@ test('stopping during the opening reading pause cannot publish text or commit de
  await attempted;assert.equal((await service.getMemories()).memories.length,0);
  controller.abort();await assert.rejects(pending,{name:'AbortError'});
  assert.deepEqual(visible,[]);assert.equal((await service.getMemories()).memories.length,0);
+});
+
+
+test('same-title conversations retain their names but expose distinct content timestamps and turn counts',()=>{
+ const a={title:'通勤与生活',created:Date.parse('2026-10-15T01:00:00Z'),lastOpened:Date.parse('2026-10-15T06:00:00Z'),turns:[{query:'相同的问题'}]};
+ const b={...a,updated:Date.parse('2026-10-15T02:30:00Z'),turns:[...a.turns,{query:'补充预算3000元'}]};
+ assert.notEqual(conversationMeta(a),conversationMeta(b));assert.match(conversationMeta(a),/09:00/);assert.match(conversationMeta(b),/10:30/);assert.match(conversationMeta(b),/2 次交流/);assert.equal(a.title,b.title);assert.equal(matchesConversation(b,'3000'),true);assert.equal(conversationPreview(b,'3000'),'补充预算3000元');
 });

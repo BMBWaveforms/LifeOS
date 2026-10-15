@@ -36,6 +36,7 @@
   <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
   <symbol id="link" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14m10 0v6H4V4h6"/></symbol>
   <symbol id="share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></symbol>
+  <symbol id="grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></symbol>
   <symbol id="trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V3h8v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
 </defs></svg>
 
@@ -67,7 +68,7 @@
   <aside id="conversation-sidebar" class="sidebar" aria-label="对话导航">
     <a href="#/" class="wordmark"><svg class="brand-mark"><use href="#mark"/></svg><span>LifeOS</span></a>
     <button class="new-chat" data-action="new-chat"><svg class="icon"><use href="#plus"/></svg>开始新对话</button>
-    <div class="history-heading"><span>最近聊过</span><button class="icon-button" id="history-search-toggle" aria-label="搜索对话"><svg class="icon"><use href="#search"/></svg></button></div>
+    <div class="history-heading"><span id="history-heading-label">对话</span><div class="history-tools"><button id="history-order-reset" type="button" class="history-order-action" hidden>恢复默认</button><button id="history-order-toggle" type="button" class="history-order-action" aria-pressed="false">排序</button><button class="icon-button" id="history-search-toggle" aria-label="搜索对话"><svg class="icon"><use href="#search"/></svg></button></div></div><p id="history-order-help" class="sr-only">拖动右侧手柄调整同组对话的顺序，也可以聚焦手柄后使用上下方向键。拖动中按 Escape 取消。</p>
     <div id="history" class="history"></div>
     <button id="history-all" class="history-all" data-action="conversation-library">全部对话<span id="history-total">0</span></button>
     <div class="sidebar-bottom">
