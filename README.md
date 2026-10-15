@@ -1,6 +1,6 @@
 # LifeOS · 苟活
 
-固定指南问答、长期会话摘要和首页问题回访。Python / FastAPI 后端保留身份、指南校验和记忆管理；问答默认通过 Claude Agent SDK（内含 Claude Code CLI）调度，仍使用 DeepSeek；可显式切换 Python 自实现执行层。正式页面采用合伙人的 LifeOS 前端；用 Docker Compose 启动前后端，不依赖 Dify。
+固定指南问答、长期会话摘要和首页问题回访。Python / FastAPI 后端保留身份、指南校验和记忆管理；问答统一通过 Claude Agent SDK（内含 Claude Code CLI）调度，仍使用 DeepSeek；SDK 管理连续会话与普通历史压缩。正式页面采用合伙人的 LifeOS 前端；用 Docker Compose 启动前后端，不依赖 Dify。
 
 用户提问后，Agent 搜索并完整读取指南，后端校验来源后展示答复。开启记忆时，每轮自动生成摘要，记录明确的用户状态、寻求过的指南和问题进展。首页先询问上次的问题解决了没有、是否需要继续咨询；用户提交问题后才展示指南正文。
 
@@ -69,7 +69,7 @@ python3 -m venv .venv
 cp .env.example .env
 ```
 
-将 `.env` 的 `API_CONFIG_FILE` 改成自己模型配置文件的绝对路径。所有启动方式缺省都使用 `claude-sdk`；SDK 通过 Anthropic 兼容入口调用 DeepSeek，摘要和回访继续走原 Chat Completions 入口。需要原生执行层时显式设置 `AGENT_RUNTIME=native`。再运行：
+将 `.env` 的 `API_CONFIG_FILE` 改成自己模型配置文件的绝对路径。所有启动方式统一使用 `claude-sdk`；SDK 通过 Anthropic 兼容入口调用 DeepSeek，摘要、首页回访和评测判定也使用独立无工具的 SDK 临时任务。Python 原生问答执行层和切换入口已移除；旧 `AGENT_RUNTIME` 环境变量不再改变执行层。再运行：
 
 ```sh
 .venv/bin/python scripts/run_local.py
@@ -87,14 +87,14 @@ CI 会运行后端测试、产品/预览 JavaScript 语法检查与契约测试�
 
 ## 评测工作台
 
-完整应用登录后访问 `/workbench.html`。在“评测集”填写输入、步骤和预期，可批量运行同一版本，用两个执行层或两个提示词组合做 A/B。结果展示五个环节与独立整体判定，支持人工复核和 JSON / CSV 导出。“提示词管理”可编辑模块、保存版本、对比差异、创建组合；测试与产品启用分开。七个初始虚构用例用于熟悉工具，不代表通过的质量基准。具体限制、API 和操作顺序见 [评测工作台手册](docs/评测工作台.md)。
+完整应用登录后访问 `/workbench.html`。在“评测集”填写输入、步骤和预期，可批量运行同一版本，用两份提示词组合做 A/B，均通过SDK执行。结果展示五个环节与独立整体判定，支持人工复核和 JSON / CSV 导出。“提示词管理”可编辑模块、保存版本、对比差异、创建组合；测试与产品启用分开。七个初始虚构用例用于熟悉工具，不代表通过的质量基准。具体限制、API 和操作顺序见 [评测工作台手册](docs/评测工作台.md)。
 
 ## 文件在哪里维护
 
 | 内容 | 位置 |
 |---|---|
 | FastAPI、工具调用循环、记忆及校验 | `backend/` |
-| 可替换执行层、共用工具、隔离测试记录 | `backend/executors.py`、`tools.py`、`workbench.py` |
+| SDK 会话与压缩、指南工具、隔离测试记录 | `backend/executors.py`、`tools.py`、`workbench.py` |
 | 唯一产品入口、固定情境与真实接口适配 | `frontend/index.html`、`app.js`、`scenes.js`、`services.js` |
 | 模块化提示词初始文档 | `prompts/modules/*.md`（七模块）；部署后版本在工作台维护，可导出/导入独立文档 |
 | 评测集、批量判定与提示词管理 | `backend/evaluation.py`、`prompts.py`；[工作台手册](docs/评测工作台.md) |
@@ -106,7 +106,7 @@ CI 会运行后端测试、产品/预览 JavaScript 语法检查与契约测试�
 | 团队调试、架构、部署与验收说明 | `docs/` |
 | 自动测试与 Pages 发布 | `.github/workflows/` |
 
-提示词从独立模块文档初始化，工作台保存不可变版本和组合；每次请求固定产品启用组合。Docker 只读挂载 `prompts/`；已有部署通过工作台导入/编辑、测试并单独启用。`skills/guide-only.md` 是维护约束，当前没有作为运行时 Skill 自动加载。业务 harness 保留上下文、来源和记忆版本校验；工具循环交给选定执行层。切换、部署和测试方式见 [执行层与测试台](docs/执行层与测试台.md)。
+提示词从独立模块文档初始化，工作台保存不可变版本和组合；每次请求固定产品启用组合。Docker 只读挂载 `prompts/`；已有部署通过工作台导入/编辑、测试并单独启用。`skills/guide-only.md` 是维护约束，当前没有作为运行时 Skill 自动加载。业务 harness 保留上下文、来源和记忆版本校验；工具循环、连续历史及普通压缩交给SDK。部署和测试方式见 [执行层与测试台](docs/执行层与测试台.md)。
 
 ## 当前范围
 
@@ -117,3 +117,5 @@ CI 会运行后端测试、产品/预览 JavaScript 语法检查与契约测试�
 旧 Dify 版本和原始源码交付包仍保存在项目所有者电脑的 `保留版本/Dify-v0.2/`，不包含在这个仓库中。本机的密钥、密码、SQLite、个人记忆和历史运行 JSON 不提交。已有验证及边界见 [验收记录](docs/验收记录.md)。
 
 合作方页面保留随附素材和 Noto Serif SC 的 [字体许可](frontend/assets/fonts/OFL.txt)。指南内容按 CC BY 4.0 保留署名；见 [来源说明](data/ATTRIBUTION.txt) 和 [指南许可证](data/GUIDE-LICENSE.txt)。
+
+会话按用户隔离，只有通过来源及记忆版本校验的轮次可恢复。默认提前至 SDK 计算窗口的 60% 尝试压缩，闲置 7 天或超过每用户 30 个会话时在后续访问清理；重要事实、问题状态仍在 SQLite，压缩摘要不作为唯一依据。产品页面刷新后仍开启新对话，暂未增加完整历史列表。配置与边界见 [SDK 执行层与测试台](docs/执行层与测试台.md)。Mac 系统应用目前仅完成[接入调研](docs/Mac备忘录与提醒事项接入调研.md)，尚未连接私人数据。

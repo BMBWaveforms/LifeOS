@@ -63,7 +63,11 @@ API_CONFIG_PATH=./api.json
 WEB_PORT=8780
 ALLOWED_ORIGINS=http://localhost:8780,http://127.0.0.1:8780
 COOKIE_SECURE=false
-AGENT_RUNTIME=claude-sdk
+AGENT_SDK_AUTO_COMPACT=true
+AGENT_SDK_COMPACT_PCT=60
+AGENT_SDK_SESSION_TTL_SECONDS=604800
+AGENT_SDK_MAX_SESSIONS=30
+AGENT_SDK_CONTEXT_USAGE=false
 AGENT_SDK_BASE_URL=https://api.deepseek.com/anthropic
 TEST_ACCOUNT_PASSWORD=
 ```
@@ -76,11 +80,13 @@ TEST_ACCOUNT_PASSWORD=
 | `ALLOWED_ORIGINS` | 浏览器地址的完整 origin，含协议及非默认端口，不带路径或末尾斜杠；多个用逗号分隔且不加空格 | 填服务器 IP 不等于允许本机隧道地址 |
 | `COOKIE_SECURE` | 浏览器使用 HTTPS 时为 true；本机/隧道 HTTP 为 false | HTTP 开启 true 会导致登录 Cookie 不发送 |
 | `COMPOSE_PROJECT_NAME` | 识别容器和数据卷，部署后保持固定 | 改名字会创建另一套账号和记忆卷 |
-| `AGENT_RUNTIME` | 产品默认 native / claude-sdk | 测试页切换不改变产品默认；失败不自动回退 |
-| `AGENT_SDK_BASE_URL` | SDK 的 Anthropic 兼容入口 | 与 api.json 的 Chat Completions base_url 不同 |
+| `AGENT_SDK_AUTO_COMPACT` / `AGENT_SDK_COMPACT_PCT` | 自动压缩开关及提前阈值，默认true/60 | 不等于精确输入token预算或无损保证 |
+| `AGENT_SDK_SESSION_TTL_SECONDS` / `AGENT_SDK_MAX_SESSIONS` | SDK会话默认闲置7天/每用户30个 | 后续访问清理，非定时删除 |
+| `AGENT_SDK_CONTEXT_USAGE` | SDK token统计，默认false | 第三方接口不支持时unknown，不能记为0 |
+| `AGENT_SDK_BASE_URL` | SDK 的 Anthropic 兼容入口 | 这是所有模型任务的实际入口；旧api.json的base_url仅用于兼容识别提供者 |
 | `TEST_ACCOUNT_PASSWORD` | 私有统一测试密码，启动时补齐 test1 到 test10 | 仅更新这些测试账号的密码；原账号及数据保留；密码不提交到 Git |
 
-`api.json` 中的 `base_url` 必须是无账号密码、查询参数和片段的 HTTPS 地址；客户端在末尾追加 `/chat/completions`。Docker 部署把模型名和 Key 放在挂载 JSON 中；当前 Compose 没有把宿主机的 `MODEL_API_KEY`、`MODEL_NAME` 等变量直接传入容器。
+`api.json` 中的 `base_url` 必须是无账号密码、查询参数和片段的 HTTPS 地址；不再追加 `/chat/completions`；所有实际模型任务使用 AGENT_SDK_BASE_URL，旧 base_url 保留用于兼容配置和识别提供者。Docker 部署把模型名和 Key 放在挂载 JSON 中；当前 Compose 没有把宿主机的 `MODEL_API_KEY`、`MODEL_NAME` 等变量直接传入容器。
 
 Compose 会优先使用当前 shell 的同名环境变量，其次才是 `--env-file`；发现配置值异常时检查这一来源。只检查有关参数，不整体转储环境中的敏感值。[Docker 环境变量说明](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
 
@@ -135,7 +141,7 @@ curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8780/health
 curl --silent --show-error --max-time 5 -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8780/api/memories
 ```
 
-页面应返回 200；健康 JSON 应包含 `status: ok`、`backend: python-direct-api`、当前 687 个条目和内容版本。未经登录的 `/api/memories` 应为 401。这三步同时确认前端能访问、转发到正确后端，以及私有接口需要登录。
+页面应返回 200；健康 JSON 应包含 `status: ok`、`backend: python-sdk`、当前 687 个条目和内容版本。未经登录的 `/api/memories` 应为 401。这三步同时确认前端能访问、转发到正确后端，以及私有接口需要登录。
 
 `model.configured=true` 仅说明配置可解析。占位 Key 或余额不足时也可能为 true，因此不能在这里报告真实问答成功。
 
@@ -299,7 +305,7 @@ docker compose --env-file .env.compose logs --tail 100 backend frontend
 
 ## 执行层与测试台验收
 
-本轮增加锁定 Claude Agent SDK、DeepSeek Anthropic 兼容入口和 /workbench.html。部署后用现有账号登录测试页，分别选择 native / claude-sdk，核对来源、工具轨迹、摘要保存和连续测试。对比使用独立测试会话；原产品数据不复制或修改。回切设置 AGENT_RUNTIME=native 后重启 backend。详细接口、上下文策略、功能边界见 [执行层与测试台](执行层与测试台.md)。
+问答统一锁定 Claude Agent SDK 和 DeepSeek Anthropic 兼容入口；旧 AGENT_RUNTIME 不再选择执行层。部署后在隔离测试会话验证：首轮不恢复，次轮session_resumed=true且本轮重新回读指南；重启后同测试会话能恢复；删除/纠正/关闭记忆后旧会话不再恢复；失败轮次无提交标记；受控手动压缩后仍能继续。压缩摘要不作唯一业务状态。A/B比较两份提示词组合，原产品数据不复制或修改。回退使用已验证代码版本，不再配置native兜底。详细接口见 [执行层与测试台](执行层与测试台.md)。
 
 
 ## 完整评测工作台验收

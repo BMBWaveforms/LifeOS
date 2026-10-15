@@ -25,7 +25,7 @@ class Store:
         self.path = self.directory / 'memory.sqlite'
         self.lock = threading.RLock()
         self.runs = {}
-        self.conversation_revisions = {}
+        self.change_listeners = []
         self.guide = json.loads((ROOT / 'data/guide.json').read_text())
         self.entries = {e['guide_id']: e for e in self.guide['entries']}
         config_path = self.directory / 'profiles.json'
@@ -143,6 +143,10 @@ class Store:
             else:
                 raise ValueError('未知操作')
             db.execute('UPDATE profiles SET revision=revision+1 WHERE id=?',(owner,))
+        # Summary writes deliberately do not trigger this: they advance the same
+        # conversation. Explicit management changes revoke every SDK session.
+        for listener in self.change_listeners:
+            listener(owner)
         return self.state(owner)
 
     def search(self, query, limit=8):
@@ -175,8 +179,9 @@ class Store:
             now=time.time()
             self.runs={k:v for k,v in self.runs.items() if v['expires']>now}
             s=self.state(owner)
-            memories=sorted(s['effective'],key=lambda m:m['updated'],reverse=True)[:12] if use_memory else []
-            followup=next((m for m in memories if m['id']==followup_memory_id),None)
+            effective=sorted(s['effective'],key=lambda m:m['updated'],reverse=True) if use_memory else []
+            followup=next((m for m in effective if m['id']==followup_memory_id),None)
+            memories=([followup]+[m for m in effective if m['id']!=followup['id']])[:12] if followup else effective[:12]
             if followup_memory_id and not followup:raise ValueError('回访记录已删除、停用或不属于当前用户')
             followups=[m for m in memories if m.get('origin')=='model_summary' and m.get('problem') and m.get('problem_status')!='resolved'][:3]
             rid=secrets.token_urlsafe(24)
@@ -285,6 +290,8 @@ class Store:
                 raise ValueError('请求已到期，请重新执行')
             if self.state(run['owner'])['revision'] != run['revision']:
                 raise ValueError('记忆已变更，旧结果已失效，请重新执行')
+            if any(m.get('expires') is not None and m['expires'] <= time.time() for m in run['memories']):
+                raise ValueError('本轮使用的记忆已到期，请重新执行')
             return run
 
     def finalize(self, owner, rid, raw):

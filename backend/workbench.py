@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from backend.errors import ModelError
 from backend.executors import validate_runtime
-from backend.model import AgentService, prompt
+from backend.model import AgentService
 from backend.store import Store
 
 
@@ -43,7 +43,7 @@ class Workbench:
         connection.row_factory = sqlite3.Row
         return connection
 
-    def create_session(self, owner, runtime, memory_enabled=True, bundle_id=None, snapshot=None):
+    def create_session(self, owner, runtime='claude-sdk', memory_enabled=True, bundle_id=None, snapshot=None):
         runtime = validate_runtime(runtime)
         if not isinstance(memory_enabled, bool):
             raise ValueError('memory_enabled 必须为布尔值。')
@@ -76,25 +76,8 @@ class Workbench:
         if sid not in self.services:
             snapshot = json.loads(session['bundle']) if session.get('bundle') else None
             service = AgentService(Store(self.directory / sid), self.client, self.executors, snapshot)
-            # Restore only approved exchanges whose final memory revision still matches.
-            with self.db() as db:
-                rows = db.execute('SELECT payload FROM results WHERE session_id=? AND status=? ORDER BY created DESC LIMIT 6',
-                                  (sid, 'success')).fetchall()
-            records = [json.loads(row['payload']) for row in reversed(rows)]
-            if records:
-                last = records[-1]
-                cid = last['result']['conversation_id']
-                revision = service.store.state(owner)['revision']
-                if last['memory_revision'] == revision:
-                    history = []
-                    for record in records:
-                        if record['result']['conversation_id'] == cid:
-                            history.extend([{'role': 'user', 'content': record['query']},
-                                            {'role': 'assistant', 'content': record['result']['result']['markdown']}])
-                    service.conversations[(owner, cid)] = {
-                        'messages': history, 'revision': revision, 'runtime': session['runtime'],
-                        'prompt_version': last['prompt_versions']['chat'],
-                        'tool_version': last['result']['execution'].get('tool_version', ''), 'updated': time.time()}
+            # The approved conversation id is persisted in result payloads. AgentService
+            # restores its SDK session mapping; never replay old Python-built histories.
             if len(self.services) >= 30:
                 self.services.pop(next(iter(self.services)))
             self.services[sid] = service
@@ -102,6 +85,8 @@ class Workbench:
 
     def run(self, owner, data):
         session = self.session(owner, data.get('session_id'))
+        if session['runtime'] != 'claude-sdk':
+            raise ValueError('此会话使用已停用的执行层；历史记录保留，请新建 SDK 测试会话。')
         runtime = validate_runtime(data.get('runtime', session['runtime']))
         if runtime != session['runtime']:
             raise ValueError('切换执行层请新建对应的测试会话。')
