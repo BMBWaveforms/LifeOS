@@ -1,6 +1,6 @@
 # LifeOS · 苟活
 
-固定指南问答、长期会话摘要和首页问题回访。Python / FastAPI 后端直接接入模型 API，HTML/CSS/JavaScript 前端独立运行；用 Docker Compose 启动前后端，不依赖 Dify。
+固定指南问答、长期会话摘要和首页问题回访。Python / FastAPI 后端保留身份、指南校验和记忆管理；问答执行层可选择 Python 自实现或 Claude Agent SDK，两种都使用 DeepSeek。HTML/CSS/JavaScript 前端独立运行；用 Docker Compose 启动前后端，不依赖 Dify。
 
 用户提问后，Agent 搜索并完整读取指南，后端校验来源后展示答复。开启记忆时，每轮自动生成摘要，记录明确的用户状态、寻求过的指南和问题进展。首页先询问上次的问题解决了没有、是否需要继续咨询；用户提交问题后才展示指南正文。
 
@@ -13,6 +13,7 @@
 | 在线静态预览 | [GitHub Pages](https://shuaishuaisylas.github.io/LifeOS/) | 虚构账号、固定指南示例、浏览器模拟记忆与回访交互 |
 | 完整应用 | 在自己电脑启动 Docker，访问 `http://localhost:8780` | 真实模型问答、自动模型摘要、SQLite 长期记忆与回访 |
 | 架构与流程 | [团队讲解材料](docs/团队讲解/苟活项目架构与流程说明.md) | 整体架构、四张图、十分钟讲解顺序和常见问题 |
+| 评测工作台 | 完整应用地址下 `/workbench.html` | 评测集、批量 A/B、五环节及整体评测、系统判定与人工复核、提示词版本和产品启用；需登录 |
 
 在线预览不连接模型或 Python 后端，记忆仅保存在当前浏览器，不用于验证模型质量或后端权限。Pages 发布状态见 [Actions](https://github.com/shuaishuaisylas/LifeOS/actions)。完整联调见 [团队调试与预览](docs/团队调试与预览.md)。
 
@@ -34,13 +35,13 @@ docker compose --env-file .env.compose up -d --build
 docker compose --env-file .env.compose ps
 ```
 
-访问 `http://localhost:8780`。首次启动会为 `alice` 和 `bob` 生成独立的随机密码，查看：
+访问 `http://localhost:8780`。团队测试账号为 `test1` 到 `test10`；在私有 `.env.compose` 设置 `TEST_ACCOUNT_PASSWORD` 后，启动时自动补齐十个账号并同步这些测试账号的密码。原有账号、身份和数据保留；未配置测试密码时保持已有账号。部署者可查看私有凭据文件：
 
 ```sh
 docker compose --env-file .env.compose exec backend python -c 'from pathlib import Path; print(Path("/app/runtime/login.json").read_text())'
 ```
 
-启用自动摘要后，尝试“工作时被手机通知打断，怎么改善？”，查看指南来源、长期摘要和首页回访；点击已解决后，该问题退出回访。两个账号数据隔离。
+启用自动摘要后，尝试“工作时被手机通知打断，怎么改善？”，查看指南来源、长期摘要和首页回访；点击已解决后，该问题退出回访。各账号数据隔离。
 
 如果 8780 已被占用，可用下面的替代启动命令：
 
@@ -54,7 +55,7 @@ SQLite、账号哈希和首次凭据保存在 `memory_data` 数据卷中。`dock
 
 ## 本地开发
 
-使用 Python 3.9 或以上；Docker 和 CI 使用 Python 3.12。
+使用 Python 3.10 或以上；Docker 和 CI 使用 Python 3.12。已有 Python 3.9 虚拟环境请保留，另建 `.venv-sdk`；macOS 启动脚本会优先使用兼容环境。
 
 ```sh
 python3 -m venv .venv
@@ -78,13 +79,21 @@ cp .env.example .env
 
 CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交文件检查与 Compose 配置检查。CI 使用 FakeModel 校验业务约束，不代表真实模型效果评测。
 
+## 评测工作台
+
+完整应用登录后访问 `/workbench.html`。在“评测集”填写输入、步骤和预期，可批量运行同一版本，用两个执行层或两个提示词组合做 A/B。结果展示五个环节与独立整体判定，支持人工复核和 JSON / CSV 导出。“提示词管理”可编辑模块、保存版本、对比差异、创建组合；测试与产品启用分开。七个初始虚构用例用于熟悉工具，不代表通过的质量基准。具体限制、API 和操作顺序见 [评测工作台手册](docs/评测工作台.md)。
+
+[PR #1](https://github.com/shuaishuaisylas/LifeOS/pull/1) 合并前，团队调试此版本请检出 `feat/replaceable-agent-runtime`。新拉取可执行 `git clone --branch feat/replaceable-agent-runtime https://github.com/shuaishuaisylas/LifeOS.git`，然后按上面的 Docker 步骤配置与启动；合并后可使用 main。已有部署更新继续保留原配置、项目名和卷。
+
 ## 文件在哪里维护
 
 | 内容 | 位置 |
 |---|---|
 | FastAPI、工具调用循环、记忆及校验 | `backend/` |
+| 可替换执行层、共用工具、隔离测试记录 | `backend/executors.py`、`tools.py`、`workbench.py` |
 | 正式前端页面与交互 | `frontend/` |
-| 问答、摘要、回访提示词 | `prompts/chat.md`、`summary.md`、`home.md` |
+| 模块化提示词初始文档 | `prompts/modules/*.md`（七模块）；部署后版本在工作台维护，可导出/导入独立文档 |
+| 评测集、批量判定与提示词管理 | `backend/evaluation.py`、`prompts.py`；[工作台手册](docs/评测工作台.md) |
 | 两个只读工具定义 | `prompts/tools.json` |
 | 指南能力维护约束 | `skills/guide-only.md` |
 | 固定指南全文、来源与许可证 | `data/` |
@@ -93,13 +102,13 @@ CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交
 | 团队调试、架构、部署与验收说明 | `docs/` |
 | 自动测试与 Pages 发布 | `.github/workflows/` |
 
-提示词每轮从独立文件读取；Docker 只读挂载 `prompts/`，修改后对后续调用生效。`skills/guide-only.md` 是维护约束，当前没有作为运行时 Skill 自动加载。自实现 harness 包含工具循环、上下文组织、调用上限、来源及版本校验。
+提示词从独立模块文档初始化，工作台保存不可变版本和组合；每次请求固定产品启用组合。Docker 只读挂载 `prompts/`；已有部署通过工作台导入/编辑、测试并单独启用。`skills/guide-only.md` 是维护约束，当前没有作为运行时 Skill 自动加载。业务 harness 保留上下文、来源和记忆版本校验；工具循环交给选定执行层。切换、部署和测试方式见 [执行层与测试台](docs/执行层与测试台.md)。
 
 ## 当前范围
 
 当前是单机 Demo：一个问答 Agent、两个只读工具，另有摘要和回访两个模型任务。指南使用 2026-10-12 固定快照，共 687 条，检索采用中文双字片段匹配和标题加权。
 
-账号为两个预置体验账号；尚未实现注册、找回密码、SSO、多实例状态协调或正式用户上线验收。后端保持一个 worker。公网完整服务需要 HTTPS、正式账号和运维配置，不能直接把静态 Pages 预览当成 Python 服务。
+团队测试支持 `test1` 到 `test10`，原 `alice` / `bob` 仍保留。测试密码通过私有配置提供；尚未实现注册、找回密码、SSO、多实例状态协调或正式用户上线验收。后端保持一个 worker。公网完整服务需要 HTTPS、正式账号和运维配置，不能直接把静态 Pages 预览当成 Python 服务。
 
 旧 Dify 版本和原始源码交付包仍保存在项目所有者电脑的 `保留版本/Dify-v0.2/`，不包含在这个仓库中。本机的密钥、密码、SQLite、个人记忆和历史运行 JSON 不提交。已有验证及边界见 [验收记录](docs/验收记录.md)。
 

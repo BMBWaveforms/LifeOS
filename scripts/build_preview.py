@@ -11,6 +11,8 @@ def build():
         shutil.rmtree(DEST)
     DEST.mkdir()
     source = (ROOT / 'frontend/index.html').read_text()
+    source = source.replace('placeholder="test1 ～ test10"', 'placeholder="alice 或 bob"')
+    source = source.replace('<a id="testbench-link" href="/workbench.html">测试工作台</a>', '')
     source = source.replace('<title>苟活 · 问题回访与会话记忆</title>', '<title>苟活 · 团队静态预览</title>')
     source = source.replace('<span class="pill">Python 独立版</span>', '<span class="pill">团队静态预览 · 模拟交互</span>')
     source = source.replace('体验账户为虚构数据；咨询内容来自固定指南快照。', '没有连接模型或后端；记忆仅保存在当前浏览器。')

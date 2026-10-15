@@ -7,7 +7,7 @@
 1. `README.md`：产品、体验方式和开发入口。
 2. `docs/Agent部署与验收.md`：按步骤部署、验证、更新及排障。
 3. `compose.yml`、`deploy/compose.env.example`：实际服务和部署参数。
-4. 涉及业务改动时，再读 `docs/架构与接口.md`、相关 `prompts/` 和 `tests/`。
+4. 涉及业务改动时，再读 `docs/架构与接口.md`、`docs/执行层与测试台.md`、`docs/评测工作台.md`、相关 `prompts/` 和 `tests/`。
 
 当前源码仓库是 `https://github.com/shuaishuaisylas/LifeOS`，主分支是 `main`。开始前检查工作树和分支；已有用户修改时保留它们，只调整本次任务需要的文件。
 
@@ -28,10 +28,13 @@
 - 前端：原生 HTML/CSS/JavaScript，正式文件在 `frontend/`；无需 Node 构建应用。
 - 后端：Python + FastAPI + Uvicorn；Docker 使用 Python 3.12。
 - 模型：`backend/model.py` 用 `httpx` 调用 OpenAI 兼容的 HTTPS Chat Completions 接口。
-- Harness：`AgentService` 在 Python 中组织模型、上下文、工具循环和摘要/回访任务。
-- 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，分发在 `backend/model.py`，检索实现及校验在 `backend/store.py`。
+- Harness：`AgentService` 在 Python 中组织上下文和摘要/回访任务；`backend/executors.py` 提供 native / claude-sdk 两种可替换问答执行层。Docker 默认 claude-sdk，仍使用 DeepSeek。
+- SDK：锁定 claude-agent-sdk 0.2.166，包含 Claude Code CLI；不需要宿主机另装 Claude Code。SDK 使用 Anthropic 兼容入口，摘要/首页继续使用原模型接口。
+- 工具：仅 `search_entries(query)`、`get_entry(guide_id)` 两个只读指南工具；声明在 `prompts/tools.json`，共同分发及权限检查在 `backend/tools.py`，检索实现及结果校验在 `backend/store.py`。
+- 团队账号：`backend/accounts.py` 按私有 `TEST_ACCOUNT_PASSWORD` 补齐 test1 到 test10，并同步这些测试账号的密码；保留已有身份、其他账号凭据和数据。新密码经独立盐的 PBKDF2 保存，账号文件原子更新；密码不写入公开文档或源码配置。
+- 评测工作台：`frontend/workbench.html`、`evaluation.js` / `evaluation.css`；`workbench.js` 保留自由测试。`backend/workbench.py` 管隔离会话，`evaluation.py` 管版本化评测集、队列、五环节及整体判定、复核与导出。共享定义，个人运行与结果；用例/方案分别隔离。批量会话放在 evaluation-runs/{job_id}/workbench，自由测试 API 不能续接；旧批量会话保留并标 scope=evaluation。
 - 数据：`data/guide.json` 是 2026-10-12 固定指南快照，共 687 条。SQLite 和账号配置保存在运行目录或 Docker 卷中。
-- 提示词：`prompts/chat.md`、`summary.md`、`home.md`；每次调用读取，Docker 只读挂载。
+- 提示词：`prompts/modules/*.md` 为七个业务初始文档；`prompts/contracts/*.md` 单独维护输出契约。组合固定契约全文，导入采用本部署契约；不得通过工作台编辑扩权或绕过后端校验。`backend/prompts.py` 首次初始化不可变版本；已有部署以 prompts.sqlite 的版本和启用记录为准，改仓库文档不会自动覆盖。工作台可导入/导出 .md 和组合 JSON；编辑、测试、产品启用分别操作。旧 chat.md/summary.md/home.md 仅保留独立 AgentService 无 registry 时的兼容入口。
 - `skills/guide-only.md` 是维护约束文档，未作为运行时 Skill 自动加载。
 - `preview/adapter.js` 只用于静态预览，不接入正式前端或后端。
 
@@ -47,6 +50,12 @@
 6. 记录的 `active/superseded` 与问题的 `resolved/unresolved/unknown` 是独立状态。
 7. 用户归属、实际回读记录和记忆 revision 由后端校验；删除、纠正和设置变更会使陈旧结果失效。
 8. 调整指南快照、模型输出契约或工具参数时，同步提示词、校验、测试与说明；保留指南署名及许可。
+9. SDK 不读取用户/项目配置，不开放 Bash、文件和 Web 工具。每轮启动新 SDK 会话，仅重放后端已校验的短期历史；不使用 resume / continue 恢复旧记忆。工具失败后 Python 拒绝整轮结果，不允许 SDK 将失败伪装成正常无答案。
+10. 测试执行层选择只作用于该测试会话，不改变产品默认。原生与 SDK 测试不共用会话或记忆；不保存模型私有思维链、API Key 或请求头。执行成功与质量判定独立；系统语义判定可能出错，保留人工复核和待确认，整体结果不能取五项平均。
+
+11. 批量任务固定用例版本、提示词全文、判定版本、模型配置和指南/工具哈希。最多 200 用例、每例 20 步、两方案；单队列执行，重启将未结束任务标为 interrupted，用原快照手动重跑。不要增加后端 worker。
+12. 新提示词组合至少完成一个成功执行的评测用例才能启用；这不是质量门槛证明。产品启用需要独立调用与原因，并校验 expected_active 防止覆盖队友操作。既有启用组合可回滚。
+13. 评测不保存 reasoning_content / thinking / 原始 SDK 会话。理解字段是显式任务标签；缺失时必须待确认，不从最终答案猜隐藏过程。规则和语义判定分别保留证据，复核不覆盖系统结论。
 
 ## 部署配置与数据
 
@@ -56,6 +65,9 @@
 - `API_CONFIG_FILE`：后端读取配置的路径；本地 Python 在 `.env` 中设置，容器内由 `compose.yml` 设置。它与宿主机的 `API_CONFIG_PATH` 不同。
 - `WEB_PORT`：宿主机前端端口，默认 8780。改变它时同步浏览器地址对应的 `ALLOWED_ORIGINS`。
 - `COOKIE_SECURE`：浏览器通过 HTTPS 访问时设为 `true`；本地或 SSH 隧道的 HTTP 访问保持 `false`。
+- `AGENT_RUNTIME`：产品默认执行层 native / claude-sdk；SDK 失败会明确报错，不自动回退。无变量的程序默认 native，Compose 和示例配置默认 claude-sdk。
+- `AGENT_SDK_BASE_URL`：SDK 入口，DeepSeek 官方为 https://api.deepseek.com/anthropic。第三方模型代理需要操作者提供真实兼容地址，不猜测路径。
+- `TEST_ACCOUNT_PASSWORD`：私有统一测试密码，仅作用于 test1 到 test10；为空时不创建或重设测试账号，不删除已有账号。登录字段必须传字符串，保留前导零。
 - `COMPOSE_PROJECT_NAME`：固定一个部署项目名，并在启动、日志、更新及备份时使用同一配置。更换名字会指向另一套卷和账号。
 - `memory_data`：包含数据库、账号哈希、profiles 和首次密码；重建应用容器保留卷。
 
@@ -74,7 +86,9 @@
 ```sh
 python -m pytest -q
 node --check frontend/app.js
+node --check frontend/workbench.js
 node --check preview/adapter.js
+node --check frontend/evaluation.js
 python3 scripts/build_preview.py
 python3 scripts/check_publish.py
 docker compose --env-file .env.compose config --quiet

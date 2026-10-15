@@ -11,6 +11,7 @@ def check():
     for name in filter(None, files):
         p = Path(name)
         if (set(p.parts) & {'.runtime', '.venv', '__pycache__', '.pytest_cache', '.preview-site', '.private-backups'}
+                or any(part.startswith('.venv-') for part in p.parts)
                 or p.name in {'api.json', 'auth.json', 'login.json'}
                 or (p.name.startswith('.env') and p.name != '.env.example')
                 or '.sqlite' in p.name):

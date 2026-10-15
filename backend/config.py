@@ -11,5 +11,6 @@ def load_local_env():
                 continue
             key, value = line.split('=', 1)
             key = key.strip()
-            if key in {'API_CONFIG_FILE','MODEL_API_KEY','MODEL_BASE_URL','MODEL_NAME','DATA_DIR','ALLOWED_ORIGINS','COOKIE_SECURE'}:
+            if key in {'API_CONFIG_FILE','MODEL_API_KEY','MODEL_BASE_URL','MODEL_NAME','DATA_DIR','ALLOWED_ORIGINS','COOKIE_SECURE',
+                       'AGENT_RUNTIME','AGENT_SDK_BASE_URL','TEST_ACCOUNT_PASSWORD'}:
                 os.environ.setdefault(key, value.strip().strip('\"\''))

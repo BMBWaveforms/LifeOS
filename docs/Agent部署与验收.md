@@ -63,6 +63,9 @@ API_CONFIG_PATH=./api.json
 WEB_PORT=8780
 ALLOWED_ORIGINS=http://localhost:8780,http://127.0.0.1:8780
 COOKIE_SECURE=false
+AGENT_RUNTIME=claude-sdk
+AGENT_SDK_BASE_URL=https://api.deepseek.com/anthropic
+TEST_ACCOUNT_PASSWORD=
 ```
 
 | 参数 | 位置与作用 | 常见误解 |
@@ -73,6 +76,9 @@ COOKIE_SECURE=false
 | `ALLOWED_ORIGINS` | 浏览器地址的完整 origin，含协议及非默认端口，不带路径或末尾斜杠；多个用逗号分隔且不加空格 | 填服务器 IP 不等于允许本机隧道地址 |
 | `COOKIE_SECURE` | 浏览器使用 HTTPS 时为 true；本机/隧道 HTTP 为 false | HTTP 开启 true 会导致登录 Cookie 不发送 |
 | `COMPOSE_PROJECT_NAME` | 识别容器和数据卷，部署后保持固定 | 改名字会创建另一套账号和记忆卷 |
+| `AGENT_RUNTIME` | 产品默认 native / claude-sdk | 测试页切换不改变产品默认；失败不自动回退 |
+| `AGENT_SDK_BASE_URL` | SDK 的 Anthropic 兼容入口 | 与 api.json 的 Chat Completions base_url 不同 |
+| `TEST_ACCOUNT_PASSWORD` | 私有统一测试密码，启动时补齐 test1 到 test10 | 仅更新这些测试账号的密码；原账号及数据保留；密码不提交到 Git |
 
 `api.json` 中的 `base_url` 必须是无账号密码、查询参数和片段的 HTTPS 地址；客户端在末尾追加 `/chat/completions`。Docker 部署把模型名和 Key 放在挂载 JSON 中；当前 Compose 没有把宿主机的 `MODEL_API_KEY`、`MODEL_NAME` 等变量直接传入容器。
 
@@ -135,7 +141,7 @@ curl --silent --show-error --max-time 5 -o /dev/null -w '%{http_code}\n' http://
 
 ### 4.2 登录及真实模型链路
 
-首次密码是每个部署独立随机生成的，不是 GitHub Pages 的 `preview` 口令。可将首次登录文件复制到忽略的私有目录，让操作者安全读取：
+团队测试账号 test1 到 test10 使用私有配置 TEST_ACCOUNT_PASSWORD；启动时创建或同步这些账号，密码字段必须传字符串以保留前导零。旧 alice / bob 的密码仍是部署独立生成的值。GitHub Pages 使用自己的虚构预览账号。可将首次登录文件复制到忽略的私有目录，让操作者安全读取：
 
 ```sh
 mkdir -p .private-backups
@@ -206,7 +212,7 @@ COOKIE_SECURE=true
 
 重新创建应用容器，确认 HTTPS 登录 Cookie 与 API 均正常。网关上游读取超时匹配项目内置 Nginx 的 300 秒配置，保留 Host 转发。若网关运行在另一个容器中，它的 `127.0.0.1` 不是宿主机，应按目标网络设计确定上游，不能照抄此地址。
 
-目前仅有两个体验账号，适合受控团队调试。对正式用户开放仍需账号、并发、数据和运维方案；部署任务不自动等于新增注册、SSO 或多实例架构。
+配置统一测试密码后提供十个团队测试账号，并保留已有体验账号，适合受控团队调试。对正式用户开放仍需账号、并发、数据和运维方案；部署任务不自动等于新增注册、SSO 或多实例架构。
 
 ## 6. 日常更新、备份和回退
 
@@ -214,7 +220,7 @@ COOKIE_SECURE=true
 
 后续所有命令继续使用原 `.env.compose` 和项目名。修改 Key JSON 后通常后续调用会读取新值；若用原子替换的方式换了文件，重新创建后端以刷新 secret 挂载。修改端口、来源或 Cookie 配置后重新创建容器。
 
-更新 Python/前端代码时重新构建；`prompts/` 当前为只读绑定挂载，编辑后对后续模型调用生效。数据库和账号卷保持原样。
+更新 Python/前端代码时重新构建；`prompts/` 为只读绑定挂载。七个模块文档只用于首次初始化，已有部署通过工作台导入或编辑生成新版本，测试后独立启用；不会因文件编辑覆盖 prompts.sqlite 中的启用组合。数据库和账号卷保持原样。
 
 ### 数据备份
 
@@ -290,3 +296,16 @@ docker compose --env-file .env.compose logs --tail 100 backend frontend
 > 请拉取 `https://github.com/shuaishuaisylas/LifeOS` 的 `main`，先读根目录 `AGENTS.md` 和 `docs/Agent部署与验收.md`。我的目标是部署完整 Python/Docker 应用，而不是 GitHub Pages 模拟页面。请在我指定的机器与目录中执行；保留已有配置、账号和记忆卷。新部署按 `deploy/compose.env.example` 建立 `.env.compose`，模型凭据使用我提供的私有文件路径。先检查 Docker 和端口，再构建、启动并按手册验证路由、登录、真实问答、摘要、回访及持久化。缺少 SSH、模型配置或域名时只询问缺失信息，并继续完成独立的准备工作。最后报告访问地址、提交 SHA、Compose 项目名、实际验收结果和未验证项，不在报告中包含密钥、密码或 Cookie。
 
 若只需要前端体验，请将目标句替换为：“我只需要静态交互预览，运行 `scripts/build_preview.py`，不接入真实模型，也不把模拟摘要描述成模型验收成功。”
+
+## 执行层与测试台验收
+
+本轮增加锁定 Claude Agent SDK、DeepSeek Anthropic 兼容入口和 /workbench.html。部署后用现有账号登录测试页，分别选择 native / claude-sdk，核对来源、工具轨迹、摘要保存和连续测试。对比使用独立测试会话；原产品数据不复制或修改。回切设置 AGENT_RUNTIME=native 后重启 backend。详细接口、上下文策略、功能边界见 [执行层与测试台](执行层与测试台.md)。
+
+
+## 完整评测工作台验收
+
+当前 `/workbench.html` 增加评测集、批量 A/B、五环节和独立整体判定、人工复核、提示词版本/组合/启用。按 [工作台手册](评测工作台.md) 验证：创建并修改一个虚构用例，确认历史版本保留；选择两方案运行；查看五环节证据及整体结论；保存人工备注并导出；编辑一个模块，确认产品启用 ID 没有变化；测试新组合，再启用并回滚。验证账号无法读取其他账号的任务或结果、产品记忆不受测试影响。
+
+运行卷新增 `prompts.sqlite` 和 `evaluations.sqlite`，原 `memory.sqlite` 和 `workbench/tests.sqlite` 保留。部署更新前按手册备份现有卷，使用原 .env.compose、项目名及卷执行 `up -d --build`。正在运行的批次会因重启变为 interrupted；从任务页用原快照重跑。不要删卷或更换部署项目名。
+
+前端允许评测集导入最多 2 MB，后端仍按接口限制请求体；每集最多 200 例，每例最多 20 步，最多 A/B 两方案。后台单队列，同账号最多三个未完成任务。队列完成仅证明执行/判定流程可用，模型效果需要团队复核样本。
