@@ -1,38 +1,23 @@
-"""Build a static UI preview. Never copies local configs, runtime data or backend code."""
+"""Build the product-only static demo. Never copy credentials, runtime or backend."""
 import json
+import re
 import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / '.preview-site'
+PRODUCT_FILES = ('api.js', 'ui.js', 'services.js', 'scenes.js', 'app.js', 'styles.css')
+GUIDE_IDS = ('15-01', '04-18', '03-01', '02-11', '05-01', '21-07', '15-06', '04-07')
+PREVIEW_MARKER = '<!-- Preview modules are injected only by scripts/build_preview.py. -->'
 
-def build():
-    if DEST.exists():
-        shutil.rmtree(DEST)
-    DEST.mkdir()
-    source = (ROOT / 'frontend/index.html').read_text()
-    source = source.replace('placeholder="test1 ～ test10"', 'placeholder="alice 或 bob"')
-    source = source.replace('<a id="testbench-link" href="/workbench.html">测试工作台</a>', '')
-    source = source.replace('<title>苟活 · 问题回访与会话记忆</title>', '<title>苟活 · 团队静态预览</title>')
-    source = source.replace('<span class="pill">Python 独立版</span>', '<span class="pill">团队静态预览 · 模拟交互</span>')
-    source = source.replace('体验账户为虚构数据；咨询内容来自固定指南快照。', '没有连接模型或后端；记忆仅保存在当前浏览器。')
-    source = source.replace('模型记录你明确表达的状态、问题和咨询过的指南，无需每次手动保存。', '正式版由模型记录状态、问题和咨询过的指南；本页仅模拟该过程。')
-    source = source.replace('<section id="login">', '''<section><strong>这是界面和流程预览，不是实际 AI 服务。</strong><p>可体验回访、纠正、删除、关闭记忆和账号切换。演示问答固定使用“手机通知打断工作”案例；真实功能请运行仓库中的 Docker 版。</p><div class="row"><button id="demo-alice">进入 Alice 预览</button><button id="demo-bob">进入 Bob 预览</button><button id="demo-reset">重置演示数据</button><a href="architecture/index.html">架构与流程图</a><a href="https://github.com/shuaishuaisylas/LifeOS">源码与调试说明</a></div></section><section id="login">''')
-    source = source.replace('<h2>登录</h2>', '<h2>进入虚构账号</h2><small>账号 alice 或 bob，演示口令 preview；不对应真实服务的账号密码。</small>')
-    source = source.replace('<script src="/app.js"></script>', '<script src="fixture.js"></script><script src="preview.js"></script><script src="app.js"></script>')
-    (DEST / 'index.html').write_text(source)
-    (DEST / 'app.js').write_text((ROOT / 'frontend/app.js').read_text().replace('模型会话摘要', '前端模拟摘要'))
-    shutil.copyfile(ROOT / 'preview/adapter.js', DEST / 'preview.js')
-    guide = json.loads((ROOT / 'data/guide.json').read_text())
-    entry = next(e for e in guide['entries'] if e['guide_id'] == '03-01')
-    (DEST / 'fixture.js').write_text('window.PREVIEW_GUIDE = ' + json.dumps(entry, ensure_ascii=False) + ';\n')
-    (DEST / '.nojekyll').touch()
+
+def copy_architecture():
+    """Keep the existing team explanation as a read-only reference entry."""
     doc = ROOT / 'docs/团队讲解'
     arch = DEST / 'architecture'
     arch.mkdir()
     html = (doc / '苟活项目架构与流程说明.html').read_text()
-    # Code references are for the project tree, not the static artifact.
-    import re
+
     def link(match):
         path = match.group(1)
         if path.startswith('../../'):
@@ -40,13 +25,42 @@ def build():
         if path.startswith('../'):
             return 'href="https://github.com/shuaishuaisylas/LifeOS/blob/main/docs/' + path[3:] + '"'
         return match.group(0)
-    html = re.sub(r'href="([^"]+)"', link, html)
-    (arch / 'index.html').write_text(html)
-    for p in doc.iterdir():
-        if p.is_file() and p.suffix in {'.pdf', '.md'}:
-            shutil.copyfile(p, arch / p.name)
+
+    (arch / 'index.html').write_text(re.sub(r'href="([^"]+)"', link, html))
+    for path in doc.iterdir():
+        if path.is_file() and path.suffix in {'.pdf', '.md'}:
+            shutil.copyfile(path, arch / path.name)
     shutil.copytree(doc / '图示', arch / '图示')
-    print('Static preview built at', DEST, '(synthetic browser records; no model calls).')
+
+
+def build():
+    if DEST.exists():
+        shutil.rmtree(DEST)
+    DEST.mkdir()
+    source = (ROOT / 'frontend/index.html').read_text()
+    if source.count(PREVIEW_MARKER) != 1:
+        raise ValueError('The production HTML must contain exactly one preview injection marker.')
+    source = source.replace('<title>苟活 · LifeOS</title>', '<title>苟活 · 静态交互演示</title>')
+    source = source.replace('</head>', '<link rel="stylesheet" href="preview.css"></head>')
+    source = source.replace(PREVIEW_MARKER, '<script src="fixture.js"></script><script src="mock-service.js"></script><script src="preview.js"></script>')
+    notice = '''<aside id="preview-notice" aria-label="演示环境说明"><details><summary>静态交互演示 · 虚构数据</summary><p>固定情境模拟，没有调用真实 AI 或后端；记录仅保留在本页，刷新即重置。</p><nav><a href="architecture/index.html">架构与流程说明</a><a href="ATTRIBUTION.txt">指南来源</a><a href="GUIDE-LICENSE.txt">CC BY 4.0</a><a href="assets/fonts/OFL.txt">字体许可</a></nav></details></aside>'''
+    source = source.replace('<div id="status"', notice + '\n<div id="status"', 1)
+    source = source.replace('真实问答需要组员提供的体验账号。', '仅可使用虚构演示账号 alice / bob，演示口令 preview。')
+    (DEST / 'index.html').write_text(source)
+    for name in PRODUCT_FILES:
+        shutil.copyfile(ROOT / 'frontend' / name, DEST / name)
+    shutil.copytree(ROOT / 'frontend/assets', DEST / 'assets')
+    for original, target in (('adapter.js', 'preview.js'), ('mock-service.js', 'mock-service.js'), ('styles.css', 'preview.css')):
+        shutil.copyfile(ROOT / 'preview' / original, DEST / target)
+    entries = {entry['guide_id']: entry for entry in json.loads((ROOT / 'data/guide.json').read_text())['entries']}
+    guides = [entries[guide_id] for guide_id in GUIDE_IDS]
+    (DEST / 'fixture.js').write_text('window.PREVIEW_GUIDES = ' + json.dumps(guides, ensure_ascii=False) + ';\n')
+    for name in ('ATTRIBUTION.txt', 'GUIDE-LICENSE.txt'):
+        shutil.copyfile(ROOT / 'data' / name, DEST / name)
+    (DEST / '.nojekyll').touch()
+    copy_architecture()
+    print('Static product demo built at', DEST, '(synthetic in-page records; no model or backend).')
+
 
 if __name__ == '__main__':
     build()

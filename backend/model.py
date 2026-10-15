@@ -98,7 +98,7 @@ class AgentService:
         self.client = client or ModelClient()
         self.conversations = {}
         self.executors = executors or {'native': NativeExecutor(self.client), 'claude-sdk': ClaudeSDKExecutor(self.client)}
-        self.default_runtime = validate_runtime(os.getenv('AGENT_RUNTIME', 'native'))
+        self.default_runtime = validate_runtime(os.getenv('AGENT_RUNTIME', 'claude-sdk'))
         self.prompt_source = prompt_source
 
     def prompt_snapshot(self):
@@ -123,7 +123,8 @@ class AgentService:
         query = str(data.get('query', '')).strip()
         if not query or len(query) > 2000:
             raise ValueError('请输入 1—2000 字的问题。')
-        c = self.store.context(owner, query, 'chat', followup_memory_id=str(data.get('followup_memory_id') or ''))
+        c = self.store.context(owner, query, 'chat', followup_memory_id=str(data.get('followup_memory_id') or ''),
+                               guide_id=data.get('guide_id'))
         rid = c['run_id']
         snapshot = self.prompt_snapshot()
         instruction, version = self.resolve_prompt('chat', snapshot)
@@ -145,7 +146,8 @@ class AgentService:
         observations = {
             'understanding': {'input': {'query': query, 'memories': c['memories'], 'history': history[-12:]},
                               'output': None, 'status': 'unobserved'},
-            'retrieval': {'input': {'query': query, 'candidate_titles': c['candidate_titles']},
+            'retrieval': {'input': {'query': query, 'candidate_titles': c['candidate_titles'],
+                                    'selected_guide': c['selected_guide']},
                           'output': tools.trace, 'status': 'observed'},
             'reply': {'input': {'query': query}, 'output': None, 'status': 'unobserved'},
         }

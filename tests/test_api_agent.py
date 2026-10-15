@@ -42,6 +42,53 @@ def test_model_cannot_skip_read(s):
     with pytest.raises(ValueError,match='全文回读'):AgentService(s,client).chat('alice',{'query':'手机通知'})
     assert not s.state('alice')['memories']
 
+
+def test_selected_situation_uses_snapshot_metadata_and_still_reads_full_entry(s):
+    query = '我被手机通知打断，先看看这个情境'
+    client = FakeModel([read_call(), text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]}), summary()])
+    result = AgentService(s, client).chat('alice', {
+        'query': query, 'guide_id': '03-01', 'title': '客户端伪造标题', 'source_url': 'https://example.invalid'},
+        include_trace=True)
+    current = json.loads(client.inputs[0][1]['content'])
+    assert current['query'] == query
+    assert current['selected_guide'] == {'guide_id': '03-01', 'title': s.entries['03-01']['title'], 'user_selected': True}
+    assert current['candidate_titles'][0]['guide_id'] == '03-01'
+    assert sum(c['guide_id'] == '03-01' for c in current['candidate_titles']) == 1
+    assert '客户端伪造标题' not in json.dumps(current, ensure_ascii=False)
+    assert 'example.invalid' not in json.dumps(current)
+    assert result['trace'][0]['tool'] == 'get_entry' and result['trace'][0]['output']['complete']
+    assert result['summary']['saved']
+
+
+def test_selected_situation_does_not_count_as_full_read(s):
+    client = FakeModel([text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]})])
+    with pytest.raises(ValueError, match='全文回读'):
+        AgentService(s, client).chat('alice', {'query': '我想了解这个情境', 'guide_id': '03-01'})
+    assert not s.state('alice')['memories']
+
+
+def test_selected_situation_is_only_a_candidate_and_not_carried_to_next_turn(s):
+    s.change('alice', 'settings', {'enabled': False})
+    client = FakeModel([text({'status': 'clarification', 'clarification': '想咨询哪方面？', 'cards': []}),
+                        text({'status': 'acknowledged', 'cards': []})])
+    service = AgentService(s, client)
+    first = service.chat('alice', {'query': '我想问别的问题', 'guide_id': '03-01'})
+    assert first['result']['status'] == 'clarification' and first['result']['cards'] == []
+    service.chat('alice', {'query': '谢谢', 'conversation_id': first['conversation_id']})
+    assert json.loads(client.inputs[1][-1]['content'])['selected_guide'] is None
+
+
+@pytest.mark.parametrize('guide_id', ['missing-guide', 3, False, [], {}])
+def test_invalid_selected_situation_returns_400_before_model_call(tmp_path, guide_id):
+    model = FakeModel([])
+    app = create_app(tmp_path, model)
+    client = TestClient(app)
+    credentials = json.loads((tmp_path / 'login.json').read_text())
+    client.post('/api/login', json={'username': 'alice', 'password': credentials['alice']['password']})
+    response = client.post('/api/run', json={'mode': 'chat', 'query': '咨询所选情境', 'guide_id': guide_id})
+    assert response.status_code == 400 and '所选情境指南' in response.json()['message']
+    assert not model.inputs and not app.state.store.runs
+
 def test_unauthorized_tool_rejected(s):
     client=FakeModel([read_call(name='delete_memory')])
     with pytest.raises(ModelError,match='未授权工具'):AgentService(s,client).chat('alice',{'query':'手机通知'})
@@ -140,3 +187,40 @@ def test_home_uses_current_status_and_explicit_memory_id(s):
     provided=json.loads(model.inputs[-1][1]['content'])['followups'][0]
     assert provided['memory_id']==mid and provided['problem_status']=='unresolved'
     assert 'status_evidence' not in provided and 'summary' not in provided
+
+
+def test_followup_rolls_summary_id_for_two_turns_then_resolved_leaves_home(s):
+    model = FakeModel([read_call(), text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]}), summary()])
+    service = AgentService(s, model)
+    first = service.chat('alice', {'query': '我被手机通知打断', 'guide_id': '03-01'})
+    original_id = first['summary']['memory_id']
+    model.responses = [text({'followups': [{'memory_id': original_id}]})]
+    assert service.home('alice')['result']['followups'][0]['memory_id'] == original_id
+
+    model.responses = [read_call(), text({'status': 'answer', 'cards': [{'guide_id': '03-01'}]}),
+        text({'summary': '问题尚未解决，用户继续咨询。', 'user_state': '', 'state_evidence': '',
+              'problem': '', 'problem_status': 'unresolved', 'status_evidence': '', 'followup_of': '', 'guide_ids': []})]
+    continued = service.chat('alice', {'query': '这个问题还没解决，需要继续咨询',
+        'conversation_id': first['conversation_id'], 'followup_memory_id': original_id})
+    continued_id = continued['summary']['memory_id']
+    assert continued['summary']['saved'] and continued_id != original_id
+    assert continued['conversation_id'] == first['conversation_id']
+    model.responses = [text({'followups': [{'memory_id': continued_id}]})]
+    assert service.home('alice')['result']['followups'][0]['memory_id'] == continued_id
+
+    model.responses = [text({'status': 'acknowledged', 'cards': []}),
+        text({'summary': '用户明确反馈该问题已经解决。', 'user_state': '', 'state_evidence': '',
+              'problem': '', 'problem_status': 'resolved', 'status_evidence': '已经解决了',
+              'followup_of': '', 'guide_ids': []})]
+    resolved = service.chat('alice', {'query': '这个问题已经解决了',
+        'conversation_id': continued['conversation_id'], 'followup_memory_id': continued_id})
+    resolved_id = resolved['summary']['memory_id']
+    assert resolved['summary']['saved'] and resolved_id != continued_id
+    memories = {m['id']: m for m in s.state('alice')['memories']}
+    assert memories[original_id]['state'] == memories[continued_id]['state'] == 'superseded'
+    assert memories[continued_id]['followup_of'] == original_id
+    assert memories[resolved_id]['followup_of'] == continued_id
+    assert memories[resolved_id]['problem_status'] == 'resolved'
+    assert memories[resolved_id]['guide_ids'] == ['03-01']
+    assert service.home('alice')['result']['followups'] == []
+    assert not model.responses

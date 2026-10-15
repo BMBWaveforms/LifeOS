@@ -48,6 +48,27 @@ def sdk_service(tmp_path, responses=()):
     return AgentService(Store(tmp_path), client)
 
 
+def test_unset_runtime_defaults_to_sdk_and_receives_selected_situation(tmp_path, monkeypatch, sdk_transport):
+    monkeypatch.delenv('AGENT_RUNTIME', raising=False)
+    service = sdk_service(tmp_path)
+    result = service.chat('alice', {'query': '我被手机通知打断', 'guide_id': '03-01'})
+    assert service.default_runtime == service.runtime_status()['default'] == 'claude-sdk'
+    assert result['execution']['runtime'] == 'claude-sdk'
+    current = sdk_transport['inputs'][0]['current']
+    assert current['query'] == '我被手机通知打断'
+    assert current['selected_guide']['guide_id'] == '03-01'
+    assert current['candidate_titles'][0]['guide_id'] == '03-01'
+    assert result['result']['cards'][0]['guide_id'] == '03-01'
+
+
+def test_explicit_native_default_is_preserved(tmp_path, monkeypatch, sdk_transport):
+    monkeypatch.setenv('AGENT_RUNTIME', 'native')
+    service = sdk_service(tmp_path, [text({'status': 'acknowledged', 'cards': []})])
+    result = service.chat('alice', {'query': '你好'})
+    assert service.default_runtime == result['execution']['runtime'] == 'native'
+    assert not sdk_transport['options']
+
+
 def test_sdk_and_native_share_source_and_memory_contract(tmp_path, sdk_transport):
     service = sdk_service(tmp_path, [summary()])
     service.store.change('alice', 'settings', {'enabled': True})

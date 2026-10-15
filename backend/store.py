@@ -162,8 +162,16 @@ class Store:
         scored.sort(key=lambda item:(-item[0],item[1]['guide_id']))
         return [e for score,e in scored[:min(max(int(limit),1),12)]]
 
-    def context(self, owner, query, mode, use_memory=True, followup_memory_id=''):
+    def context(self, owner, query, mode, use_memory=True, followup_memory_id='', guide_id=None):
         with self.lock:
+            selected = None
+            if guide_id is not None and guide_id != '':
+                if not isinstance(guide_id, str) or guide_id not in self.entries:
+                    raise ValueError('所选情境指南不存在或已失效，请重新选择。')
+                entry = self.entries[guide_id]
+                # The client supplies only an ID. Titles come from the fixed snapshot,
+                # and selection is a candidate, never evidence or a completed read.
+                selected = {'guide_id': guide_id, 'title': entry['title'], 'user_selected': True}
             now=time.time()
             self.runs={k:v for k,v in self.runs.items() if v['expires']>now}
             s=self.state(owner)
@@ -177,10 +185,13 @@ class Store:
                             'memory_enabled':bool(use_memory and s['enabled']),'followup_memory_id':followup_memory_id,'followups':followups}
             cold=mode=='home' and not followups
             candidates=self.search(query,8) if mode=='chat' else []
+            if selected:
+                candidates=([self.entries[guide_id]]+[e for e in candidates if e['guide_id']!=guide_id])[:8]
             return {'run_id':rid,'memory_revision':s['revision'],'content_version':self.guide['content_version'],
                     'cold_start':cold,'personalization_applied':bool(memories),'memories':memories,
                     'query':query,'mode':mode,'feedback':self.runs[rid]['feedback'],
                     'memory_enabled':self.runs[rid]['memory_enabled'],'followup':followup,'followups':followups,
+                    'selected_guide':selected,
                     'candidate_titles':[{'guide_id':e['guide_id'],'title':e['title']} for e in candidates]}
 
     @staticmethod

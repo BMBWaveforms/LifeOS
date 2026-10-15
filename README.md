@@ -1,21 +1,27 @@
 # LifeOS · 苟活
 
-固定指南问答、长期会话摘要和首页问题回访。Python / FastAPI 后端保留身份、指南校验和记忆管理；问答执行层可选择 Python 自实现或 Claude Agent SDK，两种都使用 DeepSeek。HTML/CSS/JavaScript 前端独立运行；用 Docker Compose 启动前后端，不依赖 Dify。
+固定指南问答、长期会话摘要和首页问题回访。Python / FastAPI 后端保留身份、指南校验和记忆管理；问答默认通过 Claude Agent SDK（内含 Claude Code CLI）调度，仍使用 DeepSeek；可显式切换 Python 自实现执行层。正式页面采用合伙人的 LifeOS 前端；用 Docker Compose 启动前后端，不依赖 Dify。
 
 用户提问后，Agent 搜索并完整读取指南，后端校验来源后展示答复。开启记忆时，每轮自动生成摘要，记录明确的用户状态、寻求过的指南和问题进展。首页先询问上次的问题解决了没有、是否需要继续咨询；用户提交问题后才展示指南正文。
 
 **交给 Agent 拉取、调试或部署时，请先读 [AGENTS.md](AGENTS.md)，再按 [Agent 部署与验收手册](docs/Agent部署与验收.md) 执行。** 手册提供固定部署配置、服务器访问方式、分层验收、备份和更新流程。可以直接复制手册末尾的任务说明给团队 Agent。
 
+## 正式前端与接入范围
+
+`frontend/index.html` 是唯一产品入口，采用 [lrj813/LifeOS](https://github.com/lrj813/LifeOS/tree/7d89e4b18bfaa27d49235826d740e50e200b1aff/frontend) 的正式页面与素材（来源版本 `7d89e4b18bfaa27d49235826d740e50e200b1aff`），并对接本仓库后端。此前的问答测试页不再作为产品首页；`/workbench.html` 继续保留为内部测试与评测工具。
+
+首版路径是“固定情境入口 → 真实问答 → 指南详情 → 自动摘要 → 问题回访”。情境卡片是固定入口；用户提交后由后端调用模型并校验指南来源。个人档案可开启或关闭自动摘要；新账号默认关闭。开启后，每轮返回摘要保存结果，首页显示仍需跟进的问题。聊天记录仅保留在当前页面，刷新后不恢复完整历史，已保存的长期摘要由后端保留。接口、部署边界和本轮验收见 [前端接入与验收](docs/前端接入与验收.md)。
+
 ## 团队预览与真实调试
 
 | 方式 | 入口 | 能体验什么 |
 |---|---|---|
-| 在线静态预览 | [GitHub Pages](https://shuaishuaisylas.github.io/LifeOS/) | 虚构账号、固定指南示例、浏览器模拟记忆与回访交互 |
+| 在线静态预览 | [GitHub Pages](https://shuaishuaisylas.github.io/LifeOS/) | 合伙人页面、虚构账号、固定指南示例与本页模拟摘要/回访 |
 | 完整应用 | 在自己电脑启动 Docker，访问 `http://localhost:8780` | 真实模型问答、自动模型摘要、SQLite 长期记忆与回访 |
 | 架构与流程 | [团队讲解材料](docs/团队讲解/苟活项目架构与流程说明.md) | 整体架构、四张图、十分钟讲解顺序和常见问题 |
 | 评测工作台 | 完整应用地址下 `/workbench.html` | 评测集、批量 A/B、五环节及整体评测、系统判定与人工复核、提示词版本和产品启用；需登录 |
 
-在线预览不连接模型或 Python 后端，记忆仅保存在当前浏览器，不用于验证模型质量或后端权限。Pages 发布状态见 [Actions](https://github.com/shuaishuaisylas/LifeOS/actions)。完整联调见 [团队调试与预览](docs/团队调试与预览.md)。
+在线预览不连接模型或 Python 后端，模拟记录仅保留在当前页面，刷新后重置，不用于验证模型质量或后端权限。正式前端通过同源 `/api` 使用后端登录 Cookie；静态 Pages 没有真实 API。Pages 发布状态见 [Actions](https://github.com/shuaishuaisylas/LifeOS/actions)。完整联调见 [团队调试与预览](docs/团队调试与预览.md)。
 
 ## 用 Docker 启动完整应用
 
@@ -63,7 +69,7 @@ python3 -m venv .venv
 cp .env.example .env
 ```
 
-将 `.env` 的 `API_CONFIG_FILE` 改成自己模型配置文件的绝对路径，再运行：
+将 `.env` 的 `API_CONFIG_FILE` 改成自己模型配置文件的绝对路径。所有启动方式缺省都使用 `claude-sdk`；SDK 通过 Anthropic 兼容入口调用 DeepSeek，摘要和回访继续走原 Chat Completions 入口。需要原生执行层时显式设置 `AGENT_RUNTIME=native`。再运行：
 
 ```sh
 .venv/bin/python scripts/run_local.py
@@ -77,13 +83,11 @@ cp .env.example .env
 .venv/bin/python -m pytest -q
 ```
 
-CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交文件检查与 Compose 配置检查。CI 使用 FakeModel 校验业务约束，不代表真实模型效果评测。
+CI 会运行后端测试、产品/预览 JavaScript 语法检查与契约测试、静态预览构建、提交文件检查与 Compose 配置检查。CI 使用 FakeModel 校验业务约束，不代表真实模型效果评测。
 
 ## 评测工作台
 
 完整应用登录后访问 `/workbench.html`。在“评测集”填写输入、步骤和预期，可批量运行同一版本，用两个执行层或两个提示词组合做 A/B。结果展示五个环节与独立整体判定，支持人工复核和 JSON / CSV 导出。“提示词管理”可编辑模块、保存版本、对比差异、创建组合；测试与产品启用分开。七个初始虚构用例用于熟悉工具，不代表通过的质量基准。具体限制、API 和操作顺序见 [评测工作台手册](docs/评测工作台.md)。
-
-[PR #1](https://github.com/shuaishuaisylas/LifeOS/pull/1) 合并前，团队调试此版本请检出 `feat/replaceable-agent-runtime`。新拉取可执行 `git clone --branch feat/replaceable-agent-runtime https://github.com/shuaishuaisylas/LifeOS.git`，然后按上面的 Docker 步骤配置与启动；合并后可使用 main。已有部署更新继续保留原配置、项目名和卷。
 
 ## 文件在哪里维护
 
@@ -91,14 +95,14 @@ CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交
 |---|---|
 | FastAPI、工具调用循环、记忆及校验 | `backend/` |
 | 可替换执行层、共用工具、隔离测试记录 | `backend/executors.py`、`tools.py`、`workbench.py` |
-| 正式前端页面与交互 | `frontend/` |
+| 唯一产品入口、固定情境与真实接口适配 | `frontend/index.html`、`app.js`、`scenes.js`、`services.js` |
 | 模块化提示词初始文档 | `prompts/modules/*.md`（七模块）；部署后版本在工作台维护，可导出/导入独立文档 |
 | 评测集、批量判定与提示词管理 | `backend/evaluation.py`、`prompts.py`；[工作台手册](docs/评测工作台.md) |
 | 两个只读工具定义 | `prompts/tools.json` |
 | 指南能力维护约束 | `skills/guide-only.md` |
 | 固定指南全文、来源与许可证 | `data/` |
 | Docker、Nginx 配置 | `compose.yml`、`deploy/` |
-| 静态预览适配层及构建 | `preview/adapter.js`、`scripts/build_preview.py` |
+| 独立模拟服务与静态预览构建 | `preview/mock-service.js`、`adapter.js`、`styles.css`、`scripts/build_preview.py` |
 | 团队调试、架构、部署与验收说明 | `docs/` |
 | 自动测试与 Pages 发布 | `.github/workflows/` |
 
@@ -112,4 +116,4 @@ CI 会运行后端测试、JavaScript 语法检查、静态预览构建、提交
 
 旧 Dify 版本和原始源码交付包仍保存在项目所有者电脑的 `保留版本/Dify-v0.2/`，不包含在这个仓库中。本机的密钥、密码、SQLite、个人记忆和历史运行 JSON 不提交。已有验证及边界见 [验收记录](docs/验收记录.md)。
 
-指南内容按 CC BY 4.0 保留署名；见 [来源说明](data/ATTRIBUTION.txt) 和 [指南许可证](data/GUIDE-LICENSE.txt)。
+合作方页面保留随附素材和 Noto Serif SC 的 [字体许可](frontend/assets/fonts/OFL.txt)。指南内容按 CC BY 4.0 保留署名；见 [来源说明](data/ATTRIBUTION.txt) 和 [指南许可证](data/GUIDE-LICENSE.txt)。
